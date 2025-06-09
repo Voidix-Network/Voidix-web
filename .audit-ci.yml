@@ -1,0 +1,22 @@
+# 安全审计配置
+# 用于CI/CD流水线中的安全检查
+
+# 允许的漏洞级别阈值
+moderate: true
+high: false
+critical: false
+
+# 跳过的包 (如果有已知但可接受的漏洞)
+skip-dev: false
+
+# 报告格式
+output-format: text
+
+# 审计范围
+audit-level: moderate
+
+# 白名单 (谨慎使用)
+whitelist: []
+
+# 超时设置 (秒)
+timeout: 300

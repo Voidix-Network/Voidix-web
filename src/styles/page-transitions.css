@@ -1,0 +1,95 @@
+/* filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\styles\page-transitions.css */
+
+/**
+ * 页面过渡动画样式
+ * 
+ * 提供平滑的页面切换体验，减少视觉闪烁
+ */
+
+/* 页面容器过渡动画 */
+.page-transition-container {
+  transition:
+    opacity 0.2s ease-in-out,
+    transform 0.2s ease-in-out;
+}
+
+/* 页面进入动画 */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.2s ease-out,
+    transform 0.2s ease-out;
+}
+
+/* 页面退出动画 */
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.15s ease-in,
+    transform 0.15s ease-in;
+}
+
+/* 路由状态管理器过渡 */
+.route-stabilizing {
+  opacity: 0;
+  animation: routeStabilize 0.2s ease-out forwards;
+}
+
+@keyframes routeStabilize {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 加载状态过渡 */
+.loading-fade-in {
+  animation: loadingFadeIn 0.3s ease-out;
+}
+
+@keyframes loadingFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 减少布局闪烁 */
+.layout-stable {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+/* 性能优化 */
+.page-transition-container,
+.route-stabilizing,
+.loading-fade-in {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0); /* 启用硬件加速 */
+}
+
+/* 确保动画结束后清理will-change */
+.page-transition-container:not(.page-enter):not(.page-exit) {
+  will-change: auto;
+}

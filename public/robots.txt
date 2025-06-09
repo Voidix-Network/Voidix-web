@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+Crawl-delay: 1
+
+Sitemap: https://www.voidix.net/sitemap.xml

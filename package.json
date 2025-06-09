@@ -1,0 +1,61 @@
+{
+  "name": "voidix-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Voidix官网重构项目 - React + TypeScript + Vite",
+  "scripts": {
+    "dev": "vite",
+    "build": "npx tsc && vite build && npm run generate:sitemap && npm run prerender:puppeteer",
+    "build:basic": "npx tsc && vite build",
+    "build:http": "npx tsc && vite build && npm run generate:sitemap",
+    "prerender:puppeteer": "node scripts/prerenderPuppeteer.js",
+    "generate:sitemap": "node scripts/generateSitemap.js",
+    "preview": "vite preview",
+    "type-check": "npx tsc --noEmit",
+    "style": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "style:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "lint": "npm run style:check && npm run type-check",
+    "test": "vitest run",
+    "test:dev": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "license:report": "npx license-checker --production --csv > docs/THIRD_PARTY_LICENSES.csv",
+    "license:check": "npx license-checker --production --onlyAllow \"MIT;Apache-2.0;ISC;0BSD;BSD-2-Clause;BSD-3-Clause;BlueOak-1.0.0;MIT-0;CC-BY-4.0;UNLICENSED\" --excludePrivatePackages"
+  },
+  "dependencies": {
+    "clsx": "^2.0.0",
+    "framer-motion": "^10.16.16",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.5",
+    "react-router-dom": "^7.6.2",
+    "web-vitals": "^5.0.2",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.15.30",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^3.2.3",
+    "autoprefixer": "^10.4.16",
+    "jsdom": "^26.1.0",
+    "postcss": "^8.4.32",
+    "prettier": "^3.1.1",
+    "puppeteer": "^24.10.0",
+    "serve": "^14.2.4",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.2.2",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
