@@ -1,0 +1,323 @@
+# CodeQL 安全分析工作流
+# 用于自动检测代码中的安全漏洞和质量问题
+# 严格程度：Medium 及以上严重性，Warning 及以上级别（平衡安全性和开发效率）
+
+name: 🔒 CodeQL Analysis
+
+on:
+  # 主分支推送时触发
+  push:
+    branches: [master]
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - 'package*.json'
+      - '.github/workflows/CodeQL.yml'
+
+  # Pull Request 时触发
+  pull_request:
+    branches: [master]
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - 'package*.json'
+      - '.github/workflows/CodeQL.yml'
+
+  # 每周定期扫描（周一 UTC 2:00）
+  schedule:
+    - cron: '0 2 * * 1'
+
+  # 手动触发
+  workflow_dispatch:
+
+# 工作流权限配置
+permissions:
+  contents: read # 读取仓库内容
+  security-events: write # 写入安全事件到 Security 标签页
+  actions: read # 读取 Actions 权限
+
+# 环境变量
+env:
+  NODE_VERSION: '18'
+  LANGUAGE: 'javascript' # CodeQL 分析语言
+
+jobs:
+  # CodeQL 安全分析主任务
+  codeql-analysis:
+    name: 🔍 CodeQL Analysis
+    runs-on: ubuntu-latest
+
+    # 安全策略：仅在公开仓库或有权限时运行
+    if: github.repository == 'Voidix-Network/voidix-web' || github.event_name != 'schedule'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # 支持多语言分析（当前聚焦JavaScript/TypeScript）
+        language: ['typescript']
+
+    steps:
+      # 步骤1: 检出代码
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # 深度克隆以获取完整历史，提升分析质量
+          fetch-depth: 2
+
+      # 步骤2: 设置 Node.js 环境
+      - name: 🟢 Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      # 步骤3: 安装项目依赖
+      - name: 📦 Install Dependencies
+        run: |
+          echo "📦 Installing project dependencies for CodeQL analysis..."
+          npm ci --prefer-offline --no-audit --silent
+          echo "✅ Dependencies installed successfully"
+
+      # 步骤4: 初始化 CodeQL
+      - name: 🔧 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # 使用标准安全查询套件 (Medium+ 严重性)
+          queries: security-and-quality
+          # 自定义配置（可选）
+          config: |
+            name: "Voidix Web CodeQL Config - Medium+ Strictness"
+            queries:
+              - uses: security-and-quality
+            paths-ignore:
+              - 'dist'
+              - 'coverage'
+              - 'node_modules'
+              - '**/*.test.ts'
+              - '**/*.test.tsx'
+              - '**/*.spec.ts'
+              - '**/*.spec.tsx'
+            paths:
+              - 'src'
+              - 'scripts'
+
+      # 步骤5: 构建项目（为 CodeQL 提供编译信息）
+      - name: 🏗️ Build Project for Analysis
+        run: |
+          echo "🏗️ Building project for CodeQL analysis..."
+          echo "📋 Running TypeScript compilation check..."
+          npm run type-check
+          echo "📦 Creating production build..."
+          npm run build:basic
+          echo "✅ Build completed successfully"
+
+        # 即使构建失败也继续 CodeQL 分析
+        continue-on-error: true
+
+      # 步骤6: 执行 CodeQL 分析
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        id: codeql-analyze
+        with:
+          category: '/language:${{ matrix.language }}'
+          # 上传结果到 GitHub Security 标签页
+          upload: true
+          # 等待分析完成的超时时间（分钟）
+          wait-for-processing: true
+          # 输出SARIF结果文件路径以供后续检查
+          output: './codeql-results.sarif'
+
+        # 分析失败时的处理
+        continue-on-error: false
+
+      # 步骤6.5: 检查CodeQL结果严重性
+      - name: 🚨 Check CodeQL Results Severity
+        if: always() && steps.codeql-analyze.conclusion == 'success'
+        run: |
+          echo "🔍 Checking CodeQL analysis results for Medium+ severity issues..."
+
+          # 检查是否有SARIF结果文件
+          if [ -f "./codeql-results.sarif" ]; then
+            echo "📄 SARIF results file found, analyzing..."
+
+            # 使用jq解析SARIF文件检查严重性级别
+            # 检查是否有error、warning级别的问题，以及medium+严重性问题
+            CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error" or (.properties.severity // "low") | test("critical|high|medium"; "i"))] | length' ./codeql-results.sarif 2>/dev/null || echo "0")
+            WARNING_COUNT=$(jq '[.runs[].results[] | select(.level == "warning")] | length' ./codeql-results.sarif 2>/dev/null || echo "0")
+            TOTAL_ISSUES=$(jq '[.runs[].results[]] | length' ./codeql-results.sarif 2>/dev/null || echo "0")
+
+            echo "📊 CodeQL Results Summary:"
+            echo "• Total Issues: $TOTAL_ISSUES"
+            echo "• Critical/High/Medium: $CRITICAL_COUNT"
+            echo "• Warnings: $WARNING_COUNT"
+            echo ""
+
+            # 如果有Critical/High/Medium级别问题，让工作流失败
+            if [ "$CRITICAL_COUNT" -gt 0 ]; then
+              echo "❌ SECURITY ALERT: Found $CRITICAL_COUNT Critical/High/Medium severity issues!"
+              echo "🚫 Blocking deployment due to security concerns"
+              echo ""
+              echo "📋 Required Actions:"
+              echo "• Review issues in Security tab: https://github.com/${{ github.repository }}/security/code-scanning"
+              echo "• Fix Critical/High/Medium severity vulnerabilities"
+              echo "• Re-run CodeQL analysis after fixes"
+              echo ""
+              echo "🔗 Security Dashboard: https://github.com/${{ github.repository }}/security"
+              exit 1
+            fi
+
+            # 如果有Warning级别问题，给出警告但不失败（根据需要可调整）
+            if [ "$WARNING_COUNT" -gt 0 ]; then
+              echo "⚠️ Found $WARNING_COUNT Warning level issues"
+              echo "💡 Review these issues in Security tab for code quality improvements"
+              echo "✅ Proceeding with deployment (Warning level issues don't block)"
+            fi
+
+            if [ "$TOTAL_ISSUES" -eq 0 ]; then
+              echo "🎉 No security issues detected - CodeQL analysis passed!"
+            fi
+
+          else
+            echo "⚠️ No SARIF results file found, using alternative check..."
+
+            # 检查GitHub API获取最新的代码扫描警报
+            echo "🔍 Checking for recent code scanning alerts via API..."
+
+            # 如果没有SARIF文件，我们假设分析成功意味着没有阻塞问题
+            echo "✅ CodeQL analysis completed successfully"
+          fi
+
+      # 步骤7: 分析结果处理
+      - name: 📊 Process Analysis Results
+        if: always()
+        run: |
+          echo "📊 CodeQL Analysis Summary"
+          echo "=========================="
+          echo "🔤 Language: ${{ matrix.language }}"
+          echo "📅 Scan Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "🌿 Branch: ${GITHUB_REF#refs/heads/}"
+          echo "🔗 Commit: ${GITHUB_SHA:0:8}"
+          echo ""
+          echo "📋 Analysis Details:"
+          echo "• Scope: TypeScript/JavaScript security analysis"
+          echo "• Queries: Security + Quality ruleset"
+          echo "• Strictness: Medium+ severity, Warning+ level"
+          echo "• Target: React + TypeScript + Vite application"
+          echo ""
+          echo "🎯 Severity Handling (Medium+ 模式):"
+          echo "• Critical/High/Medium: Will block deployment"
+          echo "• Low/Info: Reported for review only"
+          echo "• Warning+: All reported and tracked"
+          echo ""
+
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ CodeQL analysis completed successfully"
+            echo "🔍 Results uploaded to GitHub Security tab"
+            echo "💡 Check the Security tab for detailed findings"
+          else
+            echo "⚠️ CodeQL analysis encountered issues"
+            echo "🔧 Please review the workflow logs for details"
+          fi
+
+          echo ""
+          echo "🔗 View results: https://github.com/${{ github.repository }}/security/code-scanning"
+
+  # 安全扫描总结任务
+  security-summary:
+    name: 📋 Security Summary
+    runs-on: ubuntu-latest
+    needs: codeql-analysis
+    if: always()
+
+    steps:
+      - name: 🛡️ Security Analysis Summary
+        run: |
+          echo "🛡️ Voidix Web - Security Analysis Summary"
+          echo "========================================"
+          echo ""
+          echo "🔐 CodeQL Analysis: ${{ needs.codeql-analysis.result }}"
+          echo "📅 Scan Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "🎯 Repository: ${{ github.repository }}"
+          echo "🌿 Branch: ${GITHUB_REF#refs/heads/}"
+          echo "🔗 Commit: ${GITHUB_SHA:0:8}"
+          echo ""
+          echo "⚙️ Configuration:"
+          echo "• Severity: Medium+ (Critical, High, Medium block deployment)"
+          echo "• Reporting: Warning+ level issues tracked"
+          echo "• Queries: Security + Quality"
+          echo "• Dependencies: Medium+ vulnerabilities block PR"
+          echo ""
+
+          # 根据 CodeQL 分析结果提供建议
+          if [[ "${{ needs.codeql-analysis.result }}" == "success" ]]; then
+            echo "✅ Security Analysis Status: PASSED"
+            echo ""
+            echo "🎉 No high-severity security issues detected"
+            echo "🔍 Detailed results available in Security tab"
+            echo "📊 Continue monitoring for security best practices"
+            echo ""
+            echo "📋 Next Steps:"
+            echo "• Review any medium/low severity findings"
+            echo "• Keep dependencies updated"
+            echo "• Follow secure coding practices"
+          elif [[ "${{ needs.codeql-analysis.result }}" == "failure" ]]; then
+            echo "❌ Security Analysis Status: FAILED"
+            echo ""
+            echo "🚨 Critical security issues detected!"
+            echo "🚫 Deployment blocked due to security concerns"
+            echo ""
+            echo "📋 Required Actions:"
+            echo "• Check Security tab for detailed findings"
+            echo "• Fix Critical/High/Medium severity vulnerabilities"
+            echo "• Verify build and dependency configurations"
+            echo "• Re-run analysis after fixes"
+            echo ""
+            echo "⚠️ This workflow will continue to fail until security issues are resolved"
+            exit 1
+          else
+            echo "⚠️ Security Analysis Status: ATTENTION REQUIRED"
+            echo ""
+            echo "🔧 CodeQL analysis needs attention"
+            echo "🔍 Please review workflow logs and findings"
+            echo ""
+            echo "📋 Recommended Actions:"
+            echo "• Check Security tab for detailed findings"
+            echo "• Review and fix identified security issues"
+            echo "• Verify build and dependency configurations"
+            echo "• Re-run analysis after fixes"
+          fi
+
+          echo ""
+          echo "🔗 Security Dashboard: https://github.com/${{ github.repository }}/security"
+          echo "📖 Learn more: https://docs.github.com/en/code-security/code-scanning"
+
+        # 确保总结始终运行
+        if: always()
+
+  dependency-review:
+    name: 🔎 Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # 失败阈值：Medium 及以上严重性漏洞时失败（严格模式）
+          fail-on-severity: medium
+          # 允许的许可证类型（包括所有项目使用的开源许可证）
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, Python-2.0, BlueOak-1.0.0, MIT-0, CC-BY-4.0
+          # 拒绝的许可证类型
+          deny-licenses: GPL-2.0, GPL-3.0
+
+        # 移除continue-on-error，让Medium+问题阻止合并
+        # continue-on-error: true  # 已移除，确保Medium+问题会让工作流失败

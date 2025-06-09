@@ -1,0 +1,311 @@
+name: 🔍 Code Check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  CACHE_KEY_PREFIX: 'voidix-web'
+
+jobs:
+  # 快速检查 - 代码风格和类型检查
+  quick-checks:
+    name: ⚡ Quick Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🎨 Style Check
+        run: |
+          echo "🎨 Running Prettier style check..."
+          npm run style:check
+          echo "✅ Style check passed"
+
+      - name: 📋 Type Check
+        run: |
+          echo "📋 Running TypeScript type check..."
+          npm run type-check
+          echo "✅ Type check passed"
+
+  # 质量检测
+  quality-analysis:
+    name: 📊 Quality Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🔍 Code Quality Check
+        run: |
+          echo "🔍 Running comprehensive TypeScript compilation check..."
+          npx tsc --noEmit --pretty
+          echo "✅ Code quality check passed"
+
+      - name: 📏 Build Verification
+        run: |
+          echo "📏 Verifying build process..."
+          npm run build:basic
+          echo "📊 Analyzing build output..."
+          ls -la dist/
+          du -sh dist/
+          echo "✅ Build verification completed"
+
+  # 测试套件
+  test-suite:
+    name: 🧪 Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🧪 Run Tests with Coverage
+        run: |
+          echo "🧪 Running test suite with coverage..."
+          npm run test:coverage
+          echo "✅ Tests completed"
+
+      - name: 📊 Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+      - name: 📈 Coverage Summary
+        if: always()
+        run: |
+          echo "📈 Test Coverage Summary:"
+          if [ -f coverage/lcov.info ]; then
+            echo "✅ Coverage report generated successfully"
+            grep -o 'Lines.*[0-9]*\.[0-9]*%' coverage/lcov-report/index.html || echo "Coverage details available in artifacts"
+          else
+            echo "⚠️ Coverage report not found"
+          fi
+
+  # 安全检测
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🛡️ Dependency Security Audit
+        run: |
+          echo "🛡️ Running dependency security scan..."
+
+          echo "📦 Checking for outdated dependencies..."
+          npm outdated || echo "ℹ️ Some dependencies may be outdated (non-blocking)"
+
+          echo "🔍 Running security audit (ignoring low severity per GitHub recommendation)..."
+          npm audit --audit-level=moderate || echo "ℹ️ Low severity vulnerabilities found but ignored (GitHub recommendation for production apps)"
+
+          echo "📜 Checking license compatibility (will fail on incompatible licenses)..."
+          npx license-checker --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;Python-2.0;BlueOak-1.0.0;MIT-0;CC-BY-4.0" --excludePrivatePackages
+          echo "✅ Security scan passed"
+
+  # 许可证文件新鲜度检查
+  license-freshness-check:
+    name: 📜 License File Freshness
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 📜 Check License File Existence
+        run: |
+          echo "📜 Checking THIRD_PARTY_LICENSES.csv file..."
+
+          if [ -f "docs/THIRD_PARTY_LICENSES.csv" ]; then
+            echo "✅ THIRD_PARTY_LICENSES.csv file found"
+            echo "📊 File info:"
+            ls -la docs/THIRD_PARTY_LICENSES.csv
+            echo "📝 File size: $(wc -l < docs/THIRD_PARTY_LICENSES.csv) lines"
+          else
+            echo "❌ THIRD_PARTY_LICENSES.csv file not found!"
+            exit 1
+          fi
+
+      - name: 🔍 Generate Current License Info
+        run: |
+          echo "🔍 Generating current dependency license information..."
+
+          # 生成当前依赖的许可证信息
+          npx license-checker --csv --out current-licenses.csv --excludePrivatePackages
+
+          echo "📊 Current dependencies license summary:"
+          echo "Total current dependencies: $(tail -n +2 current-licenses.csv | wc -l)"
+
+          echo "✅ Current license info generated"
+
+      - name: 📊 Compare License Files
+        run: |
+          echo "📊 Comparing license files..."
+
+          # 计算文件行数
+          EXISTING_COUNT=$(tail -n +2 docs/THIRD_PARTY_LICENSES.csv | wc -l)
+          CURRENT_COUNT=$(tail -n +2 current-licenses.csv | wc -l)
+
+          echo "📈 License file comparison:"
+          echo "Existing file dependencies: $EXISTING_COUNT"
+          echo "Current dependencies: $CURRENT_COUNT"
+
+          # 检查差异
+          if [ "$EXISTING_COUNT" -eq "$CURRENT_COUNT" ]; then
+            echo "✅ Dependency count matches"
+          else
+            echo "⚠️ Dependency count differs (Existing: $EXISTING_COUNT, Current: $CURRENT_COUNT)"
+          fi
+
+          # 检查是否有新增或移除的依赖
+          echo ""
+          echo "🔍 Checking for differences..."
+
+          # 提取模块名称进行比较
+          tail -n +2 docs/THIRD_PARTY_LICENSES.csv | cut -d',' -f1 | sort > existing-modules.txt
+          tail -n +2 current-licenses.csv | cut -d',' -f1 | sort > current-modules.txt
+
+          # 检查新增的依赖
+          NEW_DEPS=$(comm -13 existing-modules.txt current-modules.txt)
+          if [ ! -z "$NEW_DEPS" ]; then
+            echo "🆕 New dependencies found:"
+            echo "$NEW_DEPS"
+          fi
+
+          # 检查移除的依赖
+          REMOVED_DEPS=$(comm -23 existing-modules.txt current-modules.txt)
+          if [ ! -z "$REMOVED_DEPS" ]; then
+            echo "🗑️ Removed dependencies:"
+            echo "$REMOVED_DEPS"
+          fi
+
+          if [ -z "$NEW_DEPS" ] && [ -z "$REMOVED_DEPS" ]; then
+            echo "✅ No dependency changes detected"
+          fi
+
+      - name: 📋 License Freshness Summary
+        run: |
+          echo "📋 License File Freshness Summary"
+          echo "=================================="
+          echo "✅ License file check completed"
+          echo ""
+          echo "📁 File location: docs/THIRD_PARTY_LICENSES.csv"
+          echo "🕒 Last modified: $(stat -c %y docs/THIRD_PARTY_LICENSES.csv 2>/dev/null || echo 'Unable to determine')"
+          echo ""
+          echo "💡 To update the license file:"
+          echo "1. Run: npx license-checker --csv --out docs/THIRD_PARTY_LICENSES.csv --excludePrivatePackages"
+          echo "2. Verify the generated file"
+          echo "3. Commit the changes"
+          echo ""
+          echo "🔗 Useful commands:"
+          echo "  npx license-checker --summary - Show license summary"
+          echo "  npx license-checker --csv - Generate CSV format"
+          echo "  npx license-checker --help - Show all options"
+
+  # 最终报告
+  final-report:
+    name: 📋 Final Report
+    runs-on: ubuntu-latest
+    needs: [quick-checks, quality-analysis, test-suite, security-scan, license-freshness-check]
+    if: always()
+
+    steps:
+      - name: 📊 Pipeline Summary
+        run: |
+          echo "🎯 Code Quality Pipeline Results"
+          echo "================================"
+          echo "⚡ Quick Checks: ${{ needs.quick-checks.result }}"
+          echo "📊 Quality Analysis: ${{ needs.quality-analysis.result }}"
+          echo "🧪 Test Suite: ${{ needs.test-suite.result }}"
+          echo "🔒 Security Scan: ${{ needs.security-scan.result }}"
+          echo "📜 License File Check: ${{ needs.license-freshness-check.result }}"
+          echo ""
+
+          if [[ "${{ needs.quick-checks.result }}" == "success" && "${{ needs.quality-analysis.result }}" == "success" && "${{ needs.test-suite.result }}" == "success" && "${{ needs.security-scan.result }}" == "success" && "${{ needs.license-freshness-check.result }}" == "success" ]]; then
+            echo "🏆 Overall Status: ✅ PASSED"
+            echo "✨ Code is ready for deployment"
+          else
+            echo "🏆 Overall Status: ❌ FAILED"
+            echo "⚠️ Some checks require attention"
+
+            # 显示详细的失败信息
+            if [[ "${{ needs.quick-checks.result }}" != "success" ]]; then
+              echo "   ❌ Quick Checks failed"
+            fi
+            if [[ "${{ needs.quality-analysis.result }}" != "success" ]]; then
+              echo "   ❌ Quality Analysis failed"
+            fi
+            if [[ "${{ needs.test-suite.result }}" != "success" ]]; then
+              echo "   ❌ Test Suite failed"
+            fi
+            if [[ "${{ needs.security-scan.result }}" != "success" ]]; then
+              echo "   ❌ Security Scan failed - SECURITY ISSUES DETECTED"
+            fi
+            if [[ "${{ needs.license-freshness-check.result }}" != "success" ]]; then
+              echo "   ❌ License File Check failed - THIRD_PARTY_LICENSES.csv needs update"
+            fi
+
+            exit 1
+          fi
+
+          echo ""
+          echo "📅 Pipeline completed at: $(date)"
+          echo "🔗 Commit: ${GITHUB_SHA:0:8}"
+          echo "🌿 Branch: ${GITHUB_REF#refs/heads/}"

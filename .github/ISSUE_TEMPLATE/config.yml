@@ -1,0 +1,37 @@
+# GitHub Issue 模板配置文件
+# 用于自定义 issue 创建体验，提供多种联系方式和指导
+
+# 禁用空白 issue 创建，引导用户使用模板或联系方式
+blank_issues_enabled: false
+
+# 联系方式配置，为用户提供多种沟通渠道
+contact_links:
+  # 官方网站 - 了解项目和服务器信息
+  - name: 🌐 访问官方网站
+    url: https://voidix.net
+    about: 查看Voidix Minecraft服务器官方网站和最新信息
+
+  # 项目文档 - 技术文档和开发指南
+  - name: 📖 查看项目文档
+    url: https://github.com/Voidix-Network/voidix-web/blob/main/docs/README.md
+    about: 阅读完整的项目文档、开发指南和贡献指南
+
+  # 社区交流 - QQ群实时讨论
+  - name: 💬 加入QQ群讨论
+    url: https://qm.qq.com/cgi-bin/qm/qr?k=aMRoacVuxcGVSzEwfjb49oN4CWCv6yHj&jump_from=webapi&authKey=hw0EhRKGDGN1vmHD4AfK2yJCzPzSA+AXGJOEcugZpsA7KfK9GhNXpe9GNWCjCcmr
+    about: 加入Voidix官方QQ群，与其他玩家和开发者实时交流
+
+  # 贡献指南 - 开发者参与指引
+  - name: 📋 查看贡献指南
+    url: https://github.com/Voidix-Network/voidix-web/blob/main/docs/CONTRIBUTING.md
+    about: 了解如何为项目贡献代码，包含完整的开发流程和规范
+
+  # 技术支持 - GitHub Discussions
+  - name: 🔧 技术支持论坛
+    url: https://github.com/Voidix-Network/voidix-web/discussions
+    about: 在GitHub Discussions中寻求技术支持和参与项目讨论
+
+  # 邮件联系 - 私密或紧急问题
+  - name: 📧 联系开发团队
+    url: mailto:admin@voidix.net
+    about: 通过邮件联系Voidix开发团队，适用于私密或紧急问题

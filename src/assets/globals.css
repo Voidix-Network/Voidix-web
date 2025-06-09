@@ -1,0 +1,386 @@
+/* 字体已在index.html中正确配置，无需重复导入 */
+
+/* 导入页面过渡动画样式 */
+@import '../styles/page-transitions.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 基础样式重置和全局样式 */
+@layer base {
+  /* CSS自定义属性 - 匹配原HTML设计 */
+  :root {
+    /* 渐变色彩 */
+    --gradient-primary: linear-gradient(90deg, #6a93ff, #7367f0);
+    --gradient-vbpixel: linear-gradient(90deg, #00aeff, #0067ff);
+
+    /* 动画时长 */
+    --animation-float-duration: 6s;
+    --transition-hover-duration: 0.3s;
+    --transition-accordion-duration: 0.3s;
+
+    /* 阴影 */
+    --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* 变换 */
+    --transform-hover-up: translateY(-5px);
+    --transform-float-down: translateY(-10px);
+
+    /* 改进的无障碍颜色 */
+    --color-gray-500-improved: #6b7280;
+    --color-gray-400-improved: #9ca3af;
+    --color-gray-300-improved: #d1d5db;
+    --color-high-contrast: #e5e7eb;
+    --color-medium-contrast: #d1d5db;
+
+    /* 深色主题适配颜色 */
+    --color-dark-bg: rgba(31, 41, 55, 0.8);
+    --color-dark-text: #e5e7eb;
+    --color-dark-muted: #9ca3af;
+  }
+
+  * {
+    border-color: rgb(75 85 99); /* border-gray-600 */
+  }
+
+  html {
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      'Noto Sans',
+      sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: #111827;
+    color: #f3f4f6;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      'Noto Sans',
+      sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 无障碍跳转链接 */
+  .skip-to-content {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    z-index: 999;
+    padding: 1rem;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .skip-to-content:focus {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
+
+/* 新动画系统 - 解决移动端显示问题 */
+@layer components {
+  /* 淡入上升动画 */
+  .animate-fade-in-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+  }
+
+  .animate-fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 立即显示类 - 移动端使用 */
+  .animate-immediate {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition: none !important;
+  }
+
+  /* 延迟显示类 */
+  .animate-delay-100 {
+    transition-delay: 0.1s;
+  }
+  .animate-delay-200 {
+    transition-delay: 0.2s;
+  }
+  .animate-delay-300 {
+    transition-delay: 0.3s;
+  }
+  .animate-delay-400 {
+    transition-delay: 0.4s;
+  }
+  .animate-delay-500 {
+    transition-delay: 0.5s;
+  }
+
+  /* 移动端优化 - 完全禁用动画 */
+  @media (max-width: 768px) {
+    .animate-fade-in-up {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+      transition: none !important;
+    }
+
+    /* 移动端禁用所有延迟 */
+    .animate-delay-100,
+    .animate-delay-200,
+    .animate-delay-300,
+    .animate-delay-400,
+    .animate-delay-500 {
+      transition-delay: 0s !important;
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+
+    /* 强制显示所有元素 */
+    [class*='animate-'] {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* 减少动画偏好支持 */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in-up {
+      opacity: 1;
+      transform: translateY(0);
+      transition: none;
+    }
+  }
+
+  /* 卡片悬停效果 - 复现原项目的card-hover */
+  .card-hover {
+    transition: all var(--transition-hover-duration) ease;
+  }
+
+  .card-hover:hover {
+    transform: var(--transform-hover-up);
+    box-shadow: var(--shadow-hover);
+  }
+
+  /* 时间轴卡片焕然一新效果 */
+  .timeline-card-fresh {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .timeline-card-fresh:hover {
+    background: rgba(31, 41, 55, 0.8); /* bg-gray-800/80 */
+    border-color: rgba(147, 197, 253, 0.6); /* blue-300/60 */
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(147, 197, 253, 0.1);
+    backdrop-filter: blur(16px);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .timeline-card-fresh:hover * {
+    color: rgb(243, 244, 246) !important; /* text-gray-100 */
+  }
+
+  .timeline-card-fresh:hover .text-purple-400 {
+    color: rgb(196, 181, 253) !important; /* text-purple-300 */
+  }
+
+  .timeline-card-fresh:hover .text-indigo-400 {
+    color: rgb(165, 180, 252) !important; /* text-indigo-300 */
+  }
+
+  /* 手风琴内容 */
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: all var(--transition-accordion-duration) ease-in-out;
+  }
+
+  .accordion-content.open {
+    max-height: 24rem; /* 384px */
+  }
+
+  /* 手风琴增强动画样式 */
+  .accordion-enhanced {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, box-shadow, border-color;
+  }
+
+  .accordion-enhanced:hover {
+    transform: translateY(-1px);
+  }
+
+  /* 手风琴内容渐入动画 */
+  .accordion-content-fade {
+    animation: accordionFadeIn 0.3s ease-out forwards;
+  }
+
+  @keyframes accordionFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 浮动动画 */
+  .animate-float {
+    animation: float var(--animation-float-duration) ease-in-out infinite;
+  }
+
+  /* 状态点样式 */
+  .status-dot {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+  }
+
+  .status-dot.online {
+    background-color: rgb(34 197 94); /* bg-green-500 */
+  }
+
+  .status-dot.offline {
+    background-color: rgb(239 68 68); /* bg-red-500 */
+  }
+
+  .status-dot.maintenance {
+    background-color: rgb(234 179 8); /* bg-yellow-500 */
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* 渐变文字 - 匹配原HTML设计 */
+  .gradient-text {
+    font-weight: 700;
+    background: var(--gradient-primary);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .vbpixel-gradient-text {
+    font-weight: 700;
+    background: var(--gradient-vbpixel);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 玻璃效果 */
+  .glass-effect {
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* 动画定义 */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: var(--transform-float-down);
+  }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(31 41 55);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(75 85 99);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(107 114 128);
+}
+
+/* 翻牌卡片3D效果 */
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotateY-180 {
+    transform: rotateY(180deg);
+  }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+  /* 文本行数限制 */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* 边框流光动画 */
+  @keyframes border-spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Logo流动渐变动画 */
+  @keyframes gradient-flow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}

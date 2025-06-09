@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- 首页 - 最高优先级 -->
+  <url>
+    <loc>https://www.voidix.net/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <lastmod>2025-06-11</lastmod>
+    <image:image>
+      <image:loc>https://www.voidix.net/android-chrome-512x512.png</image:loc>
+      <image:title>Voidix Minecraft服务器Logo</image:title>
+    </image:image>
+  </url>
+  
+  <!-- 服务器状态页 - 高频更新 -->
+  <url>
+    <loc>https://www.voidix.net/status</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-06-11</lastmod>
+  </url>
+  
+  <!-- 常见问题页 -->
+  <url>
+    <loc>https://www.voidix.net/faq</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-06-11</lastmod>
+  </url>
+  
+  <!-- Bug报告页 -->
+  <url>
+    <loc>https://www.voidix.net/bug-report</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2025-06-11</lastmod>
+  </url>
+
+</urlset>
