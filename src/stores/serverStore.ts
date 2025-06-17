@@ -326,7 +326,9 @@ export const useServerStore = create<ServerState & ServerActions>()(
           console.warn(`[ServerStore] 玩家 ${playerId} 重复上线到同一服务器 ${serverId}，跳过处理`);
           return;
         } else {
-          console.log(`[ServerStore] 玩家 ${playerId} 从 ${existingLocation} 移动到 ${serverId}，处理为移动操作`);
+          console.log(
+            `[ServerStore] 玩家 ${playerId} 从 ${existingLocation} 移动到 ${serverId}，处理为移动操作`
+          );
           // 使用移动处理逻辑
           get().handlePlayerMove(playerId, existingLocation, serverId);
           return;
@@ -350,14 +352,16 @@ export const useServerStore = create<ServerState & ServerActions>()(
           },
         }));
 
-        console.log(`[ServerStore] 玩家 ${playerId} 成功上线到 ${serverId}，玩家数: ${currentServer.players} → ${currentServer.players + 1}`);
+        console.log(
+          `[ServerStore] 玩家 ${playerId} 成功上线到 ${serverId}，玩家数: ${currentServer.players} → ${currentServer.players + 1}`
+        );
 
         // 重新计算聚合统计
         get().recalculateAfterPlayerChange();
       } else {
         console.warn(`[ServerStore] 尝试添加玩家到未知服务器: ${serverId}`);
         console.warn(`[ServerStore] 可用服务器列表:`, Object.keys(state.servers));
-        
+
         // 仍然记录位置，但不更新服务器玩家数
         set(state => ({
           playersLocation: {
@@ -385,7 +389,7 @@ export const useServerStore = create<ServerState & ServerActions>()(
         console.log(`[ServerStore] 从位置记录找到玩家 ${playerId} 位于服务器 ${lastServerId}`);
       } else {
         console.warn(`[ServerStore] 玩家 ${playerId} 的位置记录不存在，尝试备用查找策略`);
-        
+
         // 策略2：从 playerIgns 数据中查找服务器位置
         const playerIgnInfo = state.playerIgns[playerId];
         if (playerIgnInfo && playerIgnInfo.serverId) {
@@ -397,17 +401,19 @@ export const useServerStore = create<ServerState & ServerActions>()(
             const foundPlayer = playerList.find(player => player.uuid === playerId);
             if (foundPlayer) {
               fallbackServerId = serverId;
-              console.log(`[ServerStore] 从服务器IGN列表找到玩家 ${playerId} 位于服务器 ${fallbackServerId}`);
+              console.log(
+                `[ServerStore] 从服务器IGN列表找到玩家 ${playerId} 位于服务器 ${fallbackServerId}`
+              );
               break;
             }
           }
         }
-        
+
         // 使用备用查找结果
         if (fallbackServerId) {
           lastServerId = fallbackServerId;
           console.log(`[ServerStore] 使用备用策略确定玩家 ${playerId} 位置: ${lastServerId}`);
-          
+
           // 修复 playersLocation 记录不一致问题
           set(state => ({
             playersLocation: {
@@ -442,13 +448,17 @@ export const useServerStore = create<ServerState & ServerActions>()(
             return { playersLocation: newPlayersLocation };
           });
 
-          console.log(`[ServerStore] 玩家 ${playerId} 从服务器 ${lastServerId} 下线，更新玩家数: ${currentServer.players} → ${Math.max(0, currentServer.players - 1)}`);
+          console.log(
+            `[ServerStore] 玩家 ${playerId} 从服务器 ${lastServerId} 下线，更新玩家数: ${currentServer.players} → ${Math.max(0, currentServer.players - 1)}`
+          );
 
           // 重新计算聚合统计
           get().recalculateAfterPlayerChange();
         } else if (!currentServer) {
-          console.warn(`[ServerStore] 玩家 ${playerId} 所在服务器 ${lastServerId} 不存在，可能已被移除`);
-          
+          console.warn(
+            `[ServerStore] 玩家 ${playerId} 所在服务器 ${lastServerId} 不存在，可能已被移除`
+          );
+
           // 清理无效的位置记录
           set(state => {
             const newPlayersLocation = { ...state.playersLocation };
@@ -456,8 +466,10 @@ export const useServerStore = create<ServerState & ServerActions>()(
             return { playersLocation: newPlayersLocation };
           });
         } else {
-          console.warn(`[ServerStore] 服务器 ${lastServerId} 玩家数已为0，无法减少。可能存在状态不一致`);
-          
+          console.warn(
+            `[ServerStore] 服务器 ${lastServerId} 玩家数已为0，无法减少。可能存在状态不一致`
+          );
+
           // 清理位置记录但不修改服务器玩家数
           set(state => {
             const newPlayersLocation = { ...state.playersLocation };
@@ -477,7 +489,7 @@ export const useServerStore = create<ServerState & ServerActions>()(
           hasTargetInIgns: !!state.playerIgns[playerId],
           hasTargetInLocation: !!state.playersLocation[playerId],
         });
-        
+
         // 即使找不到位置，也要尝试清理IGN数据保持一致性
         if (state.playerIgns[playerId]) {
           console.log(`[ServerStore] 清理孤立的IGN数据: ${playerId}`);
@@ -499,7 +511,9 @@ export const useServerStore = create<ServerState & ServerActions>()(
 
       // 验证当前位置记录的一致性
       if (currentLocation && currentLocation !== fromServer) {
-        console.warn(`[ServerStore] 位置记录不一致: 期望 ${fromServer}，实际 ${currentLocation}，使用实际位置`);
+        console.warn(
+          `[ServerStore] 位置记录不一致: 期望 ${fromServer}，实际 ${currentLocation}，使用实际位置`
+        );
         // 使用实际记录的位置作为源服务器
         return get().handlePlayerMove(playerId, currentLocation, toServer);
       }
@@ -527,8 +541,12 @@ export const useServerStore = create<ServerState & ServerActions>()(
         }));
 
         console.log(`[ServerStore] 玩家移动成功:`);
-        console.log(`[ServerStore] - ${fromServer}: ${fromServerData.players} → ${Math.max(0, fromServerData.players - 1)} 玩家`);
-        console.log(`[ServerStore] - ${toServer}: ${toServerData.players} → ${toServerData.players + 1} 玩家`);
+        console.log(
+          `[ServerStore] - ${fromServer}: ${fromServerData.players} → ${Math.max(0, fromServerData.players - 1)} 玩家`
+        );
+        console.log(
+          `[ServerStore] - ${toServer}: ${toServerData.players} → ${toServerData.players + 1} 玩家`
+        );
 
         // 重新计算聚合统计
         get().recalculateAfterPlayerChange();
@@ -541,7 +559,7 @@ export const useServerStore = create<ServerState & ServerActions>()(
           toServerExists: !!toServerData,
           availableServers: Object.keys(state.servers),
         });
-        
+
         // 至少更新位置记录，即使服务器不存在
         if (toServerData) {
           console.log(`[ServerStore] 目标服务器存在，仅更新位置和目标服务器`);
