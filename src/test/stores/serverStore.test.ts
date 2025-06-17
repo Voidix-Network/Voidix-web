@@ -277,7 +277,7 @@ describe('serverStore', () => {
     it('应该防止玩家数低于0', () => {
       const { handlePlayerRemove } = useServerStore.getState();
 
-      // Mock console.warn to capture expected warning messages (not console.error)
+      // Mock console.warn to capture expected warning messages
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       // 尝试从已经为0的服务器移除玩家（先设置一个空服务器）
@@ -295,11 +295,268 @@ describe('serverStore', () => {
       const state = useServerStore.getState();
       expect(state.servers['empty-server'].players).toBe(0); // 不应该变成负数
 
-      // Verify that the expected warning was logged
-      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('尝试从服务器'));
+      // 更新断言以匹配新的警告消息
+      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('服务器'));
 
       // Restore console.warn
       consoleWarnSpy.mockRestore();
+    });
+
+    it('应该使用备用策略查找丢失的玩家位置', () => {
+      const { handlePlayerRemove, addPlayerIgn } = useServerStore.getState();
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // 1. 添加玩家IGN数据但不添加位置记录（模拟不一致状态）
+      addPlayerIgn('lost-player-uuid', 'lost-player', 'survival');
+
+      // 2. 确保 playersLocation 中没有该玩家记录
+      const initialState = useServerStore.getState();
+      expect(initialState.playersLocation['lost-player-uuid']).toBeUndefined();
+      expect(initialState.playerIgns['lost-player-uuid']).toBeDefined();
+
+      // 3. 尝试移除玩家，应该触发备用查找策略
+      handlePlayerRemove('lost-player-uuid');
+
+      // 4. 验证使用了备用策略并成功处理
+      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('位置记录不存在'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('从IGN数据找到玩家'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('修复玩家'));
+
+      // 5. 验证服务器玩家数正确减少
+      const finalState = useServerStore.getState();
+      expect(finalState.servers.survival.players).toBe(4); // 5 - 1
+      expect(finalState.playersLocation['lost-player-uuid']).toBeUndefined();
+
+      consoleLogSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('应该检测并处理重复的玩家上线', () => {
+      const { handlePlayerAdd } = useServerStore.getState();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // 第一次上线
+      handlePlayerAdd('duplicate-player', 'survival');
+      expect(useServerStore.getState().servers.survival.players).toBe(6);
+
+      // 重复上线到同一服务器
+      handlePlayerAdd('duplicate-player', 'survival');
+      
+      // 应该跳过处理并记录警告
+      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('重复上线'));
+      expect(useServerStore.getState().servers.survival.players).toBe(6); // 不应该再次增加
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('应该将重复上线到不同服务器识别为移动', () => {
+      const { handlePlayerAdd, handlePlayerMove } = useServerStore.getState();
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      
+      // Mock handlePlayerMove to verify it's called
+      const movespy = vi.spyOn(useServerStore.getState(), 'handlePlayerMove');
+
+      // 第一次上线到survival
+      handlePlayerAdd('moving-player', 'survival');
+      expect(useServerStore.getState().servers.survival.players).toBe(6);
+
+      // "上线"到不同服务器，应该被识别为移动
+      handlePlayerAdd('moving-player', 'creative');
+      
+      // 应该调用移动处理逻辑
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('移动到'));
+      expect(movespy).toHaveBeenCalledWith('moving-player', 'survival', 'creative');
+
+      consoleLogSpy.mockRestore();
+      movespy.mockRestore();
+    });
+
+    it('应该正确处理位置记录不一致的移动操作', () => {
+      const { handlePlayerMove, handlePlayerAdd } = useServerStore.getState();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      
+      // 先让玩家上线到survival
+      handlePlayerAdd('inconsistent-player', 'survival');
+      
+      // 手动修改位置记录造成不一致
+      useServerStore.setState(state => ({
+        ...state,
+        playersLocation: {
+          ...state.playersLocation,
+          'inconsistent-player': 'creative' // 实际在creative，但要移动命令说从survival
+        }
+      }));
+
+      // 尝试从survival移动到lobby1，但实际玩家在creative
+      handlePlayerMove('inconsistent-player', 'survival', 'lobby1');
+      
+      // 应该检测到不一致并使用实际位置
+      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('位置记录不一致'));
+      
+      // 最终玩家应该在lobby1
+      const state = useServerStore.getState();
+      expect(state.playersLocation['inconsistent-player']).toBe('lobby1');
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    describe('增强的容错处理', () => {
+      it('应该处理重复的玩家上线', () => {
+        const { handlePlayerAdd } = useServerStore.getState();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        // 第一次上线
+        handlePlayerAdd('player1', 'survival');
+        const initialPlayers = useServerStore.getState().servers.survival.players;
+
+        // 重复上线到同一服务器
+        handlePlayerAdd('player1', 'survival');
+
+        const state = useServerStore.getState();
+        expect(state.servers.survival.players).toBe(initialPlayers); // 不应该增加
+        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('重复上线'));
+
+        consoleWarnSpy.mockRestore();
+      });
+
+      it('应该将重复上线作为移动处理', () => {
+        const { handlePlayerAdd } = useServerStore.getState();
+        const handlePlayerMoveSpy = vi.spyOn(useServerStore.getState(), 'handlePlayerMove');
+
+        // 先上线到survival
+        handlePlayerAdd('player1', 'survival');
+        expect(useServerStore.getState().servers.survival.players).toBe(6);
+
+        // 再次上线到creative（应该被处理为移动）
+        handlePlayerAdd('player1', 'creative');
+
+        expect(handlePlayerMoveSpy).toHaveBeenCalledWith('player1', 'survival', 'creative');
+
+        handlePlayerMoveSpy.mockRestore();
+      });
+
+      it('应该从IGN数据中恢复丢失的位置记录', () => {
+        const { handlePlayerAdd, addPlayerIgn, handlePlayerRemove } = useServerStore.getState();
+        const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+        // 先正常上线并添加IGN数据
+        handlePlayerAdd('player1', 'survival');
+        addPlayerIgn('player1', 'TestPlayer', 'survival');
+
+        // 模拟位置记录丢失
+        useServerStore.setState(state => ({
+          ...state,
+          playersLocation: {}, // 清空位置记录
+        }));
+
+        // 尝试下线，应该从IGN数据中恢复位置
+        handlePlayerRemove('player1');
+
+        const state = useServerStore.getState();
+        expect(state.servers.survival.players).toBe(5); // 应该正确减少
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('从IGN数据找到'));
+
+        consoleLogSpy.mockRestore();
+      });
+
+      it('应该从服务器IGN列表中恢复位置记录', () => {
+        const { addPlayerIgn, handlePlayerRemove } = useServerStore.getState();
+        const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+        // 直接添加IGN数据到serverPlayerIgns（模拟复杂的数据状态）
+        const playerIgnInfo = {
+          uuid: 'player1',
+          ign: 'TestPlayer',
+          serverId: 'survival',
+          joinTime: new Date(),
+          lastSeen: new Date(),
+        };
+
+        useServerStore.setState(state => ({
+          ...state,
+          serverPlayerIgns: {
+            ...state.serverPlayerIgns,
+            survival: [playerIgnInfo],
+          },
+          // 不在playerIgns中记录，只在serverPlayerIgns中
+        }));
+
+        // 尝试下线，应该从serverPlayerIgns中找到位置
+        handlePlayerRemove('player1');
+
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('从服务器IGN列表找到'));
+
+        consoleLogSpy.mockRestore();
+      });
+
+      it('应该处理完全找不到位置的情况', () => {
+        const { handlePlayerRemove } = useServerStore.getState();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        // 尝试移除一个从未存在的玩家
+        handlePlayerRemove('ghost-player');
+
+        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('无法确定其位置'));
+        // 第6次调用包含诊断信息
+        expect(consoleWarnSpy).toHaveBeenNthCalledWith(6, 
+          expect.stringContaining('当前状态诊断:'), 
+          expect.any(Object)
+        );
+
+        consoleWarnSpy.mockRestore();
+      });
+
+      it('应该修复不一致的位置记录', () => {
+        const { handlePlayerRemove } = useServerStore.getState();
+        const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+        // 创建不一致的状态：IGN数据存在但位置记录缺失
+        const playerIgnInfo = {
+          uuid: 'player1',
+          ign: 'TestPlayer',
+          serverId: 'survival',
+          joinTime: new Date(),
+          lastSeen: new Date(),
+        };
+
+        useServerStore.setState(state => ({
+          ...state,
+          playerIgns: { player1: playerIgnInfo },
+          // playersLocation 为空，模拟不一致状态
+        }));
+
+        // 下线时应该修复位置记录
+        handlePlayerRemove('player1');
+
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('已修复玩家'));
+
+        consoleLogSpy.mockRestore();
+      });
+
+      it('应该处理移动时的位置记录不一致', () => {
+        const { handlePlayerAdd, handlePlayerMove } = useServerStore.getState();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const handlePlayerMoveSpy = vi.spyOn(useServerStore.getState(), 'handlePlayerMove');
+
+        // 玩家上线到survival
+        handlePlayerAdd('player1', 'survival');
+
+        // 手动修改位置记录，模拟不一致状态
+        useServerStore.setState(state => ({
+          ...state,
+          playersLocation: { player1: 'creative' }, // 实际在creative
+        }));
+
+        // 尝试从survival移动到lobby1，应该检测到不一致并修正
+        handlePlayerMove('player1', 'survival', 'lobby1');
+
+        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('位置记录不一致'));
+        expect(handlePlayerMoveSpy).toHaveBeenCalledWith('player1', 'creative', 'lobby1');
+
+        consoleWarnSpy.mockRestore();
+        handlePlayerMoveSpy.mockRestore();
+      });
     });
   });
 

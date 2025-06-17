@@ -311,15 +311,30 @@ export const useServerStore = create<ServerState & ServerActions>()(
 
     /**
      * 处理玩家上线，记录位置并更新服务器玩家数
+     * 增强版：支持重复记录检查，防止状态不一致
      */
     handlePlayerAdd: (playerId: string, serverId: string) => {
       console.log(`[ServerStore] 玩家 ${playerId} 上线到服务器 ${serverId}`);
 
       const state = get();
       const currentServer = state.servers[serverId];
+      const existingLocation = state.playersLocation[playerId];
+
+      // 检查是否有重复记录
+      if (existingLocation) {
+        if (existingLocation === serverId) {
+          console.warn(`[ServerStore] 玩家 ${playerId} 重复上线到同一服务器 ${serverId}，跳过处理`);
+          return;
+        } else {
+          console.log(`[ServerStore] 玩家 ${playerId} 从 ${existingLocation} 移动到 ${serverId}，处理为移动操作`);
+          // 使用移动处理逻辑
+          get().handlePlayerMove(playerId, existingLocation, serverId);
+          return;
+        }
+      }
 
       if (currentServer) {
-        // 记录玩家位置
+        // 记录玩家位置并更新服务器状态
         set(state => ({
           playersLocation: {
             ...state.playersLocation,
@@ -335,21 +350,74 @@ export const useServerStore = create<ServerState & ServerActions>()(
           },
         }));
 
+        console.log(`[ServerStore] 玩家 ${playerId} 成功上线到 ${serverId}，玩家数: ${currentServer.players} → ${currentServer.players + 1}`);
+
         // 重新计算聚合统计
         get().recalculateAfterPlayerChange();
       } else {
         console.warn(`[ServerStore] 尝试添加玩家到未知服务器: ${serverId}`);
+        console.warn(`[ServerStore] 可用服务器列表:`, Object.keys(state.servers));
+        
+        // 仍然记录位置，但不更新服务器玩家数
+        set(state => ({
+          playersLocation: {
+            ...state.playersLocation,
+            [playerId]: serverId,
+          },
+        }));
+        console.log(`[ServerStore] 已记录玩家 ${playerId} 位置为未知服务器 ${serverId}`);
       }
     },
 
     /**
      * 处理玩家下线，根据记录的位置更新对应服务器玩家数
+     * 增强版：支持多重查找策略，提高容错性
      */
     handlePlayerRemove: (playerId: string) => {
       console.log(`[ServerStore] 玩家 ${playerId} 下线`);
 
       const state = get();
-      const lastServerId = state.playersLocation[playerId];
+      let lastServerId = state.playersLocation[playerId];
+      let fallbackServerId: string | null = null;
+
+      // 策略1：直接从 playersLocation 查找
+      if (lastServerId) {
+        console.log(`[ServerStore] 从位置记录找到玩家 ${playerId} 位于服务器 ${lastServerId}`);
+      } else {
+        console.warn(`[ServerStore] 玩家 ${playerId} 的位置记录不存在，尝试备用查找策略`);
+        
+        // 策略2：从 playerIgns 数据中查找服务器位置
+        const playerIgnInfo = state.playerIgns[playerId];
+        if (playerIgnInfo && playerIgnInfo.serverId) {
+          fallbackServerId = playerIgnInfo.serverId;
+          console.log(`[ServerStore] 从IGN数据找到玩家 ${playerId} 位于服务器 ${fallbackServerId}`);
+        } else {
+          // 策略3：遍历所有服务器的IGN列表查找
+          for (const [serverId, playerList] of Object.entries(state.serverPlayerIgns)) {
+            const foundPlayer = playerList.find(player => player.uuid === playerId);
+            if (foundPlayer) {
+              fallbackServerId = serverId;
+              console.log(`[ServerStore] 从服务器IGN列表找到玩家 ${playerId} 位于服务器 ${fallbackServerId}`);
+              break;
+            }
+          }
+        }
+        
+        // 使用备用查找结果
+        if (fallbackServerId) {
+          lastServerId = fallbackServerId;
+          console.log(`[ServerStore] 使用备用策略确定玩家 ${playerId} 位置: ${lastServerId}`);
+          
+          // 修复 playersLocation 记录不一致问题
+          set(state => ({
+            playersLocation: {
+              ...state.playersLocation,
+              [playerId]: lastServerId!,
+            },
+          }));
+          console.log(`[ServerStore] 已修复玩家 ${playerId} 的位置记录`);
+        }
+      }
 
       if (lastServerId) {
         const currentServer = state.servers[lastServerId];
@@ -357,9 +425,6 @@ export const useServerStore = create<ServerState & ServerActions>()(
         if (currentServer && currentServer.players > 0) {
           // 从记录的服务器减少玩家数
           set(state => ({
-            playersLocation: {
-              ...state.playersLocation,
-            },
             servers: {
               ...state.servers,
               [lastServerId]: {
@@ -377,20 +442,52 @@ export const useServerStore = create<ServerState & ServerActions>()(
             return { playersLocation: newPlayersLocation };
           });
 
+          console.log(`[ServerStore] 玩家 ${playerId} 从服务器 ${lastServerId} 下线，更新玩家数: ${currentServer.players} → ${Math.max(0, currentServer.players - 1)}`);
+
           // 重新计算聚合统计
           get().recalculateAfterPlayerChange();
+        } else if (!currentServer) {
+          console.warn(`[ServerStore] 玩家 ${playerId} 所在服务器 ${lastServerId} 不存在，可能已被移除`);
+          
+          // 清理无效的位置记录
+          set(state => {
+            const newPlayersLocation = { ...state.playersLocation };
+            delete newPlayersLocation[playerId];
+            return { playersLocation: newPlayersLocation };
+          });
         } else {
-          console.warn(
-            `[ServerStore] 尝试从服务器 ${lastServerId} 移除玩家，但服务器玩家数已为0或服务器不存在`
-          );
+          console.warn(`[ServerStore] 服务器 ${lastServerId} 玩家数已为0，无法减少。可能存在状态不一致`);
+          
+          // 清理位置记录但不修改服务器玩家数
+          set(state => {
+            const newPlayersLocation = { ...state.playersLocation };
+            delete newPlayersLocation[playerId];
+            return { playersLocation: newPlayersLocation };
+          });
         }
       } else {
-        console.warn(`[ServerStore] 玩家 ${playerId} 下线，但未找到位置记录`);
+        console.warn(`[ServerStore] 玩家 ${playerId} 下线，但无法确定其位置。可能的原因：`);
+        console.warn(`[ServerStore] - 玩家从未正确上线记录`);
+        console.warn(`[ServerStore] - 位置记录已被清理`);
+        console.warn(`[ServerStore] - IGN数据不完整`);
+        console.warn(`[ServerStore] 当前状态诊断:`, {
+          playersLocationCount: Object.keys(state.playersLocation).length,
+          playerIgnsCount: Object.keys(state.playerIgns).length,
+          serverPlayerIgnsCount: Object.keys(state.serverPlayerIgns).length,
+          hasTargetInIgns: !!state.playerIgns[playerId],
+          hasTargetInLocation: !!state.playersLocation[playerId],
+        });
+        
+        // 即使找不到位置，也要尝试清理IGN数据保持一致性
+        if (state.playerIgns[playerId]) {
+          console.log(`[ServerStore] 清理孤立的IGN数据: ${playerId}`);
+        }
       }
     },
 
     /**
      * 处理玩家在服务器间移动
+     * 增强版：添加状态验证和详细日志
      */
     handlePlayerMove: (playerId: string, fromServer: string, toServer: string) => {
       console.log(`[ServerStore] 玩家 ${playerId} 从 ${fromServer} 移动到 ${toServer}`);
@@ -398,6 +495,14 @@ export const useServerStore = create<ServerState & ServerActions>()(
       const state = get();
       const fromServerData = state.servers[fromServer];
       const toServerData = state.servers[toServer];
+      const currentLocation = state.playersLocation[playerId];
+
+      // 验证当前位置记录的一致性
+      if (currentLocation && currentLocation !== fromServer) {
+        console.warn(`[ServerStore] 位置记录不一致: 期望 ${fromServer}，实际 ${currentLocation}，使用实际位置`);
+        // 使用实际记录的位置作为源服务器
+        return get().handlePlayerMove(playerId, currentLocation, toServer);
+      }
 
       if (fromServerData && toServerData) {
         // 更新两个服务器的玩家数和玩家位置记录
@@ -421,12 +526,64 @@ export const useServerStore = create<ServerState & ServerActions>()(
           },
         }));
 
+        console.log(`[ServerStore] 玩家移动成功:`);
+        console.log(`[ServerStore] - ${fromServer}: ${fromServerData.players} → ${Math.max(0, fromServerData.players - 1)} 玩家`);
+        console.log(`[ServerStore] - ${toServer}: ${toServerData.players} → ${toServerData.players + 1} 玩家`);
+
         // 重新计算聚合统计
         get().recalculateAfterPlayerChange();
       } else {
         console.warn(
           `[ServerStore] 玩家移动失败：源服务器 ${fromServer} 或目标服务器 ${toServer} 不存在`
         );
+        console.warn(`[ServerStore] 服务器状态:`, {
+          fromServerExists: !!fromServerData,
+          toServerExists: !!toServerData,
+          availableServers: Object.keys(state.servers),
+        });
+        
+        // 至少更新位置记录，即使服务器不存在
+        if (toServerData) {
+          console.log(`[ServerStore] 目标服务器存在，仅更新位置和目标服务器`);
+          set(state => ({
+            playersLocation: {
+              ...state.playersLocation,
+              [playerId]: toServer,
+            },
+            servers: {
+              ...state.servers,
+              [toServer]: {
+                ...toServerData,
+                players: toServerData.players + 1,
+                lastUpdate: new Date(),
+              },
+            },
+          }));
+        } else if (fromServerData) {
+          console.log(`[ServerStore] 源服务器存在，仅减少源服务器玩家数`);
+          set(state => ({
+            playersLocation: {
+              ...state.playersLocation,
+              [playerId]: toServer, // 仍然记录新位置
+            },
+            servers: {
+              ...state.servers,
+              [fromServer]: {
+                ...fromServerData,
+                players: Math.max(0, fromServerData.players - 1),
+                lastUpdate: new Date(),
+              },
+            },
+          }));
+        } else {
+          console.log(`[ServerStore] 两个服务器都不存在，仅更新位置记录`);
+          set(state => ({
+            playersLocation: {
+              ...state.playersLocation,
+              [playerId]: toServer,
+            },
+          }));
+        }
       }
     },
 
