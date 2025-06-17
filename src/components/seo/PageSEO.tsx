@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { getPageSEOConfig, generateKeywordsString } from '@/constants';
+import { getPageSEOConfig, generateKeywordsString, LOGO_ASSETS } from '@/constants';
 
 export interface PageSEOProps {
   title?: string;
@@ -22,7 +22,7 @@ export const PageSEO: React.FC<PageSEOProps> = ({
   title,
   description,
   keywords,
-  image = '/android-chrome-512x512.png',
+  image = LOGO_ASSETS.SEO_IMAGE,
   url = typeof window !== 'undefined' ? window.location.href : '',
   type = 'website',
   canonicalUrl,

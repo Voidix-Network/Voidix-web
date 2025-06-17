@@ -167,3 +167,10 @@ export const SERVER_CONFIG: ServerConfig = {
     keys: ['thepit'],
   },
 };
+
+// Logo资源配置
+export const LOGO_ASSETS = {
+  PWA_ICON: '/android-chrome-512x512.png', // 仅PWA清单使用
+  BRAND_LOGO: '/logo.png', // 品牌展示和Logo组件
+  SEO_IMAGE: '/logo.png', // SEO和社交媒体分享
+} as const;

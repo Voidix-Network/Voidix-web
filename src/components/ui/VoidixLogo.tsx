@@ -1,5 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GradientText } from './GradientText';
+import { LOGO_ASSETS } from '@/constants';
+
+// 图片预加载钩子 - 防止重复请求
+const useImagePreload = (src: string) => {
+  useEffect(() => {
+    const img = new Image();
+    img.src = src;
+  }, [src]);
+};
 
 interface VoidixLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -11,11 +20,14 @@ interface VoidixLogoProps {
  * Voidix Logo 组件
  * 提供多种尺寸和变体的品牌logo
  */
-export const VoidixLogo: React.FC<VoidixLogoProps> = ({
+const VoidixLogoComponent: React.FC<VoidixLogoProps> = ({
   size = 'md',
   variant = 'full',
   className = '',
 }) => {
+  // 预加载Logo图片，防止重复请求
+  useImagePreload(LOGO_ASSETS.BRAND_LOGO);
+
   const sizeConfig = {
     sm: {
       container: 'w-12 h-12',
@@ -51,9 +63,11 @@ export const VoidixLogo: React.FC<VoidixLogoProps> = ({
       className={`${config.container} bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-cyan-400/10 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/10 shadow-lg ${className}`}
     >
       <img
-        src="/android-chrome-512x512.png"
+        src={LOGO_ASSETS.BRAND_LOGO}
         alt="Voidix Logo"
         className={`${config.container} object-contain`}
+        loading="lazy"
+        decoding="async"
         style={{
           imageRendering: 'pixelated', // 保持像素风格
           filter: 'drop-shadow(0 0 8px rgba(147, 51, 234, 0.3))', // 添加紫色光晕效果
@@ -112,3 +126,6 @@ export const VoidixLogo: React.FC<VoidixLogoProps> = ({
     </>
   );
 };
+
+// 使用React.memo防止不必要的重新渲染
+export const VoidixLogo = React.memo(VoidixLogoComponent);
