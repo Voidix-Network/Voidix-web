@@ -43,7 +43,6 @@ permissions:
 # 环境变量
 env:
   NODE_VERSION: '18'
-  LANGUAGE: 'typescript' # CodeQL 分析语言
 
 jobs:
   # CodeQL 安全分析主任务
@@ -57,8 +56,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 支持多语言分析（当前聚焦JavaScript/TypeScript）
-        language: ['typescript']
+        # 支持多语言分析（JavaScript和TypeScript）
+        language: ['javascript', 'typescript']
 
     steps:
       # 步骤1: 检出代码
@@ -103,6 +102,10 @@ jobs:
               - '**/*.test.tsx'
               - '**/*.spec.ts'
               - '**/*.spec.tsx'
+              - '**/*.test.js'
+              - '**/*.test.jsx'
+              - '**/*.spec.js'
+              - '**/*.spec.jsx'
             paths:
               - 'src'
               - 'scripts'
@@ -205,10 +208,10 @@ jobs:
           echo "🔗 Commit: ${GITHUB_SHA:0:8}"
           echo ""
           echo "📋 Analysis Details:"
-          echo "• Scope: TypeScript/JavaScript security analysis"
+          echo "• Scope: JavaScript/TypeScript security analysis"
           echo "• Queries: Security + Quality ruleset"
           echo "• Strictness: Medium+ severity, Warning+ level"
-          echo "• Target: React + TypeScript + Vite application"
+          echo "• Target: React + TypeScript + Vite application + Build scripts"
           echo ""
           echo "🎯 Severity Handling (Medium+ 模式):"
           echo "• Critical/High/Medium: Will block deployment"
@@ -312,12 +315,10 @@ jobs:
       - name: 🔍 Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          # 失败阈值：Medium 及以上严重性漏洞时失败（严格模式）
-          fail-on-severity: medium
+          # 失败阈值：Moderate 及以上严重性漏洞时失败（严格模式）
+          fail-on-severity: moderate
           # 允许的许可证类型（包括所有项目使用的开源许可证）
           allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, Python-2.0, BlueOak-1.0.0, MIT-0, CC-BY-4.0
-          # 拒绝的许可证类型
-          deny-licenses: GPL-2.0, GPL-3.0
 
         # 移除continue-on-error，让Medium+问题阻止合并
         # continue-on-error: true  # 已移除，确保Medium+问题会让工作流失败
