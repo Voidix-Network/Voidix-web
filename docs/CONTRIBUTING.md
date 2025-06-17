@@ -67,8 +67,6 @@ Web 项目的关注！我们欢迎并鼓励社区贡献，无论是代码、文�
 }
 ```
 
-💡 ESLint 配置正在规划中，目前请勿依赖 ESLint 进行代码质量检查。
-
 ### ⚙️ 本地设置
 
 1. **Fork 仓库**
@@ -160,7 +158,8 @@ Web 项目的关注！我们欢迎并鼓励社区贡献，无论是代码、文�
 
 ### 📜 第三方许可证文件
 
-本项目维护一个 `THIRD_PARTY_LICENSES.csv` 文件来追踪所有第三方依赖的许可证信息。这个文件需要在以下情况下更新：
+本项目维护一个 `THIRD_PARTY_LICENSES.csv`
+文件来追踪所有第三方依赖的许可证信息。这个文件需要在以下情况下更新：
 
 - 添加新的 npm 依赖包
 - 更新现有依赖包版本
@@ -221,14 +220,15 @@ Web 项目的关注！我们欢迎并鼓励社区贡献，无论是代码、文�
 
 ### 🔍 常见问题排查
 
-**问题**: CI 显示许可证文件过期  
-**解决**: 运行 `npx license-checker --csv --out docs/THIRD_PARTY_LICENSES.csv --excludePrivatePackages` 并提交更新
+**问题**: CI 显示许可证文件过期 **解决**: 运行
+`npx license-checker --csv --out docs/THIRD_PARTY_LICENSES.csv --excludePrivatePackages`
+并提交更新
 
-**问题**: 新依赖许可证不兼容  
+**问题**: 新依赖许可证不兼容
 **解决**: 检查许可证兼容性，必要时寻找替代包或联系维护团队
 
-**问题**: 许可证文件生成失败  
-**解决**: 确保 `node_modules` 已正确安装，运行 `npm install` 后重试
+**问题**: 许可证文件生成失败 **解决**: 确保 `node_modules` 已正确安装，运行
+`npm install` 后重试
 
 ## 代码规范
 
@@ -237,7 +237,6 @@ Web 项目的关注！我们欢迎并鼓励社区贡献，无论是代码、文�
 项目使用以下工具确保代码质量：
 
 - **Prettier** - 自动代码格式化
-- ~~**ESLint** - 代码质量检查~~ (计划中)
 - **TypeScript** - 类型检查和静态分析
 - **Vitest** - 单元测试
 
