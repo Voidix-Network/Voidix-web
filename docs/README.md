@@ -176,18 +176,14 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
 
 - **Tailwind CSS IntelliSense** - Tailwind 类名智能补全
 - **Prettier** - 代码格式化
-- **ESLint** - 代码质量检查（计划中）
 - **TypeScript Hero** - TypeScript 增强支持
 - **Auto Rename Tag** - HTML/JSX 标签自动重命名
-
-💡 ESLint 配置正在规划中，目前请勿依赖 ESLint 进行代码质量检查。
 
 ### 代码规范
 
 项目使用以下工具确保代码质量：
 
 - **Prettier** - 代码格式化
-- ~~**ESLint** - 代码质量检查~~ (计划中)
 - **TypeScript** - 类型检查
 - **Vitest** - 单元测试
 
