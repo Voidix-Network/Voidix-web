@@ -101,13 +101,6 @@ describe('HomePage', () => {
       expect(performanceOptimizer).toBeInTheDocument();
     });
 
-    it('应该预加载指定的图片资源', () => {
-      render(<HomePage />);
-
-      const performanceOptimizer = screen.getByTestId('performance-optimizer');
-      expect(performanceOptimizer).toHaveAttribute('data-preload', '/android-chrome-512x512.png');
-    });
-
     it('应该预获取指定的路由', () => {
       render(<HomePage />);
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { LOGO_ASSETS } from '@/constants';
 
 interface AdvancedStructuredDataProps {
   organizationName?: string;
@@ -18,7 +19,7 @@ interface AdvancedStructuredDataProps {
 export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
   organizationName = 'Voidix Minecraft Server',
   websiteUrl = 'https://www.voidix.net',
-  logoUrl = 'https://www.voidix.net/android-chrome-512x512.png',
+  logoUrl = `https://www.voidix.net${LOGO_ASSETS.SEO_IMAGE}`,
   socialLinks = [],
   contactEmail = 'contact@voidix.net',
   description = 'Voidix是专业的Minecraft服务器平台，提供高质量的游戏体验、稳定的服务器性能和活跃的玩家社区。',

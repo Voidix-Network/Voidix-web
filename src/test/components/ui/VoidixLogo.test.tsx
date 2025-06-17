@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { VoidixLogo } from '@/components/ui/VoidixLogo';
+import { LOGO_ASSETS } from '@/constants';
 
 // Mock GradientText 组件
 vi.mock('@/components/ui/GradientText', () => ({
@@ -115,7 +116,7 @@ describe('VoidixLogo', () => {
 
       const img = screen.getByAltText('Voidix Logo');
       expect(img).toBeInTheDocument();
-      expect(img).toHaveAttribute('src', '/android-chrome-512x512.png');
+      expect(img).toHaveAttribute('src', LOGO_ASSETS.BRAND_LOGO);
       expect(img.tagName).toBe('IMG');
     });
 

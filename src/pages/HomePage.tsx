@@ -16,10 +16,7 @@ export const HomePage: React.FC = () => {
     <>
       {' '}
       <PageSEO pageKey="home" type="website" canonicalUrl="https://www.voidix.net/" />
-      <PerformanceOptimizer
-        preloadImages={['/android-chrome-512x512.png']}
-        prefetchRoutes={['/status', '/faq']}
-      />
+      <PerformanceOptimizer prefetchRoutes={['/status', '/faq']} />
       <HeroSection />
       <AboutSection />
       <ServersSection />

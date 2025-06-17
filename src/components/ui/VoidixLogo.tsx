@@ -1,5 +1,6 @@
 import React from 'react';
 import { GradientText } from './GradientText';
+import { LOGO_ASSETS } from '@/constants';
 
 interface VoidixLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -51,7 +52,7 @@ export const VoidixLogo: React.FC<VoidixLogoProps> = ({
       className={`${config.container} bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-cyan-400/10 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/10 shadow-lg ${className}`}
     >
       <img
-        src="/android-chrome-512x512.png"
+        src={LOGO_ASSETS.BRAND_LOGO}
         alt="Voidix Logo"
         className={`${config.container} object-contain`}
         style={{
