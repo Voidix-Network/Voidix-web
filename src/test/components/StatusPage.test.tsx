@@ -42,6 +42,11 @@ vi.mock('@/constants', () => ({
       color: 'green',
     },
   },
+  LOGO_ASSETS: {
+    PWA_ICON: '/android-chrome-512x512.png',
+    BRAND_LOGO: '/logo.png',
+    SEO_IMAGE: '/logo.png',
+  },
   getPageSEOConfig: vi.fn(pageKey => ({
     title: `测试页面 - ${pageKey}`,
     description: '测试描述',
