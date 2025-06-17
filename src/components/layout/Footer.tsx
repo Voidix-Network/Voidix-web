@@ -6,6 +6,22 @@ import { CommunityLinksSection } from './footer/CommunityLinksSection';
 import { ServerStatusBar } from './footer/ServerStatusBar';
 import { CopyrightSection } from './footer/CopyrightSection';
 
+// Logo区域组件 - 使用React.memo避免因为server状态更新而重新渲染
+const LogoSection = React.memo(() => (
+  <div className="hidden lg:flex flex-col items-center justify-center">
+    <div className="text-center">
+      <VoidixLogo size="lg" variant="full" className="mb-4" />
+      <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+        开放、免费、和谐的游戏体验
+        <br />
+        携手共建美好的虚拟世界
+      </p>
+    </div>
+  </div>
+));
+
+LogoSection.displayName = 'LogoSection';
+
 /**
  * 页脚组件 - 模块化重构版本
  */
