@@ -1,5 +1,15 @@
 import { AnimatedSection, GradientText, MinecraftAvatar } from '@/components';
-import { Check, ChevronDown, Shield, Users, Bug, Home, AlertTriangle, Info } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  Shield,
+  Users,
+  Bug,
+  Home,
+  AlertTriangle,
+  Info,
+  ExternalLink,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useInView, isMobileDevice, prefersReducedMotion } from '@/hooks/useInView';
@@ -475,6 +485,55 @@ const PlayerCovenant: React.FC = () => {
                   </motion.div>
                 );
               })}
+
+              {/* 查看完整规则链接 */}
+              <motion.div
+                variants={{
+                  open: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 0.3, ease: 'easeOut', delay: 0.3 },
+                  },
+                  closed: {
+                    opacity: 0,
+                    y: 20,
+                    transition: { duration: 0.2, ease: 'easeIn' },
+                  },
+                }}
+                className="mb-6"
+              >
+                <motion.a
+                  href="https://docs.qq.com/doc/DU0dGc2dwU2VaWUpm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full p-4 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/30 rounded-2xl hover:from-purple-600/30 hover:to-indigo-600/30 hover:border-purple-400/50 transition-all duration-300 group"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                        <ExternalLink className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <h5 className="font-bold text-purple-300 group-hover:text-purple-200 transition-colors">
+                          查看完整玩家规则
+                        </h5>
+                        <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors mt-1">
+                          点击查看详细的服务器规则和管理条例
+                        </p>
+                      </div>
+                    </div>
+                    <motion.div
+                      className="text-purple-400 group-hover:text-purple-300 ml-3"
+                      whileHover={{ x: 3 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    >
+                      <ExternalLink className="h-5 w-5" />
+                    </motion.div>
+                  </div>
+                </motion.a>
+              </motion.div>
             </motion.div>
 
             {/* 注意事项 */}
