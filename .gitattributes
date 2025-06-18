@@ -1,0 +1,54 @@
+# 设置默认行为，如果用户没有设置 core.autocrlf，那么文件检出时不转换
+* text=auto
+
+# 明确声明希望始终被标准化并在检出时转换为本地行结束符的文件
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+*.less text eol=lf
+*.html text eol=lf
+*.xml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+*.conf text eol=lf
+*.config text eol=lf
+*.sh text eol=lf
+
+# 明确声明希望始终被标准化并在检出时保持 LF 的文件
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.editorconfig text eol=lf
+*.dockerfile text eol=lf
+Dockerfile text eol=lf
+
+# 明确声明不需要标准化的文件，应该保持二进制文件的原样
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.7z binary
+*.rar binary
+*.pdf binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary

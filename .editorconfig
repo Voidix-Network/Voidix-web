@@ -1,0 +1,52 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# 所有文件
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# TypeScript 和 JavaScript 文件
+[*.{ts,tsx,js,jsx}]
+indent_size = 2
+max_line_length = 100
+
+# JSON 文件
+[*.json]
+indent_size = 2
+max_line_length = 120
+
+# CSS 和样式文件
+[*.{css,scss,sass,less}]
+indent_size = 2
+
+# HTML 文件
+[*.html]
+indent_size = 2
+
+# Markdown 文件
+[*.md]
+max_line_length = 80
+trim_trailing_whitespace = false
+
+# YAML 文件
+[*.{yml,yaml}]
+indent_size = 2
+
+# 配置文件
+[*.{ini,conf,config,toml}]
+indent_size = 2
+
+# Shell 脚本
+[*.sh]
+indent_size = 2
+
+# Makefile
+[Makefile]
+indent_style = tab
