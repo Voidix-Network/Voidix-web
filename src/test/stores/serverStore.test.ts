@@ -342,7 +342,7 @@ describe('serverStore', () => {
 
       // 重复上线到同一服务器
       handlePlayerAdd('duplicate-player', 'survival');
-      
+
       // 应该跳过处理并记录警告
       expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('重复上线'));
       expect(useServerStore.getState().servers.survival.players).toBe(6); // 不应该再次增加
@@ -351,9 +351,9 @@ describe('serverStore', () => {
     });
 
     it('应该将重复上线到不同服务器识别为移动', () => {
-      const { handlePlayerAdd, handlePlayerMove } = useServerStore.getState();
+      const { handlePlayerAdd } = useServerStore.getState();
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       // Mock handlePlayerMove to verify it's called
       const movespy = vi.spyOn(useServerStore.getState(), 'handlePlayerMove');
 
@@ -363,7 +363,7 @@ describe('serverStore', () => {
 
       // "上线"到不同服务器，应该被识别为移动
       handlePlayerAdd('moving-player', 'creative');
-      
+
       // 应该调用移动处理逻辑
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('移动到'));
       expect(movespy).toHaveBeenCalledWith('moving-player', 'survival', 'creative');
@@ -375,25 +375,25 @@ describe('serverStore', () => {
     it('应该正确处理位置记录不一致的移动操作', () => {
       const { handlePlayerMove, handlePlayerAdd } = useServerStore.getState();
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+
       // 先让玩家上线到survival
       handlePlayerAdd('inconsistent-player', 'survival');
-      
+
       // 手动修改位置记录造成不一致
       useServerStore.setState(state => ({
         ...state,
         playersLocation: {
           ...state.playersLocation,
-          'inconsistent-player': 'creative' // 实际在creative，但要移动命令说从survival
-        }
+          'inconsistent-player': 'creative', // 实际在creative，但要移动命令说从survival
+        },
       }));
 
       // 尝试从survival移动到lobby1，但实际玩家在creative
       handlePlayerMove('inconsistent-player', 'survival', 'lobby1');
-      
+
       // 应该检测到不一致并使用实际位置
       expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('位置记录不一致'));
-      
+
       // 最终玩家应该在lobby1
       const state = useServerStore.getState();
       expect(state.playersLocation['inconsistent-player']).toBe('lobby1');
@@ -461,7 +461,7 @@ describe('serverStore', () => {
       });
 
       it('应该从服务器IGN列表中恢复位置记录', () => {
-        const { addPlayerIgn, handlePlayerRemove } = useServerStore.getState();
+        const { handlePlayerRemove } = useServerStore.getState();
         const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
         // 直接添加IGN数据到serverPlayerIgns（模拟复杂的数据状态）
@@ -499,8 +499,9 @@ describe('serverStore', () => {
 
         expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('无法确定其位置'));
         // 第6次调用包含诊断信息
-        expect(consoleWarnSpy).toHaveBeenNthCalledWith(6, 
-          expect.stringContaining('当前状态诊断:'), 
+        expect(consoleWarnSpy).toHaveBeenNthCalledWith(
+          6,
+          expect.stringContaining('当前状态诊断:'),
           expect.any(Object)
         );
 
