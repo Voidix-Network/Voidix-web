@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { WebSocketService } from '@/services/webSocketService';
+import { WebSocketService } from '@/services/websocket';
 import { useServerStore } from '@/stores';
 import type { ConnectionStatus } from '@/types';
 
@@ -24,7 +24,7 @@ interface UseWebSocketReturn {
   reconnectAttempts: number;
   connect: () => Promise<void>;
   disconnect: () => void;
-  service: WebSocketService | null;
+  service: InstanceType<typeof WebSocketService> | null;
 }
 
 /**
@@ -42,22 +42,90 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     onConnectionFailed,
   } = options;
 
-  const serviceRef = useRef<WebSocketService | null>(null);
-  const {
-    connectionStatus,
-    updateConnectionStatus,
-    handleFullUpdate,
-    updateMaintenanceStatus,
-    updateTotalPlayers,
-    updateMultipleServers,
-    handlePlayerAdd,
-    handlePlayerRemove,
-    handlePlayerMove,
-    addPlayerIgn,
-    removePlayerIgn,
-    updatePlayerIgn,
-    // reset, // 暂时不使用，但保留以备后用
-  } = useServerStore();
+  const serviceRef = useRef<InstanceType<typeof WebSocketService> | null>(null);
+
+  let store;
+  try {
+    store = useServerStore();
+  } catch (error) {
+    console.error('[useWebSocket] Store获取失败:', error);
+    store = null;
+  }
+
+  // 安全检查：确保store存在且包含必要方法
+  if (!store) {
+    console.error('[useWebSocket] Store未初始化');
+    return {
+      connectionStatus: 'disconnected',
+      isConnected: false,
+      reconnectAttempts: 0,
+      connect: async () => {
+        console.warn('[useWebSocket] Store未初始化，无法连接');
+      },
+      disconnect: () => {
+        console.warn('[useWebSocket] Store未初始化，无法断开');
+      },
+      service: null,
+    };
+  }
+
+  // 安全地获取store方法，提供默认值
+  const connectionStatus = store.connectionStatus || 'disconnected';
+  const updateConnectionStatus =
+    store.updateConnectionStatus ||
+    (() => {
+      console.warn('[useWebSocket] updateConnectionStatus方法不可用');
+    });
+  const handleFullUpdate =
+    store.handleFullUpdate ||
+    (() => {
+      console.warn('[useWebSocket] handleFullUpdate方法不可用');
+    });
+  const updateMaintenanceStatus =
+    store.updateMaintenanceStatus ||
+    (() => {
+      console.warn('[useWebSocket] updateMaintenanceStatus方法不可用');
+    });
+  const updateTotalPlayers =
+    store.updateTotalPlayers ||
+    (() => {
+      console.warn('[useWebSocket] updateTotalPlayers方法不可用');
+    });
+  const updateMultipleServers =
+    store.updateMultipleServers ||
+    (() => {
+      console.warn('[useWebSocket] updateMultipleServers方法不可用');
+    });
+  const handlePlayerAdd =
+    store.handlePlayerAdd ||
+    (() => {
+      console.warn('[useWebSocket] handlePlayerAdd方法不可用');
+    });
+  const handlePlayerRemove =
+    store.handlePlayerRemove ||
+    (() => {
+      console.warn('[useWebSocket] handlePlayerRemove方法不可用');
+    });
+  const handlePlayerMove =
+    store.handlePlayerMove ||
+    (() => {
+      console.warn('[useWebSocket] handlePlayerMove方法不可用');
+    });
+  const addPlayerIgn =
+    store.addPlayerIgn ||
+    (() => {
+      console.warn('[useWebSocket] addPlayerIgn方法不可用');
+    });
+  const removePlayerIgn =
+    store.removePlayerIgn ||
+    (() => {
+      console.warn('[useWebSocket] removePlayerIgn方法不可用');
+    });
+  const updatePlayerIgn =
+    store.updatePlayerIgn ||
+    (() => {
+      console.warn('[useWebSocket] updatePlayerIgn方法不可用');
+    });
 
   /**
    * 初始化WebSocket服务
@@ -372,13 +440,33 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
  * 只返回连接状态，不处理连接逻辑
  */
 export function useWebSocketStatus() {
-  const store = useServerStore();
+  let store;
+  try {
+    store = useServerStore();
+  } catch (error) {
+    console.error('[useWebSocketStatus] Store获取失败:', error);
+    store = null;
+  }
+
+  // 安全检查：确保store存在
+  if (!store) {
+    console.error('[useWebSocketStatus] Store未初始化');
+    return {
+      connectionStatus: 'disconnected' as ConnectionStatus,
+      servers: {},
+      aggregateStats: { totalPlayers: 0, onlineServers: 0, totalUptime: 0 },
+      isMaintenance: false,
+      runningTime: 0,
+      totalRunningTime: 0,
+    };
+  }
+
   return {
-    connectionStatus: store.connectionStatus,
-    servers: store.servers,
-    aggregateStats: store.aggregateStats,
-    isMaintenance: store.isMaintenance,
-    runningTime: store.runningTime,
-    totalRunningTime: store.totalRunningTime,
+    connectionStatus: store.connectionStatus || 'disconnected',
+    servers: store.servers || {},
+    aggregateStats: store.aggregateStats || { totalPlayers: 0, onlineServers: 0, totalUptime: 0 },
+    isMaintenance: store.isMaintenance || false,
+    runningTime: store.runningTime || 0,
+    totalRunningTime: store.totalRunningTime || 0,
   };
 }

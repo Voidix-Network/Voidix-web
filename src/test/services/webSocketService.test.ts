@@ -4,11 +4,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { WebSocketService } from '@/services/webSocketService';
+import { WebSocketService } from '@/services/websocket';
 import { MockWebSocket } from '../mocks/webSocketMocks';
 
 describe('WebSocketService', () => {
-  let service: WebSocketService;
+  let service: InstanceType<typeof WebSocketService>;
   let mockWs: MockWebSocket;
 
   beforeEach(() => {

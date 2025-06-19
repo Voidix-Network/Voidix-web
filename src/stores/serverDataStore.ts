@@ -33,22 +33,47 @@ export const useServerDataStore = create<ServerDataState & ServerDataActions>()(
       const currentServer = get().servers[serverId];
 
       if (!currentServer) {
-        if (import.meta.env.DEV) {
-          console.warn(`[ServerDataStore] 尝试更新不存在的服务器: ${serverId}`);
-        }
-        return;
-      }
+        // 如果服务器不存在，创建一个基础的服务器记录
+        const displayName =
+          SERVER_DISPLAY_NAMES[serverId as keyof typeof SERVER_DISPLAY_NAMES] || serverId;
 
-      set(state => ({
-        servers: {
-          ...state.servers,
-          [serverId]: {
-            ...currentServer,
-            ...update,
-            lastUpdate: update.lastUpdate || new Date(),
+        const newServer: ServerInfo = {
+          id: serverId,
+          name: serverId,
+          displayName,
+          address: `${serverId}.voidix.net`,
+          status: 'online',
+          players: 0,
+          maxPlayers: 1000,
+          uptime: 0,
+          totalUptime: 0,
+          lastUpdate: new Date(),
+          isOnline: true,
+          ...update, // 应用传入的更新
+        };
+
+        set(state => ({
+          servers: {
+            ...state.servers,
+            [serverId]: newServer,
           },
-        },
-      }));
+        }));
+
+        if (import.meta.env.DEV) {
+          console.log(`[ServerDataStore] 创建新服务器: ${serverId}`, newServer);
+        }
+      } else {
+        set(state => ({
+          servers: {
+            ...state.servers,
+            [serverId]: {
+              ...currentServer,
+              ...update,
+              lastUpdate: update.lastUpdate || new Date(),
+            },
+          },
+        }));
+      }
 
       // 异步计算聚合统计，避免阻塞UI
       setTimeout(() => get().calculateAggregateStats(), 0);
