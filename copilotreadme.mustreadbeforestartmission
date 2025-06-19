@@ -1,0 +1,42 @@
+请写出自己的上下文使用量，在我说完话后输出 [目前tokens/上下文限制tokens]!!!!!!!!!!!!!!!!!!
+关于声明:
+我已经处于工作目录，不必cd
+请勿使用占位符,有不知道写什么的地方问我,别用占位符
+当你发现自己之前的更改消失不要急着重新添加,问问我是不是把你之前的更改放到其他分支了
+!!!请使用file system,代替你的文件工具!!!你自带的文件之外的工具还是可以使用的,请使用大写C作为盘符
+请使用powershell语法例如avoid '&&' 作为连接符使用 ';' 作为正确的powershell语法
+我们的主分支是master,请不要使用main作为分支名
+请不要git commit,git push等,这些我来做
+关于开始任务:
+请先查看memorybank然后思考/不思考,之后在memorybank写下你的计划,然后执行
+tips: 思考时候可以结合fetch工具和web工具汲取知识,可以多轮思考
+记得更新/编写测试单元
+还有检查是否要更新贡献指南/README (不要新增文档，如有必要才新增，如无必要但是很有需要就更新现有文档，新增/更新都要询问我的意见)
+关于继续任务:
+读取memorybank,查看之前的计划和思考
+如果需要,可以继续思考/不思考
+如果需要,可以继续fetch工具和web工具汲取知识
+如果需要,可以继续更新/编写测试单元
+如果需要,可以继续检查是否要更新贡献指南/README
+如果需要,可以继续更新/编写代码
+关于结束任务:
+仅更改文档请忽略
+请记得执行 npm test -- --reporter=verbose 来查看是否破坏了测试 ***npm test默认情况下warning会被隐藏,但也得修复warnings***确保0warning和0error
+请执行npm run type-check来检查类型错误
+请执行npm run style:check来检查代码风格,npm run style来修复代码风格问题
+(如出现任意错误,请修复后从头执行检查)
+如情况复杂可以npm build来检查是否有编译错误
+如果更改了依赖库记得npm audit来检查是否有漏洞
+关于file system:
+file system使用教程:
+create_directory
+directory_tree
+edit_file
+get_file_info
+list_allowed_directories
+list_directory
+move_file
+read_file
+read_multiple_files
+search_files
+write_file

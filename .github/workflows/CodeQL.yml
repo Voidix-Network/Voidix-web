@@ -27,6 +27,9 @@ on:
       - 'package*.json'
       - '.github/workflows/CodeQL.yml'
 
+  # 合并队列触发
+  merge_group:
+
   # 每周定期扫描（周一 UTC 2:00）
   schedule:
     - cron: '0 2 * * 1'
