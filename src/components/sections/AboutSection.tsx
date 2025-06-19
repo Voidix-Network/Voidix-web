@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { GradientText } from '@/components';
-import { useServerStore } from '@/stores/serverStore';
+import { useServerStoreCompat } from '@/stores';
 import { MINIGAME_KEYS } from '@/constants';
 
 /**
@@ -157,7 +157,7 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
  */
 export const AboutSection: React.FC = () => {
   const { aggregateStats, servers, connectionStatus, runningTime, totalRunningTime } =
-    useServerStore();
+    useServerStoreCompat();
 
   // 检查连接状态：基于connectionStatus和服务器数据是否存在
   const hasServerData = Object.keys(servers).length > 0;

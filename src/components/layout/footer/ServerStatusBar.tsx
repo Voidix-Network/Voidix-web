@@ -1,12 +1,14 @@
 // filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\layout\footer\ServerStatusBar.tsx
-import { useServerStore } from '@/stores/serverStore';
+import { useAggregateStats, useConnectionStatus, useLastUpdateTime } from '@/stores';
 
 /**
  * 服务器状态栏组件
  * 显示服务器连接状态和在线玩家数量
  */
 export const ServerStatusBar: React.FC = () => {
-  const { aggregateStats, connectionStatus, lastUpdateTime } = useServerStore();
+  const aggregateStats = useAggregateStats();
+  const connectionStatus = useConnectionStatus();
+  const lastUpdateTime = useLastUpdateTime();
 
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">

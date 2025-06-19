@@ -1,13 +1,13 @@
 // filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\layout\footer\QuickJoinSection.tsx
 import { useState } from 'react';
-import { useServerStore } from '@/stores/serverStore';
+import { useAggregateStats } from '@/stores';
 
 /**
  * 快速加入服务器部分组件
  * 显示服务器地址并提供复制功能
  */
 export const QuickJoinSection: React.FC = () => {
-  const { aggregateStats } = useServerStore();
+  const aggregateStats = useAggregateStats();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   /**

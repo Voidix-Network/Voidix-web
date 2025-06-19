@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { WebSocketService } from '@/services/webSocketService';
-import { useServerStore } from '@/stores/serverStore';
+import { useServerStore } from '@/stores';
 import type { ConnectionStatus } from '@/types';
 
 /**
@@ -372,12 +372,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
  * 只返回连接状态，不处理连接逻辑
  */
 export function useWebSocketStatus() {
-  return useServerStore(state => ({
-    connectionStatus: state.connectionStatus,
-    servers: state.servers,
-    aggregateStats: state.aggregateStats,
-    isMaintenance: state.isMaintenance,
-    runningTime: state.runningTime,
-    totalRunningTime: state.totalRunningTime,
-  }));
+  const store = useServerStore();
+  return {
+    connectionStatus: store.connectionStatus,
+    servers: store.servers,
+    aggregateStats: store.aggregateStats,
+    isMaintenance: store.isMaintenance,
+    runningTime: store.runningTime,
+    totalRunningTime: store.totalRunningTime,
+  };
 }

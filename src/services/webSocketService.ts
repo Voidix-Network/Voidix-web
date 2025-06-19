@@ -19,55 +19,6 @@ export class WebSocketService {
   }
 
   /**
-   * 处理currentPlayers数据（从 fullUpdate 消息中）
-   */
-  private handleCurrentPlayersData(currentPlayers: Record<string, any>): void {
-    console.log('[WebSocket] 处理当前玩家数据:', currentPlayers);
-
-    // 遍历所有在线玩家
-    Object.entries(currentPlayers).forEach(([playerId, playerData]) => {
-      console.log(`[WebSocket] 处理玩家 ${playerId}:`, playerData);
-
-      // 检查玩家数据格式
-      if (playerData && typeof playerData === 'object') {
-        // 提取玩家信息
-        const uuid = playerData.uuid || playerId;
-        const ign = playerData.ign || playerData.username || playerData.name || playerId;
-        const serverId = playerData.server || playerData.currentServer || 'unknown';
-
-        console.log(`[WebSocket] 从 fullUpdate 解析玩家IGN:`, {
-          uuid,
-          ign,
-          serverId,
-          originalData: playerData,
-        });
-
-        // 发射 playerAdd 事件来更新 store
-        this.emit('playerAdd', {
-          playerId: uuid,
-          serverId,
-          playerInfo: {
-            uuid,
-            ign,
-            username: ign,
-            server: serverId,
-            ...playerData,
-          },
-          player: {
-            uuid,
-            ign,
-            username: ign,
-            currentServer: serverId,
-            ...playerData,
-          },
-        });
-      } else {
-        console.warn(`[WebSocket] 玩家数据格式不正确: ${playerId}`, playerData);
-      }
-    });
-  }
-
-  /**
    * 建立WebSocket连接
    * 实现5秒连接超时机制
    */
@@ -276,12 +227,14 @@ export class WebSocketService {
       maintenanceStartTime: maintenanceStartTimeFromFull || null,
     };
 
-    // 如果fullUpdate包含玩家详情数据，处理它们
-    if (data.players?.currentPlayers && Object.keys(data.players.currentPlayers).length > 0) {
-      console.log('[WebSocket] fullUpdate包含玩家详情数据，处理IGN信息');
-      this.handleCurrentPlayersData(data.players.currentPlayers);
-    } else {
-      console.log('[WebSocket] fullUpdate不包含玩家详情数据');
+    // 移除重复的玩家数据处理，统一由aggregatedStore处理
+    // 避免重复计算玩家数量导致的数据不一致问题
+    if (import.meta.env.DEV) {
+      if (data.players?.currentPlayers && Object.keys(data.players.currentPlayers).length > 0) {
+        console.log('[WebSocket] fullUpdate包含玩家详情数据，将由aggregatedStore统一处理');
+      } else {
+        console.log('[WebSocket] fullUpdate不包含玩家详情数据');
+      }
     }
 
     this.emit('fullUpdate', payload);

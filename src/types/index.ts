@@ -86,7 +86,12 @@ export interface ServerUpdateData {
 }
 
 // WebSocket连接状态
-export type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting' | 'failed';
+export type ConnectionStatus =
+  | 'connected'
+  | 'disconnected'
+  | 'connecting'
+  | 'reconnecting'
+  | 'failed';
 
 // 服务器聚合统计
 export interface AggregateStats {
