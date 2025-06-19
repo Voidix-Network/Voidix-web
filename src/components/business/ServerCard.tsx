@@ -1,7 +1,7 @@
 // filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\business\ServerCard.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useServerPlayerIgns } from '@/stores/serverStore';
+import { useServerPlayerIgns } from '@/stores';
 
 /**
  * 单个服务器卡片组件属性接口

@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GradientText, ServerStatusCard } from '@/components';
-import { useServerStore } from '@/stores/serverStore';
+import { useServers } from '@/stores';
 
 /**
  * 英雄区域组件 - 复现原项目的首页主要区域
  */
 export const HeroSection: React.FC = () => {
-  const { servers } = useServerStore();
+  const servers = useServers();
   const navigate = useNavigate();
 
   return (

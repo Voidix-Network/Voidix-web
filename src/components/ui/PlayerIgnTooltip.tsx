@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useServerPlayerIgns, useServerStore } from '@/stores/serverStore';
+import { useServerPlayerIgns, usePlayerIgnStore } from '@/stores';
 import { useWebSocketStatus } from '@/hooks/useWebSocket';
 import { Users, Clock, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 
@@ -92,9 +92,8 @@ export const PlayerIgnTooltip: React.FC<PlayerIgnTooltipProps> = ({
   const isConnected = connectionStatus === 'connected';
 
   // 调试用：获取所有IGN数据
-  const { getAllPlayerIgns } = useServerStore(state => ({
-    getAllPlayerIgns: state.getAllPlayerIgns,
-  }));
+  // 使用新的专门的hook
+  const { getAllPlayerIgns } = usePlayerIgnStore();
   const allPlayerIgns = getAllPlayerIgns();
 
   /**

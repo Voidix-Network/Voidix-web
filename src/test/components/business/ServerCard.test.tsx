@@ -3,14 +3,12 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ServerCard } from '@/components/business/ServerCard';
 import type { ServerCardProps } from '@/components/business/ServerCard';
-import { useServerPlayerIgns } from '@/stores/serverStore';
-
 // 引入测试设置
 import '@/test/setup';
 
-// Mock useServerPlayerIgns hook
-vi.mock('@/stores/serverStore', () => ({
-  useServerPlayerIgns: vi.fn(),
+// Mock stores
+vi.mock('@/stores', () => ({
+  useServerPlayerIgns: vi.fn(() => []),
 }));
 
 // Mock framer-motion for testing
@@ -22,11 +20,15 @@ vi.mock('framer-motion', () => ({
 }));
 
 describe('ServerCard', () => {
-  // 获取mock函数的引用
-  const mockUseServerPlayerIgns = vi.mocked(useServerPlayerIgns);
+  let mockUseServerPlayerIgns: ReturnType<typeof vi.fn>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Reset mocks before each test
+    vi.clearAllMocks();
+
+    // 动态导入并设置mock
+    const stores = await import('@/stores');
+    mockUseServerPlayerIgns = vi.mocked(stores.useServerPlayerIgns);
     mockUseServerPlayerIgns.mockReturnValue([]);
   });
 
