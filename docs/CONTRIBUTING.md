@@ -336,12 +336,15 @@ git commit -m "ci: update GitHub Actions workflow"
 
 ## 更改类型
 
-- [ ] Bug修复
-- [ ] 新功能
-- [ ] 文档更新
-- [ ] 代码重构
-- [ ] 性能优化
-- [ ] 测试
+- [ ] 新功能 (feat)
+- [ ] Bug修复 (fix)
+- [ ] 文档更新 (docs)
+- [ ] 代码重构 (refactor)
+- [ ] 性能优化 (perf)
+- [ ] 测试 (test)
+- [ ] 代码格式 (style)
+- [ ] 构建配置 (chore)
+- [ ] CI/CD更改 (ci)
 
 ## 测试
 
