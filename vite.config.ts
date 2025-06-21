@@ -56,10 +56,34 @@ export default defineConfig({
     host: true,
     // 预览服务器404处理 - 静态文件404返回真正的404
     open: false,
-  },
-  build: {
+  },  build: {
     outDir: 'dist',
     sourcemap: true,
+    // 启用更激进的压缩和优化
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        // 移除console.log和debugger（保留console.error）
+        drop_console: ['log', 'debug', 'info', 'warn'],
+        drop_debugger: true,
+        // 移除未使用的代码
+        dead_code: true,
+        // 优化条件语句
+        conditionals: true,
+      },
+      format: {
+        // 移除所有注释（保留许可证注释）
+        comments: /^\**!|@preserve|@license|@cc_on/i,
+        // 最大化压缩
+        beautify: false,
+        // 移除不必要的引号
+        quote_style: 3,
+      },
+      mangle: {
+        // 混淆变量名（但保留保留字）
+        reserved: ['$', 'jQuery', 'React', 'ReactDOM'],
+      },
+    },
     rollupOptions: {
       output: {
         // 使用hash文件名，确保新版本立即更新
@@ -71,7 +95,13 @@ export default defineConfig({
           animation: ['framer-motion'],
           state: ['zustand'],
         },
+        // 压缩输出
+        compact: true,
       },
     },
+    // 启用CSS压缩
+    cssCodeSplit: true,
+    // 设置chunk大小警告阈值
+    chunkSizeWarningLimit: 1000,
   },
 });

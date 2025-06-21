@@ -36,6 +36,12 @@ export function createSitemapConfig(baseUrl = SITE_CONFIG.baseUrl, routes = null
       changefreq: 'monthly',
       lastmod: getCurrentDate(),
     },
+    {
+      path: '/privacy',
+      priority: 0.6,
+      changefreq: 'monthly',
+      lastmod: getCurrentDate(),
+    },
   ];
 
   return {
