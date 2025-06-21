@@ -1,6 +1,6 @@
+import { LOGO_ASSETS } from '@/constants';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { LOGO_ASSETS } from '@/constants';
 
 interface AdvancedStructuredDataProps {
   organizationName?: string;
@@ -171,10 +171,10 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
       name: organizationName,
       logo: logoUrl,
     },
-    dateCreated: '2023-01-01',
+    dateCreated: '2025-06-09',
     dateModified: new Date().toISOString().split('T')[0],
-    datePublished: '2023-01-01',
-    copyrightYear: '2023',
+    datePublished: '2025-06-09',
+    copyrightYear: '2025',
     copyrightHolder: {
       '@type': 'Organization',
       name: organizationName,
@@ -182,8 +182,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     license: 'https://minecraft.net/terms',
     isAccessibleForFree: true,
     usageInfo: `${websiteUrl}/faq`,
-    privacyPolicy: `${websiteUrl}/privacy`,
-    termsOfService: `${websiteUrl}/terms`,
+    privacyPolicy: `${websiteUrl}/privacy`, // 隐私政策页面已创建
+    // termsOfService: `${websiteUrl}/terms`, // 服务条款页面暂未创建
   };
 
   // FAQPage Schema - 常见问题页面
@@ -218,24 +218,18 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     ],
   };
 
+  // 条件格式化：开发环境格式化便于调试，生产环境压缩节省体积
+  const formatJson = (data: any) => {
+    return import.meta.env.DEV ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+  };
+
   return (
     <Helmet>
-      {/* Organization Schema */}
-      <script type="application/ld+json">{JSON.stringify(organizationSchema, null, 2)}</script>
-
-      {/* WebSite Schema */}
-      <script type="application/ld+json">{JSON.stringify(websiteSchema, null, 2)}</script>
-
-      {/* VideoGame Schema */}
-      <script type="application/ld+json">{JSON.stringify(gameSchema, null, 2)}</script>
-
-      {/* SoftwareApplication Schema */}
-      <script type="application/ld+json">
-        {JSON.stringify(softwareApplicationSchema, null, 2)}
-      </script>
-
-      {/* FAQPage Schema */}
-      <script type="application/ld+json">{JSON.stringify(faqPageSchema, null, 2)}</script>
+      <script type="application/ld+json">{formatJson(organizationSchema)}</script>
+      <script type="application/ld+json">{formatJson(websiteSchema)}</script>
+      <script type="application/ld+json">{formatJson(gameSchema)}</script>
+      <script type="application/ld+json">{formatJson(softwareApplicationSchema)}</script>
+      <script type="application/ld+json">{formatJson(faqPageSchema)}</script>
 
       {/* 额外的meta标签 */}
       <meta name="application-name" content={organizationName} />

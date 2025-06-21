@@ -38,6 +38,7 @@ export const PRERENDER_CONFIG = {
     { path: '/status', outputDir: 'status' },
     { path: '/faq', outputDir: 'faq' },
     { path: '/bug-report', outputDir: 'bug-report' },
+    { path: '/privacy', outputDir: 'privacy' },
   ],
 
   // Puppeteer 配置
