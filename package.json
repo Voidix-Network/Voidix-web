@@ -6,7 +6,7 @@
   "description": "Voidix官网重构项目 - React + TypeScript + Vite",
   "scripts": {
     "dev": "vite",
-    "build": "npx tsc && vite build && npm run generate:sitemap && npm run prerender:puppeteer",
+    "build": "npx tsc && vite build --mode production && npm run generate:sitemap && npm run prerender:puppeteer ",
     "build:basic": "npx tsc && vite build",
     "build:http": "npx tsc && vite build && npm run generate:sitemap",
     "prerender:puppeteer": "node scripts/prerenderPuppeteer.js",
