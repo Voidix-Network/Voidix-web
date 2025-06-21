@@ -216,8 +216,7 @@ voidix-web/
 │   └── extensions.json     # 推荐扩展列表
 ├── public/                 # 静态资源
 │   ├── icons/              # 应用图标
-│   ├── robots.txt          # 搜索引擎配置
-│   └── sitemap.xml         # 站点地图
+│   └── robots.txt          # 搜索引擎配置
 ├── src/                    # 源代码
 │   ├── assets/             # 静态资源
 │   ├── components/         # React 组件
