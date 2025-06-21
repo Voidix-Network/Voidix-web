@@ -1,12 +1,12 @@
-import { useCallback } from 'react';
 import { OptimizedAppRouter } from '@/components/routing/OptimizedAppRouter';
 import {
   SEOProvider,
   UnifiedAnalytics,
   VoidixSearchConsole,
   AdvancedStructuredData,
+  SearchEngineScript,
+  CookieConsent,
 } from '@/components/seo';
-import CookieConsentDark, { ConsentSettings } from '@/components/seo/CookieConsentDark';
 
 /**
  * 主应用组件
@@ -24,32 +24,13 @@ import CookieConsentDark, { ConsentSettings } from '@/components/seo/CookieConse
  * - ✅ 彻底解决Chrome DevTools第三方Cookie警告
  */
 function App() {
-  /**
-   * Cookie同意状态变化处理
-   * 保留用于未来可能的第三方服务集成
-   */
-  const handleConsentChange = useCallback((consent: ConsentSettings) => {
-    console.log('[App] Cookie同意状态更新:', consent);
-
-    // 清理可能的遗留cookies（预防性措施）
-    if (!consent.analytics) {
-      const cookiesToClear = ['_ga', '_ga_SPQQPKW4VN', '_gid', '_gat', 'ar_debug'];
-      cookiesToClear.forEach(cookieName => {
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}`;
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      });
-      console.log('[App] 已清理分析相关cookies');
-    }
-  }, []);
-
   return (
     <SEOProvider>
-      {/* Cookie同意横幅（GDPR合规 - 暗黑主题） */}
-      <CookieConsentDark
-        theme="dark"
-        showDetailedSettings={false}
-        onConsentChange={handleConsentChange}
-      />
+      {/* 新的Cookie同意组件 */}
+      <CookieConsent />
+
+      {/* 搜索引擎抓取脚本 */}
+      <SearchEngineScript />
 
       {/* 统一分析（仅Google Analytics） */}
       <UnifiedAnalytics

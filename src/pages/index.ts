@@ -5,3 +5,4 @@ export { BugReportPage } from './BugReportPage';
 export { StatusPage } from './StatusPage';
 export { MonitorPage } from './MonitorPage';
 export { NotFoundPage } from './NotFoundPage';
+export { PrivacyPolicyPage } from './PrivacyPolicyPage';

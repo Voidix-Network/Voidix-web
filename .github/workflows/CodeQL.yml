@@ -8,24 +8,10 @@ on:
   # 主分支推送时触发
   push:
     branches: [master]
-    paths:
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.js'
-      - '**/*.jsx'
-      - 'package*.json'
-      - '.github/workflows/CodeQL.yml'
 
   # Pull Request 时触发
   pull_request:
     branches: [master]
-    paths:
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.js'
-      - '**/*.jsx'
-      - 'package*.json'
-      - '.github/workflows/CodeQL.yml'
 
   # 合并队列触发
   merge_group:
