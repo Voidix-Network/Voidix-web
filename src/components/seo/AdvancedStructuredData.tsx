@@ -31,7 +31,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     name: organizationName,
     url: websiteUrl,
     logo: logoUrl,
-    description: 'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
+    description:
+      'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
     email: contactEmail,
     foundingDate: '2023',
     areaServed: {
@@ -62,7 +63,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     '@type': 'WebSite',
     name: organizationName,
     url: websiteUrl,
-    description: 'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
+    description:
+      'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
     inLanguage: 'zh-CN',
     isAccessibleForFree: true,
     usageInfo: `${websiteUrl}/faq`,
@@ -83,7 +85,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
       '@type': 'WebPage',
       '@id': websiteUrl,
       name: '首页',
-      description: 'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
+      description:
+        'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
     },
   };
 
