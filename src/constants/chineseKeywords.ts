@@ -17,8 +17,8 @@ export interface PageKeywords {
   keywords: ChineseKeywords;
   socialTags: {
     qq?: string;
-    wechat?: string;
-    bilibili?: string;
+    discord?: string;
+    email?: string;
   };
 }
 
@@ -115,7 +115,7 @@ export const MINECRAFT_CHINESE_KEYWORDS = {
     '红石工程师',
     '探险家',
     'QQ群',
-    '微信群',
+    'Discord',
     '论坛',
     '攻略',
     '教程',
@@ -141,7 +141,8 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
     },
     socialTags: {
       qq: '加入官方QQ群获取最新资讯',
-      wechat: '关注微信公众号了解游戏攻略',
+      discord: '加入Discord服务器与国际玩家交流',
+      email: '发送邮件获取技术支持和合作咨询',
     },
   },
 
@@ -159,6 +160,24 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
     socialTags: {},
   },
 
+  monitor: {
+    title: '服务器监控系统 - 运行时间监控 | Voidix',
+    description:
+      'Voidix服务器监控系统，实时显示过去90天的运行时间统计、服务可用性监控和性能指标。透明的服务质量展示，让玩家了解服务器稳定性和运行状态。',
+    keywords: {
+      primary: ['服务器监控', '运行时间监控', 'Minecraft服务器监控'],
+      secondary: ['服务器可用性', '运行时间统计', '服务器性能监控'],
+      longTail: ['Voidix服务器运行时间查询', 'MC服务器稳定性监控', '服务器历史运行数据'],
+      gameTerms: ['服务器运行时间', '可用性统计', '服务器健康状态', '系统监控'],
+      localTerms: ['国服监控', '中文服务器监控系统', '服务器状态页面'],
+    },
+    socialTags: {
+      qq: '加入QQ群实时了解服务器状态',
+      discord: '在Discord获取服务器维护通知',
+      email: '发送邮件获取监控数据支持',
+    },
+  },
+
   faq: {
     title: '常见问题解答 - 新手必看指南 | Voidix',
     description:
@@ -172,6 +191,8 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
     },
     socialTags: {
       qq: '遇到问题？加入官方QQ群寻求帮助',
+      discord: 'Discord社区提供英文技术支持',
+      email: '发送邮件获取详细帮助',
     },
   },
 
@@ -188,7 +209,8 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
     },
     socialTags: {
       qq: '官方QQ群：实时客服支持',
-      wechat: '微信客服：一对一问题解决',
+      discord: 'Discord：国际社区技术支持',
+      email: '发送邮件获取技术支持',
     },
   },
 };
@@ -201,29 +223,22 @@ export const SOCIAL_MEDIA_CONFIG = {
     name: 'QQ群',
     icon: '🐧',
     description: '加入官方QQ群，与万千玩家一起游戏交流',
-    link: 'https://jq.qq.com/?_wv=1027&k=voidix', // 示例链接
+    link: 'https://qm.qq.com/cgi-bin/qm/qr?k=aMRoacVuxcGVSzEwfjb49oN4CWCv6yHj&jump_from=webapi&authKey=hw0EhRKGDGN1vmHD4AfK2yJCzPzSA+AXGJOEcugZpsA7KfK9GhNXpe9GNWCjCcmr', // 示例链接
     qrCode: '/images/qq-qr.png',
-  },
-  wechat: {
-    name: '微信公众号',
-    icon: '💬',
-    description: '关注微信公众号，获取最新游戏资讯和攻略',
-    link: '#',
-    qrCode: '/images/wechat-qr.png',
-  },
-  bilibili: {
-    name: 'B站',
-    icon: '📺',
-    description: '观看游戏视频，学习高级建筑和红石技巧',
-    link: 'https://space.bilibili.com/voidix', // 示例链接
-    followText: '关注我们的B站账号',
   },
   discord: {
     name: 'Discord',
     icon: '🎮',
     description: '国际玩家交流平台，语音开黑首选',
-    link: 'https://discord.gg/voidix', // 示例链接
+    link: 'https://discord.gg/fUMyfhuQ5b',
     inviteText: '加入Discord服务器',
+  },
+  email: {
+    name: '邮箱联系',
+    icon: '📧',
+    description: '发送邮件获取技术支持和商务合作',
+    link: 'mailto:support@voidix.net',
+    contactText: '发送邮件联系我们',
   },
 };
 
