@@ -54,7 +54,7 @@ describe('MinecraftAvatar', () => {
       render(<MinecraftAvatar username="testuser" size={32} />);
 
       const img = screen.getByRole('img');
-      expect(img).toHaveAttribute('src', '/src/assets/avatars/testuser.png');
+      expect(img).toHaveAttribute('src', '/avatars/testuser.png');
     });
 
     it('应该在本地头像失败时尝试minotar API', async () => {
