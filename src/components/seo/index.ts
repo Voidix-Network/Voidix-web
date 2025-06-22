@@ -6,6 +6,7 @@ export { default as PerformanceOptimizer } from './PerformanceOptimizer';
 export { default as UltraCookielessGoogleAnalytics } from './UltraCookielessGoogleAnalytics';
 export { default as VoidixSearchConsole } from './VoidixSearchConsole';
 export { default as AdvancedStructuredData } from './AdvancedStructuredData';
+export { default as MonitorStructuredData } from './MonitorStructuredData';
 export { default as WebVitalsMonitor } from './WebVitalsMonitor';
 export { default as UnifiedAnalytics } from './UnifiedAnalytics';
 export { default as SearchEngineScript } from './SearchEngineScript';

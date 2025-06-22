@@ -25,6 +25,12 @@ export function createSitemapConfig(baseUrl = SITE_CONFIG.baseUrl, routes = null
       lastmod: getCurrentDate(),
     },
     {
+      path: '/monitor',
+      priority: 0.8,
+      changefreq: 'hourly',
+      lastmod: getCurrentDate(),
+    },
+    {
       path: '/faq',
       priority: 0.8,
       changefreq: 'weekly',
