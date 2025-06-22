@@ -48,27 +48,23 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
       // Voidix超级无Cookie Google Analytics - 真正的Cookieless版本
       (function() {
         'use strict';
-        
+
         // 防止重复加载
         if (window._voidixUltraCookielessGALoaded) {
           console.log('[UltraCookielessGA] 已加载，跳过重复加载');
           return;
         }
         window._voidixUltraCookielessGALoaded = true;
-        
+
         // 加载gtag.js脚本
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://www.googletagmanager.com/gtag/js?id=${measurementId}';
-        document.head.appendChild(script);
-        
+
         // 配置gtag为完全cookieless模式
         window.dataLayer = window.dataLayer || [];
         function gtag() { window.dataLayer.push(arguments); }
         window.gtag = gtag;
-        
+
         gtag('js', new Date());
-        
+
         // 超级严格的cookieless配置
         gtag('config', '${measurementId}', {
           // 禁用所有cookie相关功能
@@ -76,33 +72,42 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
           anonymize_ip: true,
           allow_google_signals: false,
           allow_ad_personalization_signals: false,
-          
+
           // 禁用所有自动收集
           send_page_view: false,
           transport_type: 'beacon',
-          
+
           // 禁用所有存储和跟踪
           client_storage: 'none',
           storage: 'none',
           functionality_storage: 'denied',
-          security_storage: 'denied', 
+          security_storage: 'denied',
           ad_storage: 'denied',
           analytics_storage: 'denied',
           personalization_storage: 'denied',
-          
+
           // 自定义配置
           custom_map: {
             'custom_parameter_1': 'minecraft_server'
           }
         });
-        
+
         // 手动发送页面浏览（因为禁用了自动发送）
         gtag('event', 'page_view', {
           page_title: document.title,
           page_location: window.location.href,
           page_referrer: document.referrer || 'direct'
         });
-        
+
+        // 延迟加载gtag.js脚本本身
+        window.addEventListener('load', () => {
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=${measurementId}';
+          document.head.appendChild(script);
+          ${enableDebug ? 'console.log("[UltraCookielessGA] gtag.js脚本在页面加载后注入");' : ''}
+        });
+
         // Minecraft服务器专用事件跟踪函数
         const voidixUltraCookielessGA = {
           // 服务器状态跟踪
@@ -118,7 +123,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
               });
             }
           },
-          
+
           // 服务器加入跟踪
           trackServerJoin: function(serverName, gameMode) {
             if (window.gtag) {
@@ -131,7 +136,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
               });
             }
           },
-          
+
           // Bug报告跟踪
           trackBugReport: function(reportType, severity) {
             if (window.gtag) {
@@ -143,7 +148,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
               });
             }
           },
-          
+
           // FAQ交互跟踪
           trackFAQView: function(questionId, category) {
             if (window.gtag) {
@@ -155,7 +160,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
               });
             }
           },
-          
+
           // 页面性能跟踪
           trackPagePerformance: function() {
             if ('performance' in window && 'getEntriesByType' in performance && window.gtag) {
@@ -175,7 +180,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
               }
             }
           },
-          
+
           // 连接测试跟踪
           trackConnectionTest: function(serverIP, latency, success) {
             if (window.gtag) {
@@ -188,7 +193,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
               });
             }
           },
-          
+
           // 自定义事件跟踪
           trackCustomEvent: function(action, category, label, value) {
             if (window.gtag) {
@@ -199,7 +204,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
               });
             }
           },
-          
+
           // 滚动深度跟踪
           trackScrollDepth: function(percentage) {
             if (percentage > 0 && percentage % 25 === 0 && window.gtag) {
@@ -210,10 +215,10 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
             }
           }
         };
-        
+
         // 暴露全局API
         window.voidixUltraCookielessGA = voidixUltraCookielessGA;
-        
+
         // 向后兼容API（映射到原有函数名）
         window.voidixGoogleAnalytics = {
           trackServerStatus: voidixUltraCookielessGA.trackServerStatus,
@@ -227,7 +232,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
           track: voidixUltraCookielessGA.trackCustomEvent,
           trackServerEvent: voidixUltraCookielessGA.trackServerStatus
         };
-        
+
         // 自动性能跟踪
         const initPerformanceTracking = () => {
           if (document.readyState === 'complete') {
@@ -246,7 +251,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
             });
           }
         };
-        
+
         // 等待gtag加载完成后再初始化性能跟踪
         const checkGtagLoaded = () => {
           if (window.gtag) {
@@ -256,7 +261,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
           }
         };
         checkGtagLoaded();
-        
+
         // 自动滚动深度跟踪
         let maxScrollDepth = 0;
         const scrollHandler = () => {
@@ -264,7 +269,7 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
             const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
             const clientHeight = window.innerHeight;
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
+
             if (scrollHeight > clientHeight) {
               const scrollDepth = Math.round((scrollTop / (scrollHeight - clientHeight)) * 100);
               if (scrollDepth > maxScrollDepth && scrollDepth <= 100) {
@@ -276,10 +281,10 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
             ${enableDebug ? 'console.warn("[UltraCookielessGA] 滚动跟踪错误:", error);' : ''}
           }
         };
-        
+
         // 使用passive监听器优化性能
         window.addEventListener('scroll', scrollHandler, { passive: true });
-        
+
         // 页面离开时发送最终事件
         const beforeUnloadHandler = () => {
           if (window.gtag) {
@@ -289,15 +294,15 @@ export const UltraCookielessGoogleAnalytics: React.FC<UltraCookielessGoogleAnaly
             });
           }
         };
-        
+
         window.addEventListener('beforeunload', beforeUnloadHandler);
-        
+
         // 清理函数
         window._voidixUltraCookielessGACleanup = () => {
           window.removeEventListener('scroll', scrollHandler);
           window.removeEventListener('beforeunload', beforeUnloadHandler);
         };
-        
+
         ${enableDebug ? 'console.log("[UltraCookielessGA] 超级无Cookie版本初始化完成，使用gtag.js cookieless配置，零Cookie创建");' : ''}
       })();
     `;
