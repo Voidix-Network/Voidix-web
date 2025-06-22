@@ -1,18 +1,20 @@
-import { AnimatedSection, GradientText, MinecraftAvatar } from '@/components';
+import { AnimatedSection, GradientText } from '@/components';
+import { isMobileDevice, prefersReducedMotion, useInView } from '@/hooks/useInView';
+import { motion } from 'framer-motion';
 import {
+  AlertTriangle,
+  Bug,
   Check,
   ChevronDown,
+  ExternalLink,
+  Home,
+  Info,
   Shield,
   Users,
-  Bug,
-  Home,
-  AlertTriangle,
-  Info,
-  ExternalLink,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useInView, isMobileDevice, prefersReducedMotion } from '@/hooks/useInView';
+import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+
+const LazyMinecraftAvatar = lazy(() => import('@/components/ui/MinecraftAvatar'));
 
 /**
  * 团队成员接口
@@ -244,12 +246,22 @@ const TeamMemberCard: React.FC<TeamMember & { animationDelay?: number }> = props
           <div className="flex items-center gap-3 mb-4">
             {/* 贡献详情显示MC头像 */}
             {minecraftUsername ? (
-              <MinecraftAvatar
-                username={minecraftUsername}
-                size={48}
-                fallbackText={abbreviation}
-                className="rounded-lg"
-              />
+              <Suspense
+                fallback={
+                  <div
+                    className={`w-12 h-12 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-lg flex items-center justify-center`}
+                  >
+                    <div className={`text-lg font-bold ${textColor}`}>{abbreviation}</div>
+                  </div>
+                }
+              >
+                <LazyMinecraftAvatar
+                  username={minecraftUsername}
+                  size={48}
+                  fallbackText={abbreviation}
+                  className="rounded-lg"
+                />
+              </Suspense>
             ) : (
               <div
                 className={`w-12 h-12 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-lg flex items-center justify-center`}
