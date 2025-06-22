@@ -73,7 +73,7 @@ export class UptimeRobotApiService {
 
   constructor(config: UptimeRobotConfig) {
     this.apiKey = config.apiKey;
-    this.baseUrl = config.baseUrl || 'https://https://api.uptimerobot.com/v2robot';
+    this.baseUrl = config.baseUrl || 'https://api.uptimerobot.com/v2';
     this.timeout = config.timeout || 30000;
   }
 
