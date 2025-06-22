@@ -50,19 +50,39 @@ describe('MinecraftAvatar', () => {
   });
 
   describe('API 回退机制', () => {
-    it('应该首先尝试使用cdn.voidix.net代理的minotar API', () => {
+    it('应该首先尝试使用本地头像', () => {
       render(<MinecraftAvatar username="testuser" size={32} />);
 
       const img = screen.getByRole('img');
-      expect(img).toHaveAttribute('src', 'https://https://minotar.net/helm/testuser/32');
+      expect(img).toHaveAttribute('src', '/src/assets/avatars/testuser.png');
     });
 
-    it('应该在第一个API失败时尝试第二个API', async () => {
+    it('应该在本地头像失败时尝试minotar API', async () => {
       render(<MinecraftAvatar username="testuser" size={32} />);
 
       const img = screen.getByRole('img');
 
-      // 模拟第一个API失败 - 使用act包装状态更新
+      // 模拟本地头像失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+
+      await waitFor(() => {
+        expect(img).toHaveAttribute('src', 'https://minotar.net/helm/testuser/32');
+      });
+    });
+
+    it('应该在minotar API失败时尝试crafatar API', async () => {
+      render(<MinecraftAvatar username="testuser" size={32} />);
+
+      const img = screen.getByRole('img');
+
+      // 模拟本地头像失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+
+      // 模拟minotar API失败
       await act(async () => {
         img.dispatchEvent(new Event('error'));
       });
@@ -70,35 +90,33 @@ describe('MinecraftAvatar', () => {
       await waitFor(() => {
         expect(img).toHaveAttribute(
           'src',
-          'https://https://crafatar.com/avatars/testuser?size=32&overlay=true'
+          'https://crafatar.com/avatars/testuser?size=32&overlay=true'
         );
       });
     });
 
-    it('应该在前两个API失败时尝试第三个API', async () => {
+    it('应该在crafatar API失败时尝试mc-heads API', async () => {
       render(<MinecraftAvatar username="testuser" size={32} />);
 
       const img = screen.getByRole('img');
 
-      // 模拟第一个API失败 - 使用act包装状态更新
+      // 模拟本地头像失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+
+      // 模拟minotar API失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+
+      // 模拟crafatar API失败
       await act(async () => {
         img.dispatchEvent(new Event('error'));
       });
 
       await waitFor(() => {
-        expect(img).toHaveAttribute(
-          'src',
-          'https://https://crafatar.com/avatars/testuser?size=32&overlay=true'
-        );
-      });
-
-      // 模拟第二个API也失败 - 使用act包装状态更新
-      await act(async () => {
-        img.dispatchEvent(new Event('error'));
-      });
-
-      await waitFor(() => {
-        expect(img).toHaveAttribute('src', 'https://mc-heads.net/avatar/avatar/testuser/32');
+        expect(img).toHaveAttribute('src', 'https://mc-heads.net/avatar/testuser/32');
       });
     });
   });
@@ -110,25 +128,31 @@ describe('MinecraftAvatar', () => {
       const img = screen.getByRole('img');
 
       // 模拟所有API都失败 - 需要连续触发所有错误
-      // 第一个API失败
-      await act(async () => {
-        img.dispatchEvent(new Event('error'));
-      }); // 等待状态更新，然后继续下一个API
-      await waitFor(() => {
-        expect(img).toHaveAttribute('src', expect.stringContaining('https://crafatar.com'));
-      });
-
-      // 第二个API失败
+      // 本地头像失败
       await act(async () => {
         img.dispatchEvent(new Event('error'));
       });
-
-      // 等待状态更新，然后继续下一个API
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', expect.stringContaining('mc-heads.net/avatar'));
+        expect(img).toHaveAttribute('src', expect.stringContaining('minotar.net'));
       });
 
-      // 第三个API失败，这时应该进入hasError状态
+      // minotar API失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+      await waitFor(() => {
+        expect(img).toHaveAttribute('src', expect.stringContaining('crafatar.com'));
+      });
+
+      // crafatar API失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+      await waitFor(() => {
+        expect(img).toHaveAttribute('src', expect.stringContaining('mc-heads.net'));
+      });
+
+      // mc-heads API失败，这时应该进入hasError状态
       await act(async () => {
         img.dispatchEvent(new Event('error'));
       });
@@ -286,7 +310,7 @@ describe('MinecraftAvatar', () => {
       [64, '64px'],
       [128, '128px'],
       [256, '256px'],
-    ])('应该正确处理尺寸 %dpx', (size, expectedSize) => {
+    ])('应该正确处理尺寸 %dpx', async (size, expectedSize) => {
       render(<MinecraftAvatar username="testuser" size={size} />);
 
       const container = screen.getByRole('img').parentElement;
@@ -296,7 +320,26 @@ describe('MinecraftAvatar', () => {
       });
 
       const img = screen.getByRole('img');
-      expect(img).toHaveAttribute('src', expect.stringContaining(`/${size}`));
+
+      // 模拟本地头像失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+      // 模拟minotar API失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+      // 模拟crafatar API失败
+      await act(async () => {
+        img.dispatchEvent(new Event('error'));
+      });
+
+      await waitFor(() => {
+        expect(img).toHaveAttribute(
+          'src',
+          expect.stringContaining(`mc-heads.net/avatar/testuser/${size}`)
+        );
+      });
     });
   });
 });
