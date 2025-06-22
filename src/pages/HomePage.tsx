@@ -1,11 +1,11 @@
 import {
-  HeroSection,
   AboutSection,
+  HeroSection,
   ServersSection,
-  VersionsSection,
   TimelineSection,
-  TeamSection,
+  VersionsSection,
 } from '@/components';
+import { TeamSection } from '@/components/sections/TeamSection';
 import { PageSEO, PerformanceOptimizer } from '@/components/seo';
 
 /**
