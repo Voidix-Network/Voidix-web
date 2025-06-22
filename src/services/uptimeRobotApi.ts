@@ -4,8 +4,8 @@
  * 使用真实的UptimeRobot API v2获取监控数据
  */
 
+import { MonitorCardData, MonitorStatus, UptimeRobotConfig } from '@/types/uptimeRobot';
 import dayjs from 'dayjs';
-import { UptimeRobotConfig, MonitorCardData, MonitorStatus } from '@/types/uptimeRobot';
 
 /**
  * 格式化数字，保留两位小数
@@ -73,7 +73,7 @@ export class UptimeRobotApiService {
 
   constructor(config: UptimeRobotConfig) {
     this.apiKey = config.apiKey;
-    this.baseUrl = config.baseUrl || 'https://cdn.voidix.net/uptimerobot';
+    this.baseUrl = config.baseUrl || 'https://https://api.uptimerobot.com/v2robot';
     this.timeout = config.timeout || 30000;
   }
 

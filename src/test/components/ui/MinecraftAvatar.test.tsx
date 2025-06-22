@@ -54,7 +54,7 @@ describe('MinecraftAvatar', () => {
       render(<MinecraftAvatar username="testuser" size={32} />);
 
       const img = screen.getByRole('img');
-      expect(img).toHaveAttribute('src', 'https://cdn.voidix.net/minotar/helm/testuser/32');
+      expect(img).toHaveAttribute('src', 'https://https://minotar.net/helm/testuser/32');
     });
 
     it('应该在第一个API失败时尝试第二个API', async () => {
@@ -70,7 +70,7 @@ describe('MinecraftAvatar', () => {
       await waitFor(() => {
         expect(img).toHaveAttribute(
           'src',
-          'https://cdn.voidix.net/crafatar/avatars/testuser?size=32&overlay=true'
+          'https://https://crafatar.com/avatars/testuser?size=32&overlay=true'
         );
       });
     });
@@ -88,7 +88,7 @@ describe('MinecraftAvatar', () => {
       await waitFor(() => {
         expect(img).toHaveAttribute(
           'src',
-          'https://cdn.voidix.net/crafatar/avatars/testuser?size=32&overlay=true'
+          'https://https://crafatar.com/avatars/testuser?size=32&overlay=true'
         );
       });
 
@@ -98,7 +98,7 @@ describe('MinecraftAvatar', () => {
       });
 
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', 'https://cdn.voidix.net/mc-heads/avatar/testuser/32');
+        expect(img).toHaveAttribute('src', 'https://mc-heads.net/avatar/avatar/testuser/32');
       });
     });
   });
@@ -115,7 +115,7 @@ describe('MinecraftAvatar', () => {
         img.dispatchEvent(new Event('error'));
       }); // 等待状态更新，然后继续下一个API
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', expect.stringContaining('cdn.voidix.net/crafatar'));
+        expect(img).toHaveAttribute('src', expect.stringContaining('https://crafatar.com'));
       });
 
       // 第二个API失败
@@ -125,7 +125,7 @@ describe('MinecraftAvatar', () => {
 
       // 等待状态更新，然后继续下一个API
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', expect.stringContaining('cdn.voidix.net/mc-heads'));
+        expect(img).toHaveAttribute('src', expect.stringContaining('mc-heads.net/avatar'));
       });
 
       // 第三个API失败，这时应该进入hasError状态

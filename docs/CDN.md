@@ -4,38 +4,19 @@
 
 Voidix CDN (cdn.voidix.net) 提供外部API代理和缓存服务，提高网站性能和可用性。
 
-## 支持的服务
-
-### Minecraft 头像 API
-- **MC-Heads**: `https://cdn.voidix.net/mc-heads/{username}/{size}`
-- **Minotar**: `https://cdn.voidix.net/minotar/{username}/{size}`
-- **Crafatar**: `https://cdn.voidix.net/crafatar/{username}?size={size}&overlay=true`
-- **缓存时间**: 1天
-
-### UptimeRobot API
-- **路径**: `https://cdn.voidix.net/uptime/{endpoint}`
-- **缓存时间**: 5分钟
-
 ### Google Fonts
+
 - **CSS**: `https://cdn.voidix.net/fonts/css/{css_path}`
 - **文件**: `https://cdn.voidix.net/fonts/files/{font_path}`
 - **缓存时间**: 7-30天
 
 ### 健康检查
+
 - **状态**: `https://cdn.voidix.net/cdn-status`
 
 ## 使用示例
 
 ```javascript
-// Minecraft头像
-const avatar = `https://cdn.voidix.net/mc-heads/Notch/64`;
-
-// UptimeRobot API
-fetch('https://cdn.voidix.net/uptime/getMonitors', {
-  method: 'POST',
-  body: 'api_key=your_key&format=json'
-});
-
 // Google Fonts
 <link rel="stylesheet" href="https://cdn.voidix.net/fonts/css/css2?family=Inter:wght@400;500;600;700&display=swap">
 ```
@@ -43,6 +24,7 @@ fetch('https://cdn.voidix.net/uptime/getMonitors', {
 ## 部署配置
 
 ### 主 nginx.conf 设置
+
 ```nginx
 http {
     proxy_cache_path /var/cache/nginx/voidix levels=1:2 keys_zone=voidix_cache:10m inactive=60m;
@@ -51,6 +33,7 @@ http {
 ```
 
 ### 部署步骤
+
 ```bash
 # 1. 创建缓存目录
 sudo mkdir -p /var/cache/nginx/voidix{,_temp}
@@ -65,15 +48,10 @@ sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ### 验证测试
+
 ```bash
 # CDN状态检查
 curl -I https://cdn.voidix.net/cdn-status
-
-# 头像代理测试
-curl -I https://cdn.voidix.net/mc-heads/Notch/64
-
-# 缓存状态验证
-curl -I https://cdn.voidix.net/mc-heads/Notch/64 | grep X-Cache-Status
 ```
 
 ## 安全策略
@@ -91,4 +69,4 @@ curl -I https://cdn.voidix.net/mc-heads/Notch/64 | grep X-Cache-Status
 
 ---
 
-*最后更新: 2025年6月22日*
+_最后更新: 2025年6月22日_
