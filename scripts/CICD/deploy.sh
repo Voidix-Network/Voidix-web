@@ -118,3 +118,38 @@ echo "🌐 网站地址: https://www.voidix.net"
 echo "📁 部署路径: $SERVER_PATH"
 echo "⚙️  配置文件: $NGINX_CONFIG_PATH"
 echo "==============================================="
+
+echo "[Bing Webmaster] 正在批量提交新页面URL..."
+
+# === Bing Webmaster API 配置 ===
+BING_API_KEY="sampleapikeyEDECC1EA4AE341CC8B6"
+BING_SITE_URL="https://www.voidix.net"
+BING_API_ENDPOINT="https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey=$BING_API_KEY"
+
+# 需要提交的URL列表自动从 sitemap.xml 读取
+SITEMAP_PATH="$PROJECT_DIR/public/sitemap.xml"
+if [ ! -f "$SITEMAP_PATH" ]; then
+  echo "[Bing Webmaster] 未找到 sitemap.xml，跳过URL提交。"
+else
+  # 解析 sitemap.xml，提取所有 <loc> 标签内容，并排除 /private/ 路径下的URL
+  mapfile -t BING_URL_LIST < <(grep -oP '(?<=<loc>)[^<]+' "$SITEMAP_PATH" | grep -v "/private/")
+
+  # 构造JSON数据
+  BING_JSON_DATA=$(jq -n \
+    --arg siteUrl "$BING_SITE_URL" \
+    --argjson urlList "$(printf '%s\n' "${BING_URL_LIST[@]}" | jq -R . | jq -s .)" \
+    '{siteUrl: $siteUrl, urlList: $urlList}')
+
+  # 提交到Bing Webmaster API
+  BING_RESPONSE=$(curl -s -X POST "$BING_API_ENDPOINT" \
+    -H "Content-Type: application/json; charset=utf-8" \
+    -d "$BING_JSON_DATA")
+
+  if echo "$BING_RESPONSE" | grep -q '"d":null'; then
+    echo "[Bing Webmaster] URL批量提交成功！"
+  else
+    echo "[Bing Webmaster] URL提交失败，返回：$BING_RESPONSE"
+  fi
+fi
+
+echo "==============================================="

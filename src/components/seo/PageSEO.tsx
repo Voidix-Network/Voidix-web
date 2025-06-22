@@ -34,7 +34,9 @@ export const PageSEO: React.FC<PageSEOProps> = ({
 
   const finalTitle = title || chineseConfig?.title || 'Voidix - 公益·公平·包容的Minecraft服务器';
   const finalDescription =
-    description || chineseConfig?.description || '公益、公平、包容的Minecraft小游戏服务器，致力于为玩家提供开放、透明、无门槛的游戏体验。';
+    description ||
+    chineseConfig?.description ||
+    '公益、公平、包容的Minecraft小游戏服务器，致力于为玩家提供开放、透明、无门槛的游戏体验。';
   const finalKeywords = keywords || (pageKey ? generateKeywordsString(pageKey) : '');
 
   const fullTitle = finalTitle.includes('Voidix')
