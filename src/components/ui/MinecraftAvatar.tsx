@@ -22,7 +22,7 @@ export const MinecraftAvatar: React.FC<MinecraftAvatarProps> = ({
 
   // MC头像API列表，通过CDN代理提高速度和可靠性
   const avatarApis = [
-    `/src/assets/avatars/${username}.png`, // 本地头像路径
+    `/avatars/${username}.png`, // 本地头像路径
     `https://minotar.net/helm/${username}/${size}`,
     `https://crafatar.com/avatars/${username}?size=${size}&overlay=true`,
     `https://mc-heads.net/avatar/${username}/${size}`,
