@@ -69,7 +69,6 @@ const VoidixLogoComponent: React.FC<VoidixLogoProps> = ({
         loading="lazy"
         decoding="async"
         style={{
-          imageRendering: 'pixelated', // 保持像素风格
           filter: 'drop-shadow(0 0 8px rgba(147, 51, 234, 0.3))', // 添加紫色光晕效果
         }}
       />

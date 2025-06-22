@@ -68,7 +68,10 @@ describe('MinecraftAvatar', () => {
       });
 
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', 'https://crafatar.com/avatars/testuser?size=32&overlay=true');
+        expect(img).toHaveAttribute(
+          'src',
+          'https://crafatar.com/avatars/testuser?size=32&overlay=true'
+        );
       });
     });
 
@@ -83,7 +86,10 @@ describe('MinecraftAvatar', () => {
       });
 
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', 'https://crafatar.com/avatars/testuser?size=32&overlay=true');
+        expect(img).toHaveAttribute(
+          'src',
+          'https://crafatar.com/avatars/testuser?size=32&overlay=true'
+        );
       });
 
       // 模拟第二个API也失败 - 使用act包装状态更新

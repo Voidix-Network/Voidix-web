@@ -127,11 +127,10 @@ describe('VoidixLogo', () => {
       expect(img).toHaveAttribute('alt', 'Voidix Logo');
     });
 
-    it('应该应用pixelated和filter样式', () => {
+    it('应该应用filter样式', () => {
       render(<VoidixLogo variant="icon" />);
 
       const img = screen.getByAltText('Voidix Logo');
-      expect(img.style.imageRendering).toBe('pixelated');
       expect(img.style.filter).toBe('drop-shadow(0 0 8px rgba(147, 51, 234, 0.3))');
     });
 
