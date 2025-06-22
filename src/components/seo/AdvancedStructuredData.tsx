@@ -31,7 +31,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     name: organizationName,
     url: websiteUrl,
     logo: logoUrl,
-    description: description,
+    description:
+      'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
     email: contactEmail,
     foundingDate: '2023',
     areaServed: {
@@ -42,7 +43,7 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
       '@type': 'Audience',
       audienceType: 'Minecraft玩家',
     },
-    serviceType: 'Minecraft游戏服务器',
+    serviceType: 'Minecraft公益游戏服务器',
     applicationCategory: 'Game',
     ...(socialLinks.length > 0 && {
       sameAs: socialLinks,
@@ -62,7 +63,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     '@type': 'WebSite',
     name: organizationName,
     url: websiteUrl,
-    description: description,
+    description:
+      'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
     inLanguage: 'zh-CN',
     isAccessibleForFree: true,
     usageInfo: `${websiteUrl}/faq`,
@@ -83,7 +85,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
       '@type': 'WebPage',
       '@id': websiteUrl,
       name: '首页',
-      description: description,
+      description:
+        'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。体验起床战争、空岛战争等丰富的小游戏，加入我们，一起构建开放包容的游戏社区！',
     },
   };
 
@@ -92,8 +95,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     '@context': 'https://schema.org',
     '@type': 'VideoGame',
     name: 'Voidix Minecraft Server',
-    description: '专业的Minecraft多人游戏服务器，提供丰富的游戏模式和优质的游戏体验',
-    genre: ['沙盒游戏', '建造游戏', '多人在线游戏'],
+    description: '公益、开放、包容的Minecraft多人游戏服务器，提供丰富小游戏与优质社区体验',
+    genre: ['沙盒游戏', '建造游戏', '多人在线游戏', '公益服务器'],
     platform: 'Minecraft Java Edition',
     playMode: 'MultiPlayer',
     applicationCategory: 'Game',
@@ -107,7 +110,7 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
       price: '0',
       priceCurrency: 'CNY',
       availability: 'https://schema.org/InStock',
-      description: '免费游戏服务器',
+      description: '免费公益游戏服务器',
     },
     aggregateRating: {
       '@type': 'AggregateRating',
@@ -125,7 +128,7 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     '@id': `${websiteUrl}#application`,
     name: organizationName,
     url: websiteUrl,
-    description: description,
+    description: 'Voidix中文公益Minecraft服务器，为玩家提供公平、透明、无氪金的联机游戏平台。',
     image: logoUrl,
     applicationCategory: 'Game',
     applicationSubCategory: 'Minecraft Server',
@@ -136,7 +139,7 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     installUrl: websiteUrl,
     screenshot: logoUrl,
     video: '',
-    featureList: ['多人游戏', '服务器托管', '技术支持', '社区交流'],
+    featureList: ['公益免费', '多人游戏', '技术支持', '社区交流', '无氪金', '开放包容'],
     requirements: 'Minecraft Java Edition或基岩版',
     permissions: '无需特殊权限',
     storageRequirements: '无本地存储要求',
@@ -147,7 +150,7 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
       price: '0',
       priceCurrency: 'CNY',
       availability: 'https://schema.org/InStock',
-      description: '免费游戏服务器',
+      description: '免费公益游戏服务器',
       validFrom: '2023-01-01',
       eligibleRegion: {
         '@type': 'Country',
@@ -182,8 +185,7 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     license: 'https://minecraft.net/terms',
     isAccessibleForFree: true,
     usageInfo: `${websiteUrl}/faq`,
-    privacyPolicy: `${websiteUrl}/privacy`, // 隐私政策页面已创建
-    // termsOfService: `${websiteUrl}/terms`, // 服务条款页面暂未创建
+    privacyPolicy: `${websiteUrl}/privacy`,
   };
 
   // FAQPage Schema - 常见问题页面
