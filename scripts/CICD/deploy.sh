@@ -122,7 +122,7 @@ echo "==============================================="
 echo "[Bing Webmaster] 正在批量提交新页面URL..."
 
 # === Bing Webmaster API 配置 ===
-BING_API_KEY="sampleapikeyEDECC1EA4AE341CC8B6"
+SITEMAP_PATH="/var/www/voidix.net/dist/sitemap.xml"
 BING_SITE_URL="https://www.voidix.net"
 BING_API_ENDPOINT="https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey=$BING_API_KEY"
 
@@ -131,8 +131,8 @@ SITEMAP_PATH="$PROJECT_DIR/public/sitemap.xml"
 if [ ! -f "$SITEMAP_PATH" ]; then
   echo "[Bing Webmaster] 未找到 sitemap.xml，跳过URL提交。"
 else
-  # 解析 sitemap.xml，提取所有 <loc> 标签内容，并排除 /private/ 路径下的URL
-  mapfile -t BING_URL_LIST < <(grep -oP '(?<=<loc>)[^<]+' "$SITEMAP_PATH" | grep -v "/private/")
+  # 解析 sitemap.xml，提取所有 <loc> 标签内容
+  mapfile -t BING_URL_LIST < <(grep -oP '(?<=<loc>)[^<]+' "$SITEMAP_PATH")
 
   # 构造JSON数据
   BING_JSON_DATA=$(jq -n \
