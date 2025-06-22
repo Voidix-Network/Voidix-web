@@ -20,11 +20,11 @@ export const MinecraftAvatar: React.FC<MinecraftAvatarProps> = ({
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // MC头像API列表，按优先级排序
+  // MC头像API列表，按优先级排序 - 将更可靠的API放在前面
   const avatarApis = [
-    `https://mc-heads.net/avatar/${username}/${size}`,
     `https://minotar.net/helm/${username}/${size}`,
     `https://crafatar.com/avatars/${username}?size=${size}&overlay=true`,
+    `https://mc-heads.net/avatar/${username}/${size}`,
   ];
 
   const [currentApiIndex, setCurrentApiIndex] = useState(0);

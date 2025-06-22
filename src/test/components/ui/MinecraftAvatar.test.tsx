@@ -50,11 +50,11 @@ describe('MinecraftAvatar', () => {
   });
 
   describe('API 回退机制', () => {
-    it('应该首先尝试使用mc-heads.net API', () => {
+    it('应该首先尝试使用minotar.net API', () => {
       render(<MinecraftAvatar username="testuser" size={32} />);
 
       const img = screen.getByRole('img');
-      expect(img).toHaveAttribute('src', 'https://mc-heads.net/avatar/testuser/32');
+      expect(img).toHaveAttribute('src', 'https://minotar.net/helm/testuser/32');
     });
 
     it('应该在第一个API失败时尝试第二个API', async () => {
@@ -68,7 +68,10 @@ describe('MinecraftAvatar', () => {
       });
 
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', 'https://minotar.net/helm/testuser/32');
+        expect(img).toHaveAttribute(
+          'src',
+          'https://crafatar.com/avatars/testuser?size=32&overlay=true'
+        );
       });
     });
 
@@ -83,7 +86,10 @@ describe('MinecraftAvatar', () => {
       });
 
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', 'https://minotar.net/helm/testuser/32');
+        expect(img).toHaveAttribute(
+          'src',
+          'https://crafatar.com/avatars/testuser?size=32&overlay=true'
+        );
       });
 
       // 模拟第二个API也失败 - 使用act包装状态更新
@@ -92,10 +98,7 @@ describe('MinecraftAvatar', () => {
       });
 
       await waitFor(() => {
-        expect(img).toHaveAttribute(
-          'src',
-          'https://crafatar.com/avatars/testuser?size=32&overlay=true'
-        );
+        expect(img).toHaveAttribute('src', 'https://mc-heads.net/avatar/testuser/32');
       });
     });
   });
@@ -114,7 +117,7 @@ describe('MinecraftAvatar', () => {
 
       // 等待状态更新，然后继续下一个API
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', expect.stringContaining('minotar.net'));
+        expect(img).toHaveAttribute('src', expect.stringContaining('crafatar.com'));
       });
 
       // 第二个API失败
@@ -124,7 +127,7 @@ describe('MinecraftAvatar', () => {
 
       // 等待状态更新，然后继续下一个API
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', expect.stringContaining('crafatar.com'));
+        expect(img).toHaveAttribute('src', expect.stringContaining('mc-heads.net'));
       });
 
       // 第三个API失败，这时应该进入hasError状态
