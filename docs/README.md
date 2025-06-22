@@ -241,6 +241,7 @@ voidix-web/
     ├── CONTRIBUTING.md     # 贡献指南
     ├── CODE_OF_CONDUCT.md  # 行为准则
     ├── SECURITY.md         # 安全政策
+    ├── CDN.md              # CDN代理服务文档
     └── THIRD_PARTY_LICENSES.csv # 第三方许可证报告
 ```
 

@@ -39,8 +39,8 @@ export const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({
         <link key={index} rel="prefetch" href={route} />
       ))}
 
-      {/* DNS预获取优化 */}
-      <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+      {/* DNS预获取优化 - 使用CDN代理 */}
+      <link rel="dns-prefetch" href="//cdn.voidix.net" />
       <link rel="dns-prefetch" href="//www.google-analytics.com" />
 
       {/* Critical CSS内联优化标记 */}

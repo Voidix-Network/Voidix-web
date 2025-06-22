@@ -3,9 +3,9 @@
  * 测试 Minecraft 头像组件的头像加载、回退机制、尺寸支持等功能
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
 import { MinecraftAvatar } from '@/components/ui/MinecraftAvatar';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('MinecraftAvatar', () => {
   beforeEach(() => {
@@ -50,11 +50,11 @@ describe('MinecraftAvatar', () => {
   });
 
   describe('API 回退机制', () => {
-    it('应该首先尝试使用minotar.net API', () => {
+    it('应该首先尝试使用cdn.voidix.net代理的minotar API', () => {
       render(<MinecraftAvatar username="testuser" size={32} />);
 
       const img = screen.getByRole('img');
-      expect(img).toHaveAttribute('src', 'https://minotar.net/helm/testuser/32');
+      expect(img).toHaveAttribute('src', 'https://cdn.voidix.net/minotar/helm/testuser/32');
     });
 
     it('应该在第一个API失败时尝试第二个API', async () => {
@@ -70,7 +70,7 @@ describe('MinecraftAvatar', () => {
       await waitFor(() => {
         expect(img).toHaveAttribute(
           'src',
-          'https://crafatar.com/avatars/testuser?size=32&overlay=true'
+          'https://cdn.voidix.net/crafatar/avatars/testuser?size=32&overlay=true'
         );
       });
     });
@@ -88,7 +88,7 @@ describe('MinecraftAvatar', () => {
       await waitFor(() => {
         expect(img).toHaveAttribute(
           'src',
-          'https://crafatar.com/avatars/testuser?size=32&overlay=true'
+          'https://cdn.voidix.net/crafatar/avatars/testuser?size=32&overlay=true'
         );
       });
 
@@ -98,7 +98,7 @@ describe('MinecraftAvatar', () => {
       });
 
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', 'https://mc-heads.net/avatar/testuser/32');
+        expect(img).toHaveAttribute('src', 'https://cdn.voidix.net/mc-heads/avatar/testuser/32');
       });
     });
   });
@@ -113,11 +113,9 @@ describe('MinecraftAvatar', () => {
       // 第一个API失败
       await act(async () => {
         img.dispatchEvent(new Event('error'));
-      });
-
-      // 等待状态更新，然后继续下一个API
+      }); // 等待状态更新，然后继续下一个API
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', expect.stringContaining('crafatar.com'));
+        expect(img).toHaveAttribute('src', expect.stringContaining('cdn.voidix.net/crafatar'));
       });
 
       // 第二个API失败
@@ -127,7 +125,7 @@ describe('MinecraftAvatar', () => {
 
       // 等待状态更新，然后继续下一个API
       await waitFor(() => {
-        expect(img).toHaveAttribute('src', expect.stringContaining('mc-heads.net'));
+        expect(img).toHaveAttribute('src', expect.stringContaining('cdn.voidix.net/mc-heads'));
       });
 
       // 第三个API失败，这时应该进入hasError状态
