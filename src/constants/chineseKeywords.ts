@@ -129,13 +129,13 @@ export const MINECRAFT_CHINESE_KEYWORDS = {
  */
 export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
   home: {
-    title: 'Voidix - 最受欢迎的免费Minecraft小游戏服务器',
+    title: 'Voidix - 公益·公平·包容的免费Minecraft小游戏服务器',
     description:
-      'Voidix是国内领先的免费Minecraft小游戏服务器，提供起床战争、空岛战争、跑酷等热门小游戏。支持Java版和基岩版跨平台游戏，拥有活跃的中文玩家社区。立即加入，体验最好玩的我的世界多人游戏！',
+      'Voidix是一个致力于公益、公平和包容的免费Minecraft小游戏服务器。我们坚持开放、无门槛、无氪金，欢迎每一位玩家共同建设友善的游戏社区。',
     keywords: {
-      primary: ['Voidix', 'Minecraft服务器', '免费MC服务器', '我的世界服务器'],
-      secondary: ['Minecraft小游戏', 'MC小游戏服务器', '我的世界联机', '免费游戏服务器'],
-      longTail: ['最好玩的Minecraft服务器', '免费的我的世界小游戏', '中文Minecraft服务器推荐'],
+      primary: ['Voidix', '公益服务器', '公平游戏', '包容社区', '开放服务器', '免费MC服务器', '我的世界服务器'],
+      secondary: ['Minecraft小游戏', 'MC小游戏服务器', '我的世界联机', '无氪金', '互助', '透明', '责任', '社区自治', '反作弊', '绿色游戏', '开放社区'],
+      longTail: ['公益Minecraft服务器', '公平的我的世界小游戏', '包容开放的MC社区', '无氪金MC服务器', '公益游戏服务器推荐'],
       gameTerms: ['起床战争', '空岛战争', 'BedWars', 'SkyWars', '跑酷'],
       localTerms: ['国服MC', '中文服务器', '华人游戏社区', 'QQ群'],
     },
