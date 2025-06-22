@@ -5,6 +5,8 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { PageSEO } from '@/components/seo/PageSEO';
+import { MonitorStructuredData } from '@/components/seo/MonitorStructuredData';
 import { ServiceItem } from '@/components/business/ServiceItem';
 import { EnhancedMonitor, uptimeRobotApi } from '@/services/uptimeRobotApi';
 
@@ -107,6 +109,26 @@ export const MonitorPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900">
+      {/* SEO优化 */}
+      <PageSEO
+        pageKey="monitor"
+        title="服务器监控系统 - 运行时间监控 | Voidix"
+        description="Voidix服务器监控系统，实时显示过去90天的运行时间统计、服务可用性监控和性能指标。透明的服务质量展示，让玩家了解服务器稳定性和运行状态。"
+        url={typeof window !== 'undefined' ? window.location.href : 'https://voidix.com/monitor'}
+        type="website"
+        additionalMeta={[
+          { name: 'robots', content: 'index,follow' },
+          { name: 'revisit-after', content: '1 hours' },
+          {
+            property: 'og:updated_time',
+            content: lastUpdate?.toISOString() || new Date().toISOString(),
+          },
+        ]}
+      />
+
+      {/* 结构化数据 */}
+      <MonitorStructuredData monitors={monitors} lastUpdate={lastUpdate || undefined} />
+
       {/* 页面头部 */}
       <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-b border-gray-700/50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

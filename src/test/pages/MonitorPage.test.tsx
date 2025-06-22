@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { MonitorPage } from '@/pages/MonitorPage';
 
 // Mock the entire API service module with factory functions
@@ -112,7 +113,11 @@ describe('MonitorPage', () => {
   });
 
   const renderWithRouter = (component: React.ReactElement) => {
-    return render(<BrowserRouter>{component}</BrowserRouter>);
+    return render(
+      <HelmetProvider>
+        <BrowserRouter>{component}</BrowserRouter>
+      </HelmetProvider>
+    );
   };
 
   describe('Loading States', () => {
