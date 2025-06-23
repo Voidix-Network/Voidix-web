@@ -14,6 +14,8 @@ BAIDU_SITE_URL="https://www.voidix.net"
 # 获取环境变量
 # 注意：在 CI/CD 环境中，这些变量通常直接作为环境变量提供
 # 如果在本地运行，需要确保 .env.local 文件存在并已加载
+sed -i 's/\r$//' "${SERVER_PATH}/.env.local"
+
 if [ -f "../../.env.local" ]; then
   source "../../.env.local"
 else
@@ -26,8 +28,8 @@ if [ -z "${BING_API_KEY}" ]; then
   exit 1
 fi
 
-if [ -z "${BAIDU_PUSH_TOKEN}" ]; then
-  echo "[Multi Submit] 环境变量 BAIDU_PUSH_TOKEN 未设置。"
+if [ -z "${BAIDU_API_KEY}" ]; then
+  echo "[Multi Submit] 环境变量 BAIDU_API_KEY 未设置。"
   exit 1
 fi
 
@@ -50,7 +52,7 @@ BING_URL_ARRAY=$(echo "${URL_LIST}" | jq -R . | jq -s .)
 
 # 提交到 Bing
 echo "正在提交 URL 到 Bing Webmaster..."
-BING_RESPONSE=$(curl -s -X POST \
+BING_RESPONSE=$(curl -s -v -X POST \
   "https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey=${BING_API_KEY}" \
   -H "Content-Type: application/json; charset=utf-8" \
   -d "{\"siteUrl\":\"${BING_SITE_URL}\",\"urlList\":${BING_URL_ARRAY}}")
@@ -63,8 +65,8 @@ fi
 
 # 提交到 Baidu
 echo "正在提交 URL 到 Baidu Push..."
-BAIDU_RESPONSE=$(curl -s -X POST \
-  "http://data.zz.baidu.com/urls?site=${BAIDU_SITE_URL}&token=${BAIDU_PUSH_TOKEN}" \
+BAIDU_RESPONSE=$(curl -s -v -X POST \
+  "http://data.zz.baidu.com/urls?site=${BAIDU_SITE_URL}&token=${BAIDU_API_KEY}" \
   -H "Content-Type: text/plain" \
   -H "User-Agent: curl/7.12.1" \
   --data-binary "${URL_LIST}")

@@ -1,5 +1,7 @@
-import Clarity from '@microsoft/clarity';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+// import { useConsent } from '@voidix/ui-react'; // Assuming this provides consent status
+
+import MicrosoftClarity from './MicrosoftClarity';
 import { UltraCookielessGoogleAnalytics } from './UltraCookielessGoogleAnalytics';
 
 interface UnifiedAnalyticsProps {
@@ -27,10 +29,6 @@ interface UnifiedAnalyticsProps {
    * Microsoft Clarity项目ID
    */
   clarityProjectId?: string;
-  /**
-   * 用户是否已同意分析跟踪
-   */
-  hasConsented?: boolean;
 }
 
 /**
@@ -53,89 +51,84 @@ interface UnifiedAnalyticsProps {
  */
 export const UnifiedAnalytics: React.FC<UnifiedAnalyticsProps> = ({
   enableGoogleAnalytics = true,
-  enableDebug = false,
+  enableDebug: propEnableDebug = false, // 重命名以区分内部变量
   disableInDev = true,
   delayMs = 3000,
   enableClarity = true,
   clarityProjectId = import.meta.env.VITE_CLARITY_PROJECT_ID || '',
-  hasConsented = false, // 默认值为 false
 }) => {
+  console.log('[UnifiedAnalytics] 组件开始渲染');
   const isDevelopment = import.meta.env.DEV;
   const shouldDisable = isDevelopment && disableInDev;
+  const [hasConsented, setHasConsented] = useState<boolean>(false);
 
-  if (shouldDisable && enableDebug) {
+  // 使用 propEnableDebug 作为最终的 enableDebug 状态
+  const finalEnableDebug = propEnableDebug;
+
+  useEffect(() => {
+    if (shouldDisable) {
+      setHasConsented(false);
+      return;
+    }
+    const consent = localStorage.getItem('voidix-analytics-consent');
+    setHasConsented(consent === 'true');
+
+    if (finalEnableDebug) {
+      console.log('[UnifiedAnalytics] 同意状态 (从LocalStorage): ', consent === 'true');
+    }
+  }, [shouldDisable, finalEnableDebug]);
+
+  const finalHasConsented = hasConsented;
+
+  if (shouldDisable && finalEnableDebug) {
     console.log('[UnifiedAnalytics] 开发环境已禁用所有分析功能');
   }
 
-  // 初始化Microsoft Clarity
-  React.useEffect(() => {
-    // 只有在获得用户同意后才初始化
-    if (enableClarity && clarityProjectId && !shouldDisable && hasConsented) {
-      const timer = setTimeout(() => {
-        Clarity.init(clarityProjectId);
-        if (enableDebug) {
-          console.log(`[UnifiedAnalytics] Microsoft Clarity已初始化，项目ID: ${clarityProjectId}`);
-        }
-      }, delayMs);
-      return () => clearTimeout(timer);
-    }
-  }, [enableClarity, clarityProjectId, shouldDisable, delayMs, enableDebug, hasConsented]);
-
   // 初始化统一分析API
-  React.useEffect(() => {
+  useEffect(() => {
     // 如果被禁用或未获得同意，则不初始化API
-    if (shouldDisable || !hasConsented) {
+    if (shouldDisable || !finalHasConsented) {
       // 如果禁用了，确保API不存在或为空
       if (window.voidixUnifiedAnalytics) {
         // @ts-ignore
         window.voidixUnifiedAnalytics = undefined;
+      }
+      if (finalEnableDebug) {
+        console.log('[UnifiedAnalytics] API未初始化: shouldDisable 或 finalHasConsented 为 false');
       }
       return;
     }
 
     // Voidix统一分析API
     window.voidixUnifiedAnalytics = {
-      trackServerStatus: (serverName, playerCount, isOnline) => {
-        if (window.clarity) {
-          window.clarity('event', 'server_status', { serverName, playerCount, isOnline });
-        }
-        if (enableDebug)
-          console.log('[统一分析] 服务器状态跟踪:', { serverName, playerCount, isOnline });
-      },
-      trackServerJoin: (serverName, gameMode) => {
-        if (window.clarity) {
-          window.clarity('event', 'server_join', { serverName, gameMode });
-        }
-        if (enableDebug) console.log('[统一分析] 服务器加入跟踪:', { serverName, gameMode });
-      },
       trackBugReport: (reportType, severity) => {
         if (window.clarity) {
           window.clarity('event', 'bug_report', { reportType, severity });
         }
-        if (enableDebug) console.log('[统一分析] Bug报告跟踪:', { reportType, severity });
+        if (finalEnableDebug) console.log('[统一分析] Bug报告跟踪:', { reportType, severity });
       },
       trackFAQView: (questionId, category) => {
         if (window.clarity) {
           window.clarity('event', 'faq_view', { questionId, category });
         }
-        if (enableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
+        if (finalEnableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
       },
       trackCustomEvent: (category, action, label, value) => {
         if (window.clarity) {
           window.clarity('event', action, { category, label, value });
         }
-        if (enableDebug)
+        if (finalEnableDebug)
           console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });
       },
       trackPagePerformance: () => {
         if (window.clarity) {
           window.clarity('event', 'page_performance');
         }
-        if (enableDebug) console.log('[统一分析] 页面性能跟踪已执行');
+        if (finalEnableDebug) console.log('[统一分析] 页面性能跟踪已执行');
       },
     };
 
-    if (enableDebug) {
+    if (finalEnableDebug) {
       console.log('[UnifiedAnalytics] 统一分析API已初始化');
     }
 
@@ -144,16 +137,36 @@ export const UnifiedAnalytics: React.FC<UnifiedAnalyticsProps> = ({
       // @ts-ignore
       window.voidixUnifiedAnalytics = undefined;
     };
-  }, [shouldDisable, enableDebug, hasConsented]);
+  }, [shouldDisable, finalEnableDebug, finalHasConsented]);
+
+  if (finalEnableDebug) {
+    console.log(
+      '[UnifiedAnalytics] MicrosoftClarity render conditions: ',
+      `shouldDisable: ${shouldDisable}`,
+      `finalHasConsented: ${finalHasConsented}`,
+      `enableClarity: ${enableClarity}`,
+      `clarityProjectId: ${!!clarityProjectId}`,
+      `Final condition for MicrosoftClarity: ${!shouldDisable && finalHasConsented && enableClarity && !!clarityProjectId}`
+    );
+  }
 
   return (
     <>
       {/* 超级无Cookie Google Analytics 4 */}
-      {enableGoogleAnalytics && !shouldDisable && hasConsented && (
+      {enableGoogleAnalytics && !shouldDisable && finalHasConsented && (
         <UltraCookielessGoogleAnalytics
-          enableDebug={enableDebug}
+          enableDebug={finalEnableDebug}
           disableInDev={disableInDev}
           delayMs={delayMs}
+        />
+      )}
+
+      {/* Microsoft Clarity */}
+      {enableClarity && !shouldDisable && finalHasConsented && clarityProjectId && (
+        <MicrosoftClarity
+          projectId={clarityProjectId}
+          enableDebug={finalEnableDebug}
+          hasConsented={finalHasConsented}
         />
       )}
     </>
@@ -166,8 +179,6 @@ export const UnifiedAnalytics: React.FC<UnifiedAnalyticsProps> = ({
 declare global {
   interface Window {
     voidixUnifiedAnalytics: {
-      trackServerStatus: (serverName: string, playerCount: number, isOnline: boolean) => void;
-      trackServerJoin: (serverName: string, gameMode: string) => void;
       trackBugReport: (reportType: string, severity: string) => void;
       trackFAQView: (questionId: string, category: string) => void;
       trackCustomEvent: (category: string, action: string, label: string, value?: number) => void;
