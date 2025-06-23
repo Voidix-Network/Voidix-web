@@ -127,15 +127,6 @@ export const StatusPage: React.FC = () => {
         'aggregate_stats',
         aggregateStats.totalPlayers
       );
-
-      // 跟踪个别服务器状态
-      Object.entries(servers).forEach(([serverId, serverData]) => {
-        window.voidixUnifiedAnalytics.trackServerStatus(
-          serverId,
-          serverData.players,
-          serverData.status === 'online'
-        );
-      });
     }
   }, [servers, aggregateStats]);
 

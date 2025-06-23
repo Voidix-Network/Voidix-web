@@ -25,7 +25,6 @@
     "license:check": "npx license-checker --production --onlyAllow \"MIT;Apache-2.0;ISC;0BSD;BSD-2-Clause;BSD-3-Clause;BlueOak-1.0.0;MIT-0;CC-BY-4.0;UNLICENSED\" --excludePrivatePackages"
   },
   "dependencies": {
-    "@microsoft/clarity": "^1.0.0",
     "clsx": "^2.0.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^10.16.16",
