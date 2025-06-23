@@ -118,36 +118,3 @@ echo "🌐 网站地址: https://www.voidix.net"
 echo "📁 部署路径: $SERVER_PATH"
 echo "⚙️  配置文件: $NGINX_CONFIG_PATH"
 echo "==============================================="
-
-echo "[Bing Webmaster] 正在批量提交新页面URL..."
-
-# === Bing Webmaster API 配置 ===
-SITEMAP_PATH="/var/www/voidix.net/dist/sitemap.xml"
-BING_SITE_URL="https://www.voidix.net"
-
-# 需要提交的URL列表自动从 sitemap.xml 读取
-if [ ! -f "$SITEMAP_PATH" ]; then
-  echo "[Bing Webmaster] 未找到 sitemap.xml，跳过URL提交。"
-else
-  # 解析 sitemap.xml，提取所有 <loc> 标签内容
-  mapfile -t BING_URL_LIST < <(grep -oP '(?<=<loc>)[^<]+' "$SITEMAP_PATH")
-
-  # 构造JSON数据
-  BING_JSON_DATA=$(jq -n \
-    --arg siteUrl "$BING_SITE_URL" \
-    --argjson urlList "$(printf '%s\n' "${BING_URL_LIST[@]}" | jq -R . | jq -s .)" \
-    '{siteUrl: $siteUrl, urlList: $urlList}')
-
-  # 提交到Bing Webmaster API
-  BING_RESPONSE=$(curl -s -X POST "https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey=$BING_API_KEY" \
-    -H "Content-Type: application/json; charset=utf-8" \
-    -d "$BING_JSON_DATA")
-
-  if echo "$BING_RESPONSE" | grep -q '"d":null'; then
-    echo "[Bing Webmaster] URL批量提交成功！"
-  else
-    echo "[Bing Webmaster] URL提交失败，返回：$BING_RESPONSE"
-  fi
-fi
-
-echo "==============================================="

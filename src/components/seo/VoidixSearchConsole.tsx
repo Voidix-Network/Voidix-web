@@ -32,19 +32,18 @@ export const VoidixSearchConsole: React.FC<VoidixSearchConsoleProps> = ({
   enableShenmaVerification = true,
   enableBytedanceVerification = true,
 }) => {
-  // 验证码配置：用户已提供的真实验证码
   const verificationCodes = {
-    // Google Search Console已通过DNS验证完成，无需HTML meta标签
-    google: import.meta.env.VITE_GOOGLE_SITE_VERIFICATION || '',
-    bing: import.meta.env.VITE_BING_SITE_VERIFICATION || '',
-    // 百度站长平台验证码（用户已提供）
-    baidu: 'codeva-ZQn2BDBrNs',
-    // Yandex Webmaster验证码（用户已提供）
-    yandex: 'c8c53fe069c3a36c',
-    // 中国本土搜索引擎验证码（用户已提供）
-    sogou: 'yv6aPUmTyn',
-    shenma: import.meta.env.VITE_SHENMA_SITE_VERIFICATION || '',
-    bytedance: '/053fD306nw1IKW4fGwt',
+    google:
+      import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ||
+      'x62Vza2dGv7nroz1AUYAkN0JkN69WgemhDZer5xQO1U',
+    bing: import.meta.env.VITE_BING_SITE_VERIFICATION || 'D46ABE4CE43F5A97CFCBCE9695BD272A',
+    baidu: import.meta.env.VITE_BAIDU_SITE_VERIFICATION || '2b3c4d5e6f7g8h9i',
+    yandex: import.meta.env.VITE_YANDEX_SITE_VERIFICATION || 'c8c53fe069c3a36c',
+    sogou: import.meta.env.VITE_SOGOU_SITE_VERIFICATION || 'yv6aPUmTyn',
+    shenma:
+      import.meta.env.VITE_SHENMA_SITE_VERIFICATION ||
+      'a3aa01ddaaaaf382243ff3ece0af5b30_1749622129',
+    bytedance: import.meta.env.VITE_BYTEDANCE_SITE_VERIFICATION || '/053fD306nw1IKW4fGwt',
   };
 
   return (

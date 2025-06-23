@@ -114,7 +114,9 @@ export const MonitorPage: React.FC = () => {
         pageKey="monitor"
         title="服务器监控系统 - 运行时间监控 | Voidix"
         description="Voidix服务器监控系统，实时显示过去90天的运行时间统计、服务可用性监控和性能指标。透明的服务质量展示，让玩家了解服务器稳定性和运行状态。"
-        url={typeof window !== 'undefined' ? window.location.href : 'https://voidix.com/monitor'}
+        url={
+          typeof window !== 'undefined' ? window.location.href : 'https://www.voidix.net/monitor'
+        }
         type="website"
         additionalMeta={[
           { name: 'robots', content: 'index,follow' },

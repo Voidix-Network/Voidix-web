@@ -22,7 +22,7 @@
   <p align="center">
     Voidix 官方网站源码仓库
     <br />
-    <a href="https://voidix.net">生产效果</a>
+    <a href="https://www.voidix.net">生产效果</a>
     &middot;
     <a href="https://github.com/Voidix-Network/voidix-web/issues/new?template=bug_report.md">报告错误</a>
     &middot;
@@ -155,7 +155,8 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
 
 ### 快速体验
 
-- 🌐 **官方网站**: 访问 [https://voidix.net](https://voidix.net) 查看生产效果
+- 🌐 **官方网站**: 访问 [https://www.voidix.net](https://www.voidix.net)
+  查看生产效果
 - 📱 **移动体验**: 开发者工具模拟或手机直接访问
 - 💻 **本地运行**: 按上述步骤在本地启动项目
 
@@ -376,7 +377,7 @@ server {
 
 ```bash
 # 网站基础 URL
-VITE_BASE_URL=https://voidix.net
+VITE_BASE_URL=https://www.voidix.net
 
 # API 服务地址
 VITE_API_URL=https://api.voidix.net
