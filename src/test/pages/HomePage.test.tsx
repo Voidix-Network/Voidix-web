@@ -3,17 +3,28 @@
  * 测试主页面的渲染、SEO组件集成和性能优化功能
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
 import { HomePage } from '@/pages/HomePage';
+import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock 所有子组件
-vi.mock('@/components', () => ({
+// Mock 子组件，同时保留其他真实实现
+// Mock 各个 Section 组件
+vi.mock('@/components/sections/HeroSection', () => ({
   HeroSection: () => <div data-testid="hero-section">Hero Section</div>,
+}));
+vi.mock('@/components/sections/AboutSection', () => ({
   AboutSection: () => <div data-testid="about-section">About Section</div>,
+}));
+vi.mock('@/components/sections/ServersSection', () => ({
   ServersSection: () => <div data-testid="servers-section">Servers Section</div>,
+}));
+vi.mock('@/components/sections/VersionsSection', () => ({
   VersionsSection: () => <div data-testid="versions-section">Versions Section</div>,
+}));
+vi.mock('@/components/sections/TimelineSection', () => ({
   TimelineSection: () => <div data-testid="timeline-section">Timeline Section</div>,
+}));
+vi.mock('@/components/sections/TeamSection', () => ({
   TeamSection: () => <div data-testid="team-section">Team Section</div>,
 }));
 

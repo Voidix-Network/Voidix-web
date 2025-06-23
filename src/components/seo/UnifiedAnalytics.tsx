@@ -1,3 +1,4 @@
+import Clarity from '@microsoft/clarity';
 import React from 'react';
 import { UltraCookielessGoogleAnalytics } from './UltraCookielessGoogleAnalytics';
 
@@ -18,14 +19,27 @@ interface UnifiedAnalyticsProps {
    * 延迟加载时间（毫秒）
    */
   delayMs?: number;
+  /**
+   * 是否启用Microsoft Clarity
+   */
+  enableClarity?: boolean;
+  /**
+   * Microsoft Clarity项目ID
+   */
+  clarityProjectId?: string;
+  /**
+   * 用户是否已同意分析跟踪
+   */
+  hasConsented?: boolean;
 }
 
 /**
  * Voidix统一分析组件
- * 集成Google Analytics 4，提供全面的网站分析功能
+ * 集成Google Analytics 4和Microsoft Clarity，提供全面的网站分析功能
  *
  * 功能特性：
  * - Google Analytics 4: 用户分析和事件跟踪
+ * - Microsoft Clarity: 用户行为分析（热力图、会话回放）
  * - Cookie同意机制: GDPR/隐私法规合规
  * - 统一的事件跟踪API
  * - 开发环境智能禁用
@@ -42,6 +56,9 @@ export const UnifiedAnalytics: React.FC<UnifiedAnalyticsProps> = ({
   enableDebug = false,
   disableInDev = true,
   delayMs = 3000,
+  enableClarity = true,
+  clarityProjectId = import.meta.env.VITE_CLARITY_PROJECT_ID || '',
+  hasConsented = false, // 默认值为 false
 }) => {
   const isDevelopment = import.meta.env.DEV;
   const shouldDisable = isDevelopment && disableInDev;
@@ -50,112 +67,93 @@ export const UnifiedAnalytics: React.FC<UnifiedAnalyticsProps> = ({
     console.log('[UnifiedAnalytics] 开发环境已禁用所有分析功能');
   }
 
+  // 初始化Microsoft Clarity
+  React.useEffect(() => {
+    // 只有在获得用户同意后才初始化
+    if (enableClarity && clarityProjectId && !shouldDisable && hasConsented) {
+      const timer = setTimeout(() => {
+        Clarity.init(clarityProjectId);
+        if (enableDebug) {
+          console.log(`[UnifiedAnalytics] Microsoft Clarity已初始化，项目ID: ${clarityProjectId}`);
+        }
+      }, delayMs);
+      return () => clearTimeout(timer);
+    }
+  }, [enableClarity, clarityProjectId, shouldDisable, delayMs, enableDebug, hasConsented]);
+
+  // 初始化统一分析API
+  React.useEffect(() => {
+    // 如果被禁用或未获得同意，则不初始化API
+    if (shouldDisable || !hasConsented) {
+      // 如果禁用了，确保API不存在或为空
+      if (window.voidixUnifiedAnalytics) {
+        // @ts-ignore
+        window.voidixUnifiedAnalytics = undefined;
+      }
+      return;
+    }
+
+    // Voidix统一分析API
+    window.voidixUnifiedAnalytics = {
+      trackServerStatus: (serverName, playerCount, isOnline) => {
+        if (window.clarity) {
+          window.clarity('event', 'server_status', { serverName, playerCount, isOnline });
+        }
+        if (enableDebug)
+          console.log('[统一分析] 服务器状态跟踪:', { serverName, playerCount, isOnline });
+      },
+      trackServerJoin: (serverName, gameMode) => {
+        if (window.clarity) {
+          window.clarity('event', 'server_join', { serverName, gameMode });
+        }
+        if (enableDebug) console.log('[统一分析] 服务器加入跟踪:', { serverName, gameMode });
+      },
+      trackBugReport: (reportType, severity) => {
+        if (window.clarity) {
+          window.clarity('event', 'bug_report', { reportType, severity });
+        }
+        if (enableDebug) console.log('[统一分析] Bug报告跟踪:', { reportType, severity });
+      },
+      trackFAQView: (questionId, category) => {
+        if (window.clarity) {
+          window.clarity('event', 'faq_view', { questionId, category });
+        }
+        if (enableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
+      },
+      trackCustomEvent: (category, action, label, value) => {
+        if (window.clarity) {
+          window.clarity('event', action, { category, label, value });
+        }
+        if (enableDebug)
+          console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });
+      },
+      trackPagePerformance: () => {
+        if (window.clarity) {
+          window.clarity('event', 'page_performance');
+        }
+        if (enableDebug) console.log('[统一分析] 页面性能跟踪已执行');
+      },
+    };
+
+    if (enableDebug) {
+      console.log('[UnifiedAnalytics] 统一分析API已初始化');
+    }
+
+    // 清理函数
+    return () => {
+      // @ts-ignore
+      window.voidixUnifiedAnalytics = undefined;
+    };
+  }, [shouldDisable, enableDebug, hasConsented]);
+
   return (
     <>
-      {/* 超级无Cookie Google Analytics 4（彻底解决第三方Cookie问题） */}
-      {enableGoogleAnalytics && !shouldDisable && (
+      {/* 超级无Cookie Google Analytics 4 */}
+      {enableGoogleAnalytics && !shouldDisable && hasConsented && (
         <UltraCookielessGoogleAnalytics
           enableDebug={enableDebug}
           disableInDev={disableInDev}
           delayMs={delayMs}
-        />
-      )}
-
-      {/* 统一分析API初始化 */}
-      {!shouldDisable && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Voidix统一分析API
-              window.voidixUnifiedAnalytics = {
-                // 服务器状态跟踪
-                trackServerStatus: function(serverName, playerCount, isOnline) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackServerStatus) {
-                    window.voidixUltraCookielessGA.trackServerStatus(serverName, playerCount, isOnline);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackServerStatus) {
-                    window.voidixGoogleAnalytics.trackServerStatus(serverName, playerCount, isOnline);
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] 服务器状态跟踪:', { serverName, playerCount, isOnline });` : ''}
-                },
-                
-                // 用户加入服务器跟踪
-                trackServerJoin: function(serverName, gameMode) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackServerJoin) {
-                    window.voidixUltraCookielessGA.trackServerJoin(serverName, gameMode);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackServerJoin) {
-                    window.voidixGoogleAnalytics.trackServerJoin(serverName, gameMode);
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] 服务器加入跟踪:', { serverName, gameMode });` : ''}
-                },
-                
-                // Bug报告跟踪
-                trackBugReport: function(reportType, severity) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackBugReport) {
-                    window.voidixUltraCookielessGA.trackBugReport(reportType, severity);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackBugReport) {
-                    window.voidixGoogleAnalytics.trackBugReport(reportType, severity);
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] Bug报告跟踪:', { reportType, severity });` : ''}
-                },
-                
-                // FAQ查看跟踪
-                trackFAQView: function(questionId, category) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackFAQView) {
-                    window.voidixUltraCookielessGA.trackFAQView(questionId, category);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackFaqInteraction) {
-                    window.voidixGoogleAnalytics.trackFaqInteraction(questionId, 'view');
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] FAQ查看跟踪:', { questionId, category });` : ''}
-                },
-                
-                // 自定义事件跟踪
-                trackCustomEvent: function(category, action, label, value) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackCustomEvent) {
-                    window.voidixUltraCookielessGA.trackCustomEvent(action, category, label, value);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackCustomEvent) {
-                    window.voidixGoogleAnalytics.trackCustomEvent(action, category, label, value);
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });` : ''}
-                },
-                
-                // 页面性能跟踪
-                trackPagePerformance: function() {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackPagePerformance) {
-                    window.voidixUltraCookielessGA.trackPagePerformance();
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackPagePerformance) {
-                    window.voidixGoogleAnalytics.trackPagePerformance();
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] 页面性能跟踪已执行');` : ''}
-                }
-              };
-              
-              ${enableDebug ? `console.log('[UnifiedAnalytics] 统一分析API已初始化');` : ''}
-            `,
-          }}
         />
       )}
     </>
@@ -175,6 +173,7 @@ declare global {
       trackCustomEvent: (category: string, action: string, label: string, value?: number) => void;
       trackPagePerformance: () => void;
     };
+    clarity?: (type: string, eventName: string, properties?: Record<string, any>) => void;
   }
 }
 
