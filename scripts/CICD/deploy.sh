@@ -64,8 +64,8 @@ log_step "更新Nginx配置"
 cp "$SERVER_PATH/nginx-production.conf" "$NGINX_CONFIG_PATH"
 
 # 创建软链接
-if [[ -L "$NGINX_SYMLINK_PATH" ]]; then
-    rm "$NGINX_SYMLINK_PATH"
+if [[ -e "$NGINX_SYMLINK_PATH" ]]; then
+    rm -f "$NGINX_SYMLINK_PATH"
 fi
 ln -s "$NGINX_CONFIG_PATH" "$NGINX_SYMLINK_PATH"
 log_success "Nginx配置更新完成"
