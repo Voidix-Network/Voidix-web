@@ -33,12 +33,12 @@ export const MonitorStructuredData: React.FC<MonitorStructuredDataProps> = ({
     '@type': 'WebPage',
     name: 'Voidix服务器监控系统',
     description: 'Voidix Minecraft服务器实时监控状态，显示过去90天的运行时间统计和服务可用性。',
-    url: typeof window !== 'undefined' ? window.location.href : 'https://voidix.com/monitor',
+    url: typeof window !== 'undefined' ? window.location.href : 'https://www.voidix.net/monitor',
     inLanguage: 'zh-CN',
     isPartOf: {
       '@type': 'WebSite',
       name: 'Voidix',
-      url: 'https://voidix.com',
+      url: 'https://www.voidix.net',
     },
     lastReviewed: lastUpdate?.toISOString() || new Date().toISOString(),
     about: {
@@ -47,7 +47,7 @@ export const MonitorStructuredData: React.FC<MonitorStructuredDataProps> = ({
       provider: {
         '@type': 'Organization',
         name: 'Voidix',
-        url: 'https://voidix.com',
+        url: 'https://www.voidix.net',
       },
       serviceType: 'Minecraft游戏服务器',
       areaServed: 'China',
@@ -90,9 +90,9 @@ export const MonitorStructuredData: React.FC<MonitorStructuredDataProps> = ({
     '@type': 'DataFeed',
     name: 'Voidix服务器可用性统计',
     description: 'Voidix Minecraft服务器运行时间和可用性的历史数据',
-    url: typeof window !== 'undefined' ? window.location.href : 'https://voidix.com/monitor',
+    url: typeof window !== 'undefined' ? window.location.href : 'https://www.voidix.net/monitor',
     dateModified: lastUpdate?.toISOString() || new Date().toISOString(),
-    license: 'https://voidix.com/privacy',
+    license: 'https://www.voidix.net/privacy',
     provider: {
       '@type': 'Organization',
       name: 'Voidix',
@@ -123,7 +123,7 @@ export const MonitorStructuredData: React.FC<MonitorStructuredDataProps> = ({
     '@type': 'StatusPage',
     name: 'Voidix服务状态',
     description: 'Voidix Minecraft服务器的实时状态和历史可用性数据',
-    url: typeof window !== 'undefined' ? window.location.href : 'https://voidix.com/monitor',
+    url: typeof window !== 'undefined' ? window.location.href : 'https://www.voidix.net/monitor',
     lastReviewed: lastUpdate?.toISOString() || new Date().toISOString(),
     status: calculateOverallStatus(),
     services: monitors.map(monitor => ({

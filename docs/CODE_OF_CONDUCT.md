@@ -157,7 +157,7 @@ Web 项目的参与者、贡献者和维护者，我们承诺为每个人创造�
 - **📖 贡献指南**: [CONTRIBUTING.md](./CONTRIBUTING.md)
 - **🔒 安全政策**: [SECURITY.md](./SECURITY.md)
 - **📞 联系方式**: conduct@voidix.net
-- **🌐 官方网站**: https://voidix.net
+- **🌐 官方网站**: https://www.voidix.net
 - **💬 社区论坛**: https://github.com/Voidix-Network/voidix-web/discussions
 
 ## 📜 归属说明
@@ -174,5 +174,4 @@ https://www.contributor-covenant.org/version/2/1/code_of_conduct.html 查看。
 > 💡
 > **记住**: 好的社区需要每个人的努力。让我们一起创造一个友好、包容、充满创造力的环境！
 
-**最后更新**: 2025年6月15日  
-**版本**: 1.0.0
+**最后更新**: 2025年6月15日 **版本**: 1.0.0
