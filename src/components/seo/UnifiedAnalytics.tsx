@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+// import { useConsent } from '@voidix/ui-react'; // Assuming this provides consent status
+
+import MicrosoftClarity from './MicrosoftClarity';
 import { UltraCookielessGoogleAnalytics } from './UltraCookielessGoogleAnalytics';
 
 interface UnifiedAnalyticsProps {
@@ -18,14 +21,23 @@ interface UnifiedAnalyticsProps {
    * 延迟加载时间（毫秒）
    */
   delayMs?: number;
+  /**
+   * 是否启用Microsoft Clarity
+   */
+  enableClarity?: boolean;
+  /**
+   * Microsoft Clarity项目ID
+   */
+  clarityProjectId?: string;
 }
 
 /**
  * Voidix统一分析组件
- * 集成Google Analytics 4，提供全面的网站分析功能
+ * 集成Google Analytics 4和Microsoft Clarity，提供全面的网站分析功能
  *
  * 功能特性：
  * - Google Analytics 4: 用户分析和事件跟踪
+ * - Microsoft Clarity: 用户行为分析（热力图、会话回放）
  * - Cookie同意机制: GDPR/隐私法规合规
  * - 统一的事件跟踪API
  * - 开发环境智能禁用
@@ -39,123 +51,122 @@ interface UnifiedAnalyticsProps {
  */
 export const UnifiedAnalytics: React.FC<UnifiedAnalyticsProps> = ({
   enableGoogleAnalytics = true,
-  enableDebug = false,
+  enableDebug: propEnableDebug = false, // 重命名以区分内部变量
   disableInDev = true,
   delayMs = 3000,
+  enableClarity = true,
+  clarityProjectId = import.meta.env.VITE_CLARITY_PROJECT_ID || '',
 }) => {
+  console.log('[UnifiedAnalytics] 组件开始渲染');
   const isDevelopment = import.meta.env.DEV;
   const shouldDisable = isDevelopment && disableInDev;
+  const [hasConsented, setHasConsented] = useState<boolean>(false);
 
-  if (shouldDisable && enableDebug) {
+  // 使用 propEnableDebug 作为最终的 enableDebug 状态
+  const finalEnableDebug = propEnableDebug;
+
+  useEffect(() => {
+    if (shouldDisable) {
+      setHasConsented(false);
+      return;
+    }
+    const consent = localStorage.getItem('voidix-analytics-consent');
+    setHasConsented(consent === 'true');
+
+    if (finalEnableDebug) {
+      console.log('[UnifiedAnalytics] 同意状态 (从LocalStorage): ', consent === 'true');
+    }
+  }, [shouldDisable, finalEnableDebug]);
+
+  const finalHasConsented = hasConsented;
+
+  if (shouldDisable && finalEnableDebug) {
     console.log('[UnifiedAnalytics] 开发环境已禁用所有分析功能');
+  }
+
+  // 初始化统一分析API
+  useEffect(() => {
+    // 如果被禁用或未获得同意，则不初始化API
+    if (shouldDisable || !finalHasConsented) {
+      // 如果禁用了，确保API不存在或为空
+      if (window.voidixUnifiedAnalytics) {
+        // @ts-ignore
+        window.voidixUnifiedAnalytics = undefined;
+      }
+      if (finalEnableDebug) {
+        console.log('[UnifiedAnalytics] API未初始化: shouldDisable 或 finalHasConsented 为 false');
+      }
+      return;
+    }
+
+    // Voidix统一分析API
+    window.voidixUnifiedAnalytics = {
+      trackBugReport: (reportType, severity) => {
+        if (window.clarity) {
+          window.clarity('event', 'bug_report', { reportType, severity });
+        }
+        if (finalEnableDebug) console.log('[统一分析] Bug报告跟踪:', { reportType, severity });
+      },
+      trackFAQView: (questionId, category) => {
+        if (window.clarity) {
+          window.clarity('event', 'faq_view', { questionId, category });
+        }
+        if (finalEnableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
+      },
+      trackCustomEvent: (category, action, label, value) => {
+        if (window.clarity) {
+          window.clarity('event', action, { category, label, value });
+        }
+        if (finalEnableDebug)
+          console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });
+      },
+      trackPagePerformance: () => {
+        if (window.clarity) {
+          window.clarity('event', 'page_performance');
+        }
+        if (finalEnableDebug) console.log('[统一分析] 页面性能跟踪已执行');
+      },
+    };
+
+    if (finalEnableDebug) {
+      console.log('[UnifiedAnalytics] 统一分析API已初始化');
+    }
+
+    // 清理函数
+    return () => {
+      // @ts-ignore
+      window.voidixUnifiedAnalytics = undefined;
+    };
+  }, [shouldDisable, finalEnableDebug, finalHasConsented]);
+
+  if (finalEnableDebug) {
+    console.log(
+      '[UnifiedAnalytics] MicrosoftClarity render conditions: ',
+      `shouldDisable: ${shouldDisable}`,
+      `finalHasConsented: ${finalHasConsented}`,
+      `enableClarity: ${enableClarity}`,
+      `clarityProjectId: ${!!clarityProjectId}`,
+      `Final condition for MicrosoftClarity: ${!shouldDisable && finalHasConsented && enableClarity && !!clarityProjectId}`
+    );
   }
 
   return (
     <>
-      {/* 超级无Cookie Google Analytics 4（彻底解决第三方Cookie问题） */}
-      {enableGoogleAnalytics && !shouldDisable && (
+      {/* 超级无Cookie Google Analytics 4 */}
+      {enableGoogleAnalytics && !shouldDisable && finalHasConsented && (
         <UltraCookielessGoogleAnalytics
-          enableDebug={enableDebug}
+          enableDebug={finalEnableDebug}
           disableInDev={disableInDev}
           delayMs={delayMs}
         />
       )}
 
-      {/* 统一分析API初始化 */}
-      {!shouldDisable && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Voidix统一分析API
-              window.voidixUnifiedAnalytics = {
-                // 服务器状态跟踪
-                trackServerStatus: function(serverName, playerCount, isOnline) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackServerStatus) {
-                    window.voidixUltraCookielessGA.trackServerStatus(serverName, playerCount, isOnline);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackServerStatus) {
-                    window.voidixGoogleAnalytics.trackServerStatus(serverName, playerCount, isOnline);
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] 服务器状态跟踪:', { serverName, playerCount, isOnline });` : ''}
-                },
-                
-                // 用户加入服务器跟踪
-                trackServerJoin: function(serverName, gameMode) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackServerJoin) {
-                    window.voidixUltraCookielessGA.trackServerJoin(serverName, gameMode);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackServerJoin) {
-                    window.voidixGoogleAnalytics.trackServerJoin(serverName, gameMode);
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] 服务器加入跟踪:', { serverName, gameMode });` : ''}
-                },
-                
-                // Bug报告跟踪
-                trackBugReport: function(reportType, severity) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackBugReport) {
-                    window.voidixUltraCookielessGA.trackBugReport(reportType, severity);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackBugReport) {
-                    window.voidixGoogleAnalytics.trackBugReport(reportType, severity);
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] Bug报告跟踪:', { reportType, severity });` : ''}
-                },
-                
-                // FAQ查看跟踪
-                trackFAQView: function(questionId, category) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackFAQView) {
-                    window.voidixUltraCookielessGA.trackFAQView(questionId, category);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackFaqInteraction) {
-                    window.voidixGoogleAnalytics.trackFaqInteraction(questionId, 'view');
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] FAQ查看跟踪:', { questionId, category });` : ''}
-                },
-                
-                // 自定义事件跟踪
-                trackCustomEvent: function(category, action, label, value) {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackCustomEvent) {
-                    window.voidixUltraCookielessGA.trackCustomEvent(action, category, label, value);
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackCustomEvent) {
-                    window.voidixGoogleAnalytics.trackCustomEvent(action, category, label, value);
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });` : ''}
-                },
-                
-                // 页面性能跟踪
-                trackPagePerformance: function() {
-                  // Google Analytics跟踪（新的超级无Cookie版本）
-                  if (window.voidixUltraCookielessGA && window.voidixUltraCookielessGA.trackPagePerformance) {
-                    window.voidixUltraCookielessGA.trackPagePerformance();
-                  }
-                  // 向后兼容API
-                  if (window.voidixGoogleAnalytics && window.voidixGoogleAnalytics.trackPagePerformance) {
-                    window.voidixGoogleAnalytics.trackPagePerformance();
-                  }
-                  
-                  ${enableDebug ? `console.log('[统一分析] 页面性能跟踪已执行');` : ''}
-                }
-              };
-              
-              ${enableDebug ? `console.log('[UnifiedAnalytics] 统一分析API已初始化');` : ''}
-            `,
-          }}
+      {/* Microsoft Clarity */}
+      {enableClarity && !shouldDisable && finalHasConsented && clarityProjectId && (
+        <MicrosoftClarity
+          projectId={clarityProjectId}
+          enableDebug={finalEnableDebug}
+          hasConsented={finalHasConsented}
         />
       )}
     </>
@@ -168,13 +179,12 @@ export const UnifiedAnalytics: React.FC<UnifiedAnalyticsProps> = ({
 declare global {
   interface Window {
     voidixUnifiedAnalytics: {
-      trackServerStatus: (serverName: string, playerCount: number, isOnline: boolean) => void;
-      trackServerJoin: (serverName: string, gameMode: string) => void;
       trackBugReport: (reportType: string, severity: string) => void;
       trackFAQView: (questionId: string, category: string) => void;
       trackCustomEvent: (category: string, action: string, label: string, value?: number) => void;
       trackPagePerformance: () => void;
     };
+    clarity?: (type: string, eventName: string, properties?: Record<string, any>) => void;
   }
 }
 

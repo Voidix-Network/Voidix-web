@@ -1,11 +1,11 @@
 import { OptimizedAppRouter } from '@/components/routing/OptimizedAppRouter';
 import {
+  AdvancedStructuredData,
+  CookieConsent,
+  SearchEngineScript,
   SEOProvider,
   UnifiedAnalytics,
   VoidixSearchConsole,
-  AdvancedStructuredData,
-  SearchEngineScript,
-  CookieConsent,
 } from '@/components/seo';
 
 /**
@@ -33,12 +33,7 @@ function App() {
       <SearchEngineScript />
 
       {/* 统一分析（仅Google Analytics） */}
-      <UnifiedAnalytics
-        enableGoogleAnalytics={true}
-        enableDebug={import.meta.env.DEV}
-        disableInDev={true}
-        delayMs={2000}
-      />
+      <UnifiedAnalytics enableGoogleAnalytics={true} disableInDev={true} delayMs={2000} />
 
       <VoidixSearchConsole />
       <AdvancedStructuredData />
