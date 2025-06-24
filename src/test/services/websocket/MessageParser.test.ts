@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { WebSocketMessageParser } from '@/services/websocket/MessageParser';
 import type { WebSocketMessage } from '@/types';
+import { describe, expect, it } from 'vitest';
 
 describe('WebSocketMessageParser', () => {
   describe('消息解析', () => {
@@ -158,15 +158,15 @@ describe('WebSocketMessageParser', () => {
     it('应该正确检查是否包含玩家数据', () => {
       const withPlayerData = {
         type: 'full',
-        players: { online: '5', currentPlayers: { player1: {} } },
+        players: { max: 100, online: '5', currentPlayers: { player1: {} } },
       } as WebSocketMessage;
       const withoutPlayerData = {
         type: 'full',
-        players: { online: '0', currentPlayers: {} },
+        players: { max: 100, online: '0', currentPlayers: {} },
       } as WebSocketMessage;
       const emptyPlayerData = {
         type: 'full',
-        players: { online: '0', currentPlayers: {} },
+        players: { max: 100, online: '0', currentPlayers: {} },
       } as WebSocketMessage;
 
       expect(WebSocketMessageParser.hasPlayerData(withPlayerData)).toBe(true);
@@ -177,7 +177,7 @@ describe('WebSocketMessageParser', () => {
     it('应该正确提取服务器数据', () => {
       const message = {
         type: 'server_update',
-        servers: { server1: 10 },
+        servers: { server1: { online: 10, isOnline: true } },
       } as WebSocketMessage;
       const serverData = WebSocketMessageParser.extractServerData(message);
 
@@ -198,8 +198,11 @@ describe('WebSocketMessageParser', () => {
     it('应该生成正确的调试信息', () => {
       const message = {
         type: 'full',
-        servers: { server1: 10, server2: 5 },
-        players: { online: '5', currentPlayers: { player1: {} } },
+        servers: {
+          server1: { online: 10, isOnline: true },
+          server2: { online: 5, isOnline: true },
+        },
+        players: { max: 100, online: '5', currentPlayers: { player1: {} } },
         player: { uuid: '123' },
       } as WebSocketMessage;
 

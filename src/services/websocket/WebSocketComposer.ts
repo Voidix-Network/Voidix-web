@@ -1,12 +1,12 @@
-import type { WebSocketConfig } from '@/types';
 import { WEBSOCKET_CONFIG } from '@/constants';
+import type { WebSocketConfig } from '@/types';
 import {
-  WebSocketEventEmitter,
-  ReconnectStrategy,
   ConnectionManager,
+  EventCoordinator,
   MaintenanceHandler,
   MessageRouter,
-  EventCoordinator,
+  ReconnectStrategy,
+  WebSocketEventEmitter,
 } from './index';
 import type { WebSocketEventMap } from './types';
 
@@ -56,6 +56,42 @@ export class WebSocketComposer {
 
     // 设置重连事件协调
     this.eventCoordinator.setupReconnectEvents(() => this.connect());
+
+    // 设置公告事件桥接
+    this.setupNoticeEventBridge();
+  }
+
+  /**
+   * 设置公告事件桥接
+   * 将内部事件转换为DOM事件供组件监听
+   */
+  private setupNoticeEventBridge(): void {
+    // 监听公告返回事件
+    this.eventEmitter.on('noticeReturn', data => {
+      console.log('[WebSocketComposer] 桥接公告返回事件:', data);
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('noticeReturn', { detail: data });
+        window.dispatchEvent(event);
+      }
+    });
+
+    // 监听公告错误事件
+    this.eventEmitter.on('noticeError', data => {
+      console.log('[WebSocketComposer] 桥接公告错误事件:', data);
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('noticeError', { detail: data });
+        window.dispatchEvent(event);
+      }
+    });
+
+    // 监听公告更新事件
+    this.eventEmitter.on('noticeUpdate', data => {
+      console.log('[WebSocketComposer] 桥接公告更新事件:', data);
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('noticeUpdate', { detail: data });
+        window.dispatchEvent(event);
+      }
+    });
   }
 
   /**
@@ -70,6 +106,14 @@ export class WebSocketComposer {
         this.messageRouter.handleMessage(event);
       };
 
+      // 设置全局WebSocket变量供公告store使用
+      if (typeof window !== 'undefined') {
+        window.voidixWebSocket = {
+          send: (data: string) => this.send(data),
+          readyState: this.readyState,
+        };
+      }
+
       console.log('[WebSocketComposer] 连接建立成功');
     } catch (error) {
       console.error('[WebSocketComposer] 连接失败:', error);
@@ -78,9 +122,31 @@ export class WebSocketComposer {
   }
 
   /**
+   * 发送WebSocket消息
+   */
+  send(data: string): void {
+    try {
+      if (this.connectionManager.isConnected && this.connectionManager.webSocket) {
+        this.connectionManager.webSocket.send(data);
+        console.log('[WebSocketComposer] 发送消息:', data);
+      } else {
+        console.warn('[WebSocketComposer] WebSocket未连接，无法发送消息');
+        throw new Error('WebSocket未连接');
+      }
+    } catch (error) {
+      console.error('[WebSocketComposer] 发送消息失败:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 断开WebSocket连接
    */
   disconnect(): void {
+    // 清理全局变量
+    if (typeof window !== 'undefined') {
+      window.voidixWebSocket = undefined;
+    }
     this.connectionManager.disconnect();
   }
 

@@ -44,7 +44,7 @@ const mockHistoryBack = vi.fn();
 Object.defineProperty(window, 'history', {
   value: {
     back: mockHistoryBack,
-    length: 2 // 模拟有历史记录
+    length: 2, // 模拟有历史记录
   },
   configurable: true,
 });

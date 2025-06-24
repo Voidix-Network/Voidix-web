@@ -1,7 +1,9 @@
+import { WEBSOCKET_CONFIG } from '@/constants';
+import { useNoticeStore } from '@/stores';
 import type { WebSocketMessage } from '@/types';
-import { WebSocketMessageParser } from './MessageParser';
 import type { WebSocketEventEmitter } from './EventEmitter';
 import type { MaintenanceHandler } from './MaintenanceHandler';
+import { WebSocketMessageParser } from './MessageParser';
 
 /**
  * WebSocket消息路由器
@@ -11,6 +13,7 @@ import type { MaintenanceHandler } from './MaintenanceHandler';
 export class MessageRouter {
   private eventEmitter: WebSocketEventEmitter;
   private maintenanceHandler: MaintenanceHandler;
+  private protocolVersionVerified: boolean = false;
 
   constructor(eventEmitter: WebSocketEventEmitter, maintenanceHandler: MaintenanceHandler) {
     this.eventEmitter = eventEmitter;
@@ -24,15 +27,13 @@ export class MessageRouter {
   handleMessage(event: MessageEvent): void {
     const parseResult = WebSocketMessageParser.parse(event.data);
 
-    if (!parseResult.success) {
-      console.error('[MessageRouter] 消息解析失败:', parseResult.error, 'Raw data:', event.data);
+    if (!parseResult.success || !parseResult.data) {
+      console.error('[MessageRouter] 消息解析失败:', parseResult.error);
       return;
     }
 
-    const messageData = parseResult.data!;
-    console.log('[MessageRouter] 路由消息:', messageData.type, messageData);
+    const messageData = parseResult.data;
 
-    // 消息类型分发处理（复现原项目的switch-case逻辑）
     switch (messageData.type) {
       case 'full':
         this.handleFullMessage(messageData);
@@ -47,11 +48,13 @@ export class MessageRouter {
       case 'server_update':
         this.handleServerUpdate(messageData);
         break;
-      // 公告系统消息（状态页面不处理，但记录日志）
+      // 公告系统消息处理
+      case 'notice_return':
+        this.handleNoticeReturn(messageData);
+        break;
       case 'notice_update_add_respond':
       case 'notice_update_remove_respond':
-      case 'notice_return':
-        console.log('[MessageRouter] 收到公告系统消息（未处理）:', messageData.type);
+        this.handleNoticeUpdate(messageData);
         break;
       default:
         console.warn('[MessageRouter] 未知消息类型:', messageData.type, messageData);
@@ -63,6 +66,35 @@ export class MessageRouter {
    */
   private handleFullMessage(data: WebSocketMessage): void {
     console.log('[MessageRouter] 处理fullUpdate消息 - 原始数据:', JSON.stringify(data, null, 2));
+
+    // 首先检查协议版本
+    if (!this.protocolVersionVerified) {
+      const serverProtocolVersion = data.protocol_version;
+      const supportedVersion = WEBSOCKET_CONFIG.SUPPORTED_PROTOCOL_VERSION;
+
+      console.log(
+        `[MessageRouter] 协议版本检查: 服务器=${serverProtocolVersion}, 支持=${supportedVersion}`
+      );
+
+      if (typeof serverProtocolVersion !== 'number' || serverProtocolVersion !== supportedVersion) {
+        console.error(
+          `[MessageRouter] 协议版本不匹配！服务器版本: ${serverProtocolVersion}, 客户端支持版本: ${supportedVersion}`
+        );
+
+        // 发出协议版本错误事件，触发连接断开
+        this.eventEmitter.emit('protocolVersionMismatch', {
+          serverVersion: serverProtocolVersion,
+          clientVersion: supportedVersion,
+          error: `协议版本不兼容: 服务器v${serverProtocolVersion} vs 客户端v${supportedVersion}`,
+        });
+
+        return; // 停止处理消息
+      }
+
+      this.protocolVersionVerified = true;
+      console.log('[MessageRouter] 协议版本验证通过');
+    }
+
     console.log('[MessageRouter] fullUpdate数据结构分析:', {
       hasServers: !!data.servers,
       serverCount: data.servers ? Object.keys(data.servers).length : 0,
@@ -71,9 +103,10 @@ export class MessageRouter {
       currentPlayersCount: data.players?.currentPlayers
         ? Object.keys(data.players.currentPlayers).length
         : 0,
-      totalOnline: data.players?.online,
-      hasRunningTime: data.runningTime !== undefined,
       isMaintenance: data.isMaintenance,
+      runningTime: data.runningTime,
+      totalRunningTime: data.totalRunningTime,
+      protocolVersion: data.protocol_version,
     });
 
     // 使用MaintenanceHandler处理维护状态
@@ -210,7 +243,7 @@ export class MessageRouter {
         normalizedServers = {};
         Object.entries(data.servers).forEach(([serverId, playerCount]) => {
           normalizedServers[serverId] = {
-            online: playerCount as number,
+            online: playerCount as unknown as number,
             isOnline: true, // server_update消息中出现的服务器都是在线的
           };
         });
@@ -232,5 +265,73 @@ export class MessageRouter {
     } else {
       console.warn('[MessageRouter] server_update消息缺少servers数据:', data);
     }
+  }
+
+  /**
+   * 处理公告返回消息
+   */
+  private handleNoticeReturn(data: any) {
+    console.log('[MessageRouter] 处理公告返回:', data);
+
+    try {
+      const { notices, error_msg, page = 1, counts = 5 } = data;
+
+      if (error_msg) {
+        console.error('[MessageRouter] 公告请求错误:', error_msg);
+        this.eventEmitter.emit('noticeError', { error: error_msg });
+        return;
+      }
+
+      if (notices && typeof notices === 'object') {
+        // 处理富文本数据，确保兼容性
+        const processedNotices: Record<string, any> = {};
+
+        Object.entries(notices).forEach(([id, notice]: [string, any]) => {
+          processedNotices[id] = {
+            ...notice,
+            // 确保基础字段存在
+            title: notice.title || '',
+            text: notice.text || '',
+            time: notice.time || Date.now(),
+            color: notice.color || '#3B82F6',
+            // 富文本字段（可选）
+            title_rich: notice.title_rich || null,
+            text_rich: notice.text_rich || null,
+          };
+        });
+
+        console.log('[MessageRouter] 处理后的公告数据:', processedNotices);
+
+        // 使用新的分页响应处理方法
+        const noticeStore = useNoticeStore.getState();
+        noticeStore.handleNoticeResponse(processedNotices, page, counts);
+
+        // 同时发送事件以保持兼容性
+        this.eventEmitter.emit('noticeReturn', {
+          notices: processedNotices,
+          error_msg,
+          page,
+          counts,
+        });
+      } else {
+        console.warn('[MessageRouter] 收到的公告数据格式无效:', data);
+        this.eventEmitter.emit('noticeError', { error: '公告数据格式无效' });
+      }
+    } catch (error) {
+      console.error('[MessageRouter] 处理公告返回时出错:', error);
+      this.eventEmitter.emit('noticeError', { error: '处理公告数据时出错' });
+    }
+  }
+
+  /**
+   * 处理公告更新消息（新增/删除）
+   */
+  private handleNoticeUpdate(data: WebSocketMessage): void {
+    console.log('[MessageRouter] 处理公告更新消息:', data.type, data);
+
+    this.eventEmitter.emit('noticeUpdate', {
+      type: data.type,
+      data: data,
+    });
   }
 }

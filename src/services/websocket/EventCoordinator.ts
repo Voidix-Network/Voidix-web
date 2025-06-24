@@ -1,8 +1,8 @@
-import type { WebSocketEventEmitter } from './EventEmitter';
 import type { ConnectionManager } from './ConnectionManager';
+import { ConnectionState } from './ConnectionManager';
+import type { WebSocketEventEmitter } from './EventEmitter';
 import type { MaintenanceHandler } from './MaintenanceHandler';
 import type { ReconnectStrategy } from './ReconnectStrategy';
-import { ConnectionState } from './types';
 
 /**
  * 事件协调器
@@ -25,24 +25,36 @@ export class EventCoordinator {
   }
 
   /**
-   * 设置ConnectionManager的事件桥接
+   * 设置连接相关事件处理
    */
   setupConnectionEvents(connectionManager: ConnectionManager): void {
+    // 监听连接状态变化
     connectionManager.onStateChange(data => {
       console.log('[EventCoordinator] 连接状态变化:', data.currentState);
+      this.resetOnNewConnection(data.currentState);
+    });
 
-      switch (data.currentState) {
-        case ConnectionState.CONNECTED:
-          this.handleConnectionSuccess();
-          break;
-        case ConnectionState.DISCONNECTED:
-          this.handleConnectionLost();
-          break;
-        case ConnectionState.FAILED:
-          this.handleConnectionError();
-          break;
+    // 协议版本不匹配事件
+    this.eventEmitter.on('protocolVersionMismatch', data => {
+      console.error('[EventCoordinator] 协议版本不匹配，断开连接:', data);
+
+      // 立即断开连接
+      connectionManager.disconnect();
+
+      // 可以选择显示用户友好的错误消息
+      if (typeof window !== 'undefined') {
+        const errorEvent = new CustomEvent('protocolVersionError', {
+          detail: {
+            message: `协议版本不兼容，请刷新页面或联系管理员`,
+            serverVersion: data.serverVersion,
+            clientVersion: data.clientVersion,
+          },
+        });
+        window.dispatchEvent(errorEvent);
       }
     });
+
+    console.log('[EventCoordinator] 连接事件处理器已设置');
   }
 
   /**
@@ -170,5 +182,15 @@ export class EventCoordinator {
   cleanup(): void {
     this.connectFunction = undefined;
     this.isReconnectEnabled = false;
+  }
+
+  private resetOnNewConnection(status: string): void {
+    if (status === ConnectionState.CONNECTED) {
+      this.handleConnectionSuccess();
+    } else if (status === ConnectionState.DISCONNECTED) {
+      this.handleConnectionLost();
+    } else if (status === ConnectionState.FAILED) {
+      this.handleConnectionError();
+    }
   }
 }

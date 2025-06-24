@@ -3,8 +3,8 @@
  * 测试WebSocket连接管理、消息处理和事件系统
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { WebSocketService } from '@/services/websocket';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockWebSocket } from '../mocks/webSocketMocks';
 
 describe('WebSocketService', () => {
@@ -142,6 +142,7 @@ describe('WebSocketService', () => {
         totalRunningTime: 7200,
         isMaintenance: false,
         maintenanceStartTime: null,
+        protocol_version: 1,
       };
 
       mockWs.simulateMessage(fullMessage);

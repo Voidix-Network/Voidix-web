@@ -150,9 +150,7 @@ describe('NotFoundPage', () => {
       const additionalMeta = JSON.parse(pageSEO.getAttribute('data-additional-meta') || '[]');
 
       expect(additionalMeta).toEqual(
-        expect.arrayContaining([
-          { name: 'robots', content: 'noindex,nofollow' }
-        ])
+        expect.arrayContaining([{ name: 'robots', content: 'noindex,nofollow' }])
       );
     });
 

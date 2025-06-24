@@ -30,47 +30,43 @@ export interface ServerInfo {
   isOnline: boolean;
 }
 
-// WebSocket消息类型
+/**
+ * WebSocket消息基础类型
+ */
 export interface WebSocketMessage {
-  type:
-    | 'full'
-    | 'maintenance_status_update'
-    | 'players_update_add'
-    | 'players_update_remove'
-    | 'server_update'
-    | 'notice_update_add_respond'
-    | 'notice_update_remove_respond'
-    | 'notice_return';
-  payload?: any;
-  isMaintenance?: boolean;
-  status?: boolean | string;
-  maintenanceStartTime?: string | null;
-  servers?: Record<string, ServerData> | ServerUpdateData; // 支持两种格式
+  type: string;
+  servers?: Record<string, ServerData>;
   players?: {
-    online: string;
-    currentPlayers: Record<string, any>;
+    max: number;
+    online: string | number;
+    currentPlayers?: Record<string, any>;
   };
+  // 单个玩家信息字段 (用于 players_update_add/remove 消息)
   player?: {
     uuid: string;
     username?: string;
+    ign?: string;
+    currentServer?: string;
     previousServer?: string;
     newServer?: string;
-    currentServer?: string;
+    [key: string]: any;
   };
-  runningTime?: number | string;
-  totalRunningTime?: number | string;
-  totalOnlinePlayers?: number;
-  // 公告系统相关字段
+  runningTime?: string;
+  totalRunningTime?: string;
+  isMaintenance?: boolean;
+  // 维护相关字段
+  status?: boolean | string;
+  maintenanceStartTime?: string | null;
+  // 玩家数量字段
+  totalOnlinePlayers?: number | string;
+  // 协议版本字段
+  protocol_version?: number;
+  real_protocol_version?: number;
+  // 公告相关字段
+  notices?: Record<string, Notice>;
   error_msg?: string;
-  notices?: Record<
-    string,
-    {
-      title: string;
-      text: string;
-      time: number;
-      color: string;
-    }
-  >;
+  page?: number;
+  counts?: number;
 }
 
 // 原始服务器数据结构（用于full消息）
@@ -150,6 +146,7 @@ export interface WebSocketConfig {
   reconnectIntervals: number[];
   connectionTimeout: number;
   disableReconnect?: boolean; // 禁用重连功能（主要用于测试）
+  SUPPORTED_PROTOCOL_VERSION: number; // 协议版本
 }
 
 // 时间常量
@@ -209,4 +206,47 @@ export interface ServerCardProps {
   players: number;
   maxPlayers?: number;
   className?: string;
+}
+
+/**
+ * 富文本片段类型
+ */
+export interface RichTextSegment {
+  text: string;
+  color?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underlined?: boolean;
+  strikethrough?: boolean;
+}
+
+/**
+ * 公告数据结构
+ */
+export interface Notice {
+  title: string;
+  text: string;
+  time: number;
+  color: string;
+  // 新增富文本支持
+  title_rich?: RichTextSegment[];
+  text_rich?: RichTextSegment[];
+}
+
+export interface NoticeResponse {
+  type: 'notice_return';
+  notices: Record<string, Notice>;
+  error_msg?: string;
+}
+
+export interface NoticeRequest {
+  type: 'get_notice';
+  page: number;
+  counts: number;
+}
+
+export interface NoticeUpdateEvent {
+  type: 'notice_update_add_respond' | 'notice_update_remove_respond';
+  // 具体数据结构待确认
+  [key: string]: any;
 }
