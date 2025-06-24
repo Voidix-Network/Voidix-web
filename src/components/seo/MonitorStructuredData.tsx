@@ -32,7 +32,8 @@ export const MonitorStructuredData: React.FC<MonitorStructuredDataProps> = ({
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: 'Voidix服务器监控系统',
-    description: 'Voidix Minecraft服务器实时监控状态，显示过去90天的运行时间统计和服务可用性。',
+    description:
+      'Voidix服务器运行时间与性能监控系统。我们公开展示过去90天的服务可用性、历史运行数据和详细性能指标，让您对服务器的稳定性和健康状态一目了然。',
     url: typeof window !== 'undefined' ? window.location.href : 'https://www.voidix.net/monitor',
     inLanguage: 'zh-CN',
     isPartOf: {
@@ -67,7 +68,8 @@ export const MonitorStructuredData: React.FC<MonitorStructuredDataProps> = ({
     serviceOutput: {
       '@type': 'Dataset',
       name: '服务器运行时间数据',
-      description: '过去90天的服务器运行时间统计和性能数据',
+      description:
+        'Voidix服务器运行时间与性能监控系统。我们公开展示过去90天的服务可用性、历史运行数据和详细性能指标，让您对服务器的稳定性和健康状态一目了然。',
       dateModified: lastUpdate?.toISOString() || new Date().toISOString(),
       measurementTechnique: 'HTTP状态检查',
       temporalCoverage: '过去90天',
