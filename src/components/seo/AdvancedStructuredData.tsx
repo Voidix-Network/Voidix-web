@@ -162,8 +162,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
       ratingValue: '4.8',
       bestRating: '5',
       worstRating: '1',
-      ratingCount: '256',
-      reviewCount: '128',
+      ratingCount: '56',
+      reviewCount: '0',
     },
     author: {
       '@type': 'Organization',
