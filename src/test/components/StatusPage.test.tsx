@@ -1,5 +1,6 @@
 import { StatusPage } from '@/pages/StatusPage';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -73,18 +74,42 @@ vi.mock('@/components', () => ({
   ServerGroupCard: vi.fn(() => null),
 }));
 
+// Mock SEO组件，确保analytics在测试中可用
+vi.mock('@/components/seo', () => ({
+  SEO: () => {
+    // 初始化analytics mock（模拟SEO组件的useEffect）
+    React.useEffect(() => {
+      if (!window.voidixUnifiedAnalytics) {
+        window.voidixUnifiedAnalytics = {
+          trackCustomEvent: mockTrackCustomEvent,
+          trackBugReport: vi.fn(),
+          trackFAQView: vi.fn(),
+          trackPagePerformance: vi.fn(),
+        };
+      }
+    }, []);
+    return null;
+  }
+}));
+
 // Mock window.voidixUnifiedAnalytics
+const mockTrackCustomEvent = vi.fn();
+const mockTrackServerStatus = vi.fn();
+
 Object.defineProperty(window, 'voidixUnifiedAnalytics', {
   value: {
-    trackCustomEvent: vi.fn(),
-    trackServerStatus: vi.fn(),
+    trackCustomEvent: mockTrackCustomEvent,
+    trackServerStatus: mockTrackServerStatus,
   },
   writable: true,
+  configurable: true,
 });
 
 describe('StatusPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockTrackCustomEvent.mockClear();
+    mockTrackServerStatus.mockClear();
   });
 
   describe('基础渲染', () => {
@@ -294,7 +319,7 @@ describe('StatusPage', () => {
 
       renderWithHelmet(<StatusPage />);
 
-      expect(window.voidixUnifiedAnalytics.trackCustomEvent).toHaveBeenCalledWith(
+      expect(mockTrackCustomEvent).toHaveBeenCalledWith(
         'page_view',
         'status_page',
         'status_page_visit',
@@ -317,7 +342,7 @@ describe('StatusPage', () => {
 
       renderWithHelmet(<StatusPage />);
 
-      expect(window.voidixUnifiedAnalytics.trackCustomEvent).toHaveBeenCalledWith(
+      expect(mockTrackCustomEvent).toHaveBeenCalledWith(
         'server_status',
         'status_update',
         'aggregate_stats',

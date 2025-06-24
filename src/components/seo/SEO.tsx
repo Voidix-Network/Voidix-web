@@ -1,0 +1,304 @@
+import React, { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { generateKeywordsString, getPageSEOConfig } from './chineseKeywords';
+
+export interface SEOProps {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  image?: string;
+  url?: string;
+  type?: 'website' | 'article' | 'game';
+  canonicalUrl?: string;
+  pageKey?: string;
+  enableAnalytics?: boolean;
+  enableClarity?: boolean;
+  enableDebug?: boolean;
+  additionalMeta?: Array<{
+    name?: string;
+    property?: string;
+    content: string;
+  }>;
+}
+
+// 默认配置
+const DEFAULT_SEO_CONFIG = {
+  title: 'Voidix - 公益·公平·包容的Minecraft服务器',
+  description:
+    '公益、公平、包容的Minecraft小游戏服务器，致力于为玩家提供开放、透明、无门槛的游戏体验。',
+  image: '/logo.png',
+  keywords: 'Minecraft,服务器,公益,小游戏,起床战争,空岛战争',
+  siteName: 'Voidix - 专业Minecraft服务器',
+  organizationName: 'Voidix Minecraft Server',
+  websiteUrl: 'https://www.voidix.net',
+  contactEmail: 'contact@voidix.net',
+};
+
+// 简化的分析跟踪
+const initializeSimpleAnalytics = (enableAnalytics: boolean, enableDebug: boolean = false) => {
+  if (!enableAnalytics || typeof window === 'undefined') return;
+
+  // 检查用户同意
+  const hasConsent = localStorage.getItem('voidix-analytics-consent') === 'true';
+  const isDev = import.meta.env.DEV;
+
+  if (!hasConsent || isDev) return;
+
+  // 简化的GA4配置
+  const measurementId = 'G-SPQQPKW4VN';
+
+  // 只加载必要的gtag功能
+  if (!window.gtag) {
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () {
+      window.dataLayer.push(arguments);
+    };
+
+    // 延迟加载gtag.js
+    setTimeout(() => {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+      document.head.appendChild(script);
+
+      script.onload = () => {
+        window.gtag('js', new Date());
+        window.gtag('config', measurementId, {
+          client_storage: 'none',
+          anonymize_ip: true,
+          allow_google_signals: false,
+          send_page_view: true,
+        });
+        if (enableDebug) console.log('[SEO] GA4 initialized');
+      };
+    }, 2000);
+  }
+};
+
+// Microsoft Clarity集成
+const initializeClarity = (enableClarity: boolean, enableDebug: boolean = false) => {
+  if (!enableClarity || typeof window === 'undefined') return;
+
+  const hasConsent = localStorage.getItem('voidix-analytics-consent') === 'true';
+  const isDev = import.meta.env.DEV;
+  const clarityId = import.meta.env.VITE_CLARITY_PROJECT_ID || '';
+
+  if (!hasConsent || isDev || !clarityId) return;
+
+  // 检查Clarity是否已加载
+  if (window.clarity) {
+    if (enableDebug) console.log('[SEO] Clarity already loaded');
+    return;
+  }
+
+  // 加载Microsoft Clarity
+  (function (c: any, l: any, a: any, r: any, i: any, t: any, y: any) {
+    c[a] =
+      c[a] ||
+      function () {
+        (c[a].q = c[a].q || []).push(arguments);
+      };
+    t = l.createElement(r);
+    t.async = 1;
+    t.src = 'https://www.clarity.ms/tag/' + i;
+    y = l.getElementsByTagName(r)[0];
+    y.parentNode.insertBefore(t, y);
+  })(window, document, 'clarity', 'script', clarityId, null, null);
+
+  if (enableDebug) console.log('[SEO] Clarity initialized');
+};
+
+// 统一分析API
+const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
+  if (typeof window === 'undefined') return;
+
+  const hasConsent = localStorage.getItem('voidix-analytics-consent') === 'true';
+  const isDev = import.meta.env.DEV;
+
+  if (!hasConsent || isDev) {
+    // @ts-ignore
+    window.voidixUnifiedAnalytics = undefined;
+    return;
+  }
+
+  // Voidix统一分析API
+  window.voidixUnifiedAnalytics = {
+    trackBugReport: (reportType: string, severity: string) => {
+      if (window.clarity) {
+        window.clarity('event', 'bug_report', { reportType, severity });
+      }
+      if (enableDebug) console.log('[统一分析] Bug报告跟踪:', { reportType, severity });
+    },
+    trackFAQView: (questionId: string, category: string) => {
+      if (window.clarity) {
+        window.clarity('event', 'faq_view', { questionId, category });
+      }
+      if (enableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
+    },
+    trackCustomEvent: (category: string, action: string, label: string, value?: number) => {
+      if (window.clarity) {
+        window.clarity('event', action, { category, label, value });
+      }
+      if (enableDebug)
+        console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });
+    },
+    trackPagePerformance: () => {
+      if (window.clarity) {
+        window.clarity('event', 'page_performance');
+      }
+      if (enableDebug) console.log('[统一分析] 页面性能跟踪已执行');
+    },
+  };
+
+  if (enableDebug) console.log('[SEO] 统一分析API已初始化');
+};
+
+// 生成基础结构化数据
+const generateBasicStructuredData = () => {
+  const organization = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: DEFAULT_SEO_CONFIG.organizationName,
+    url: DEFAULT_SEO_CONFIG.websiteUrl,
+    logo: `${DEFAULT_SEO_CONFIG.websiteUrl}${DEFAULT_SEO_CONFIG.image}`,
+    description: DEFAULT_SEO_CONFIG.description,
+    email: DEFAULT_SEO_CONFIG.contactEmail,
+    areaServed: { '@type': 'Country', name: 'China' },
+    serviceType: 'Minecraft公益游戏服务器',
+  };
+
+  const website = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: DEFAULT_SEO_CONFIG.siteName,
+    url: DEFAULT_SEO_CONFIG.websiteUrl,
+    description: DEFAULT_SEO_CONFIG.description,
+    inLanguage: 'zh-CN',
+    publisher: { '@type': 'Organization', name: DEFAULT_SEO_CONFIG.organizationName },
+  };
+
+  return [organization, website];
+};
+
+/**
+ * 核心SEO组件
+ * 整合了PageSEO、基础结构化数据、轻量级分析和MicrosoftClarity
+ * 使用chineseKeywords.ts中的精选配置
+ */
+export const SEO: React.FC<SEOProps> = ({
+  title,
+  description,
+  keywords,
+  image = DEFAULT_SEO_CONFIG.image,
+  url = typeof window !== 'undefined' ? window.location.href : '',
+  type = 'website',
+  canonicalUrl,
+  pageKey,
+  enableAnalytics = true,
+  enableClarity = true,
+  enableDebug = false,
+  additionalMeta = [],
+}) => {
+  // 获取页面配置 - 使用您精心配置的关键词
+  const pageConfig = pageKey ? getPageSEOConfig(pageKey) : null;
+
+  const finalTitle = title || (pageConfig ? pageConfig.title : DEFAULT_SEO_CONFIG.title);
+  const finalDescription =
+    description || (pageConfig ? pageConfig.description : DEFAULT_SEO_CONFIG.description);
+  const finalKeywords =
+    keywords || (pageKey ? generateKeywordsString(pageKey) : DEFAULT_SEO_CONFIG.keywords);
+
+  const fullTitle = finalTitle.includes('Voidix')
+    ? finalTitle
+    : `${finalTitle} | ${DEFAULT_SEO_CONFIG.siteName}`;
+  const fullImageUrl = image.startsWith('http')
+    ? image
+    : `${DEFAULT_SEO_CONFIG.websiteUrl}${image}`;
+
+  // 初始化分析功能
+  useEffect(() => {
+    if (enableAnalytics) {
+      initializeSimpleAnalytics(true, enableDebug);
+    }
+    if (enableClarity) {
+      initializeClarity(true, enableDebug);
+    }
+    // 始终初始化统一API（内部会检查同意状态）
+    initializeUnifiedAnalytics(enableDebug);
+  }, [enableAnalytics, enableClarity, enableDebug]);
+
+  // 生成结构化数据
+  const structuredData = generateBasicStructuredData();
+
+  return (
+    <Helmet>
+      {/* 基础SEO */}
+      <title>{fullTitle}</title>
+      <meta name="description" content={finalDescription} />
+      <meta name="keywords" content={finalKeywords} />
+
+      {/* 中文优化 */}
+      <meta name="language" content="zh-CN" />
+      <meta name="geo.region" content="CN" />
+      <meta name="geo.country" content="China" />
+
+      {/* Open Graph */}
+      <meta property="og:title" content={fullTitle} />
+      <meta property="og:description" content={finalDescription} />
+      <meta property="og:image" content={fullImageUrl} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content={type} />
+      <meta property="og:site_name" content={DEFAULT_SEO_CONFIG.siteName} />
+      <meta property="og:locale" content="zh_CN" />
+
+      {/* Twitter Card */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={fullTitle} />
+      <meta name="twitter:description" content={finalDescription} />
+      <meta name="twitter:image" content={fullImageUrl} />
+
+      {/* 移动端优化 */}
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+
+      {/* Canonical URL */}
+      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+
+      {/* 结构化数据 */}
+      {structuredData.map((schema, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
+
+      {/* 额外的meta标签 */}
+      {additionalMeta.map((meta, index) => (
+        <meta
+          key={index}
+          {...(meta.name ? { name: meta.name } : {})}
+          {...(meta.property ? { property: meta.property } : {})}
+          content={meta.content}
+        />
+      ))}
+    </Helmet>
+  );
+};
+
+// 类型声明
+declare global {
+  interface Window {
+    dataLayer: any[];
+    gtag: (...args: any[]) => void;
+    voidixUnifiedAnalytics: {
+      trackBugReport: (reportType: string, severity: string) => void;
+      trackFAQView: (questionId: string, category: string) => void;
+      trackCustomEvent: (category: string, action: string, label: string, value?: number) => void;
+      trackPagePerformance: () => void;
+    };
+  }
+}
+
+export default SEO;

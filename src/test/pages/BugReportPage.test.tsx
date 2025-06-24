@@ -3,9 +3,9 @@
  * 测试Bug反馈页面的渲染、事件追踪、SEO集成和用户交互功能
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
 import { BugReportPage } from '@/pages/BugReportPage';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock 所有子组件
 vi.mock('@/components', () => ({
@@ -28,7 +28,7 @@ vi.mock('@/components', () => ({
 
 // Mock SEO组件
 vi.mock('@/components/seo', () => ({
-  PageSEO: ({ pageKey, type, canonicalUrl }: any) => (
+  SEO: ({ pageKey, type, canonicalUrl }: any) => (
     <div
       data-testid="page-seo"
       data-page-key={pageKey}
@@ -40,8 +40,8 @@ vi.mock('@/components/seo', () => ({
   ),
 }));
 
-// Mock 常量配置
-vi.mock('@/constants', () => ({
+// Mock SEO配置
+vi.mock('@/components/seo/feedbackChannels', () => ({
   FEEDBACK_CHANNELS_CONFIG: [
     {
       iconName: 'MessageSquare',
@@ -72,6 +72,9 @@ vi.mock('@/constants', () => ({
       color: 'from-gray-500 to-slate-500',
     },
   ],
+}));
+
+vi.mock('@/components/seo/feedbackRequirements', () => ({
   FEEDBACK_REQUIREMENTS_CONFIG: [
     {
       iconName: 'Bug',

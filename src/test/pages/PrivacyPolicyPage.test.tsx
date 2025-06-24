@@ -1,6 +1,6 @@
+import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
 import { vi } from 'vitest';
 
 // Mock framer-motion
@@ -29,7 +29,8 @@ vi.mock('@/components', () => ({
 }));
 
 vi.mock('@/components/seo', () => ({
-  PageSEO: () => null,
+  SEO: () => null,
+  FAQSchema: () => null,
 }));
 
 const renderComponent = () => {

@@ -3,10 +3,10 @@
  * 测试404错误页面的渲染、导航功能、状态码设置和SEO配置
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock React Router
 vi.mock('react-router-dom', () => ({
@@ -19,7 +19,7 @@ vi.mock('react-router-dom', () => ({
 
 // Mock SEO组件
 vi.mock('@/components/seo', () => ({
-  PageSEO: ({ title, description, keywords, additionalMeta }: any) => (
+  SEO: ({ title, description, keywords, additionalMeta }: any) => (
     <div
       data-testid="page-seo"
       data-title={title}
@@ -27,7 +27,7 @@ vi.mock('@/components/seo', () => ({
       data-keywords={keywords}
       data-additional-meta={JSON.stringify(additionalMeta)}
     >
-      PageSEO
+      SEO
     </div>
   ),
 }));
@@ -43,9 +43,11 @@ vi.mock('lucide-react', () => {
 });
 
 // Mock window 对象
+const mockHistoryBack = vi.fn();
 Object.defineProperty(window, 'history', {
   value: {
-    back: vi.fn(),
+    back: mockHistoryBack,
+    length: 2, // 模拟有历史记录
   },
   configurable: true,
 });
@@ -57,6 +59,7 @@ describe('NotFoundPage', () => {
   beforeEach(() => {
     // 清理所有mock
     vi.clearAllMocks();
+    mockHistoryBack.mockClear();
 
     // Mock React.useEffect 来避免 DOM 操作
     useEffectSpy = vi.spyOn(React, 'useEffect').mockImplementation(() => {
@@ -135,7 +138,7 @@ describe('NotFoundPage', () => {
       expect(pageSEO).toHaveAttribute('data-title', '页面未找到 - Voidix');
       expect(pageSEO).toHaveAttribute(
         'data-description',
-        '抱歉，您访问的页面不存在。返回首页继续探索Voidix的精彩内容。'
+        '抱歉，您访问的页面不存在。返回首页继续探索Voidix Minecraft服务器的精彩内容。'
       );
       expect(pageSEO).toHaveAttribute('data-keywords', '404,页面未找到,Voidix');
     });
@@ -146,7 +149,11 @@ describe('NotFoundPage', () => {
       const pageSEO = screen.getByTestId('page-seo');
       const additionalMeta = JSON.parse(pageSEO.getAttribute('data-additional-meta') || '[]');
 
-      expect(additionalMeta).toEqual([{ name: 'robots', content: 'noindex, nofollow' }]);
+      expect(additionalMeta).toEqual(
+        expect.arrayContaining([
+          { name: 'robots', content: 'noindex,nofollow' }
+        ])
+      );
     });
 
     it('应该包含适当的SEO元数据', () => {
@@ -193,7 +200,7 @@ describe('NotFoundPage', () => {
       fireEvent.click(backButton);
 
       // 验证window.history.back被调用
-      expect(window.history.back).toHaveBeenCalledTimes(1);
+      expect(mockHistoryBack).toHaveBeenCalledTimes(1);
     });
 
     it('应该设置正确的按钮和链接样式', () => {

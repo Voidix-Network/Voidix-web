@@ -1,10 +1,8 @@
 import { OptimizedAppRouter } from '@/components/routing/OptimizedAppRouter';
 import {
-  AdvancedStructuredData,
   CookieConsent,
   SearchEngineScript,
   SEOProvider,
-  UnifiedAnalytics,
   VoidixSearchConsole,
 } from '@/components/seo';
 
@@ -12,31 +10,28 @@ import {
  * 主应用组件
  * 使用优化的路由器，支持代码分割、懒加载和错误边界
  * 集成SEOProvider提供动态SEO管理功能
- * 集成UnifiedAnalytics提供现代化Google Analytics和百度统计
- * 集成VoidixSearchConsole提供搜索引擎验证
- * 集成AdvancedStructuredData提供高级Schema.org标记
- * 集成CookieConsent提供GDPR合规的Cookie同意管理
+ * 简化的SEO架构，提升性能和维护性
  *
- * 第三方Cookie问题修复：
- * - ✅ 使用超级无Cookie版本Google Analytics，零第三方依赖
- * - ✅ 完全不加载第三方GA脚本，使用Measurement Protocol
- * - ✅ 开发环境默认禁用，避免测试污染
- * - ✅ 彻底解决Chrome DevTools第三方Cookie警告
+ * SEO优化改进：
+ * - ✅ 简化SEO组件架构，减少冗余
+ * - ✅ 整合分析功能，避免重复代码
+ * - ✅ 优化性能，减少bundle大小
+ * - ✅ 保持GDPR合规性
+ * - ✅ 维护搜索引擎优化效果
  */
 function App() {
   return (
     <SEOProvider>
-      {/* 新的Cookie同意组件 */}
-      <CookieConsent />
+      {/* 简化的Cookie同意管理 */}
+      <CookieConsent enableCustomization={true} />
 
       {/* 搜索引擎抓取脚本 */}
       <SearchEngineScript />
 
-      {/* 统一分析（仅Google Analytics） */}
-      <UnifiedAnalytics enableGoogleAnalytics={true} disableInDev={true} delayMs={2000} />
-
+      {/* 搜索引擎验证 */}
       <VoidixSearchConsole />
-      <AdvancedStructuredData />
+
+      {/* 主路由组件 */}
       <OptimizedAppRouter />
     </SEOProvider>
   );

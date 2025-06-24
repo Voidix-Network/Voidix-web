@@ -116,7 +116,7 @@ vi.mock('@/pages/StatusPage', () => ({
 
 // Mock SEO组件
 vi.mock('@/components/seo', () => ({
-  PageSEO: ({ title, description, keywords }: any) => (
+  SEO: ({ title, description, keywords }: any) => (
     <div
       data-testid="page-seo"
       data-title={title}
