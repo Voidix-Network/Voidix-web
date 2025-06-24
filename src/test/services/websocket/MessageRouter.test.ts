@@ -27,7 +27,12 @@ describe('MessageRouter', () => {
   describe('消息解析和路由', () => {
     it('应该正确处理有效的JSON消息', () => {
       const mockEmit = vi.spyOn(eventEmitter, 'emit');
-      const messageData = { type: 'full', servers: {}, players: { online: '0' } };
+      const messageData = {
+        type: 'full',
+        servers: {},
+        players: { online: '0' },
+        protocol_version: 1, // 添加协议版本
+      };
       const event = new MessageEvent('message', {
         data: JSON.stringify(messageData),
       });
@@ -45,11 +50,18 @@ describe('MessageRouter', () => {
 
       messageRouter.handleMessage(event);
 
+      // 第一个错误来自MessageParser
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[MessageRouter] 消息解析失败:',
-        expect.any(String),
+        '[MessageParser] 消息解析失败:',
+        expect.any(Error),
         'Raw data:',
         'invalid json'
+      );
+
+      // 第二个错误来自MessageRouter
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[MessageRouter] 消息解析失败:',
+        expect.stringContaining('消息解析失败:')
       );
     });
 
@@ -84,6 +96,7 @@ describe('MessageRouter', () => {
         totalRunningTime: 7200,
         isMaintenance: false,
         maintenanceStartTime: null,
+        protocol_version: 1, // 添加协议版本
       };
       const event = new MessageEvent('message', {
         data: JSON.stringify(messageData),
@@ -106,6 +119,7 @@ describe('MessageRouter', () => {
       const messageData = {
         type: 'full',
         servers: {}, // 提供空的servers对象以通过验证
+        protocol_version: 1, // 添加协议版本
         // 缺少players字段
       };
       const event = new MessageEvent('message', {
@@ -273,8 +287,9 @@ describe('MessageRouter', () => {
       messageRouter.handleMessage(event);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        '[MessageRouter] 收到公告系统消息（未处理）:',
-        'notice_update_add_respond'
+        '[MessageRouter] 处理公告更新消息:',
+        'notice_update_add_respond',
+        messageData
       );
     });
   });

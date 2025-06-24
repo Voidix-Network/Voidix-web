@@ -135,7 +135,7 @@ const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
       }
       if (enableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
     },
-    trackCustomEvent: (category: string, action: string, label: string, value?: number) => {
+    trackCustomEvent: (category: string, action: string, label?: string, value?: number) => {
       if (window.clarity) {
         window.clarity('event', action, { category, label, value });
       }
@@ -287,18 +287,6 @@ export const SEO: React.FC<SEOProps> = ({
   );
 };
 
-// 类型声明
-declare global {
-  interface Window {
-    dataLayer: any[];
-    gtag: (...args: any[]) => void;
-    voidixUnifiedAnalytics: {
-      trackBugReport: (reportType: string, severity: string) => void;
-      trackFAQView: (questionId: string, category: string) => void;
-      trackCustomEvent: (category: string, action: string, label: string, value?: number) => void;
-      trackPagePerformance: () => void;
-    };
-  }
-}
+// 全局类型声明已移至 types/analytics.d.ts
 
 export default SEO;

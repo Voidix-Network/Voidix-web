@@ -1,7 +1,7 @@
-import { useEffect, useRef, useCallback } from 'react';
 import { WebSocketService } from '@/services/websocket';
 import { useServerStore } from '@/stores';
 import type { ConnectionStatus } from '@/types';
+import { useCallback, useEffect, useRef } from 'react';
 
 /**
  * useWebSocket Hook配置选项
@@ -424,6 +424,34 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [connect]);
+
+  // 监听协议版本错误
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleProtocolVersionError = (event: CustomEvent) => {
+      const { message } = event.detail;
+
+      console.error('[useWebSocket] 协议版本错误:', event.detail);
+
+      // 设置错误状态
+      updateConnectionStatus('disconnected');
+
+      // 可以选择显示alert或toast通知
+      if (window.confirm(`${message}\n\n是否刷新页面？`)) {
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('protocolVersionError', handleProtocolVersionError as EventListener);
+
+    return () => {
+      window.removeEventListener(
+        'protocolVersionError',
+        handleProtocolVersionError as EventListener
+      );
+    };
+  }, [updateConnectionStatus]);
 
   return {
     connectionStatus,

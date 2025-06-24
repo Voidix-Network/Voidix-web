@@ -129,6 +129,9 @@ export interface WebSocketEventMap {
   playerAdd: PlayerAddEventData;
   playerRemove: PlayerRemoveEventData;
   playerMove: PlayerMoveEventData;
+  noticeReturn: NoticeReturnEventData;
+  noticeError: NoticeErrorEventData;
+  noticeUpdate: NoticeUpdateEventData;
 }
 
 /**
@@ -204,4 +207,40 @@ export interface MaintenanceStateChangeData {
   currentState: MaintenanceState;
   timestamp: number;
   source: 'message' | 'force' | 'reset';
+}
+
+/**
+ * 公告返回事件数据
+ */
+export interface NoticeReturnEventData {
+  notices: Record<string, any>;
+  error_msg?: string;
+}
+
+/**
+ * 公告错误事件数据
+ */
+export interface NoticeErrorEventData {
+  error: string;
+}
+
+/**
+ * 公告更新事件数据
+ */
+export interface NoticeUpdateEventData {
+  type: 'notice_update_add_respond' | 'notice_update_remove_respond';
+  data: any;
+}
+
+/**
+ * WebSocket配置类型
+ */
+export interface WebSocketConfig {
+  url: string;
+  maxReconnectAttempts: number;
+  reconnectIntervals: number[];
+  disableReconnect: boolean;
+  connectionTimeout: number;
+  // 协议版本支持
+  SUPPORTED_PROTOCOL_VERSION: number;
 }

@@ -1,9 +1,10 @@
 import type {
-  ServerInfo,
-  ConnectionStatus,
   AggregateStats,
-  ServerData,
+  ConnectionStatus,
+  Notice,
   PlayerIgnInfo,
+  ServerData,
+  ServerInfo,
   ServerPlayerIgns,
 } from '@/types';
 
@@ -105,6 +106,44 @@ export interface UptimeActions {
 }
 
 /**
+ * 公告系统相关类型
+ */
+export interface NoticeState {
+  notices: Record<string, Notice>;
+  isLoading: boolean;
+  error: string | null;
+  lastFetchTime: number | null;
+  currentPage: number;
+  hasMore: boolean;
+  totalPages: number;
+  pageSize: number;
+}
+
+export interface NoticeActions {
+  setNotices: (notices: Record<string, Notice>) => void;
+  addNotice: (id: string, notice: Notice) => void;
+  removeNotice: (id: string) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  updatePage: (page: number) => void;
+  setHasMore: (hasMore: boolean) => void;
+  reset: () => void;
+  requestNotices: (page?: number, counts?: number) => void;
+  handleNoticeResponse: (
+    notices: Record<string, Notice>,
+    requestedPage: number,
+    pageSize: number
+  ) => void;
+  goToPage: (page: number) => void;
+  nextPage: () => void;
+  prevPage: () => void;
+  refreshCurrentPage: () => void;
+  smartUpdateNotices: (newNotices: Record<string, Notice>) => void;
+  requestNoticesEnhanced: (page?: number, counts?: number) => void;
+  debugWebSocketStatus: () => any;
+}
+
+/**
  * 全量更新数据类型
  */
 export interface FullUpdateData {
@@ -125,4 +164,5 @@ export interface StoreContext {
   playerTrackingStore: PlayerTrackingState & PlayerTrackingActions;
   playerIgnStore: PlayerIgnState & PlayerIgnActions;
   uptimeStore: UptimeState & UptimeActions;
+  noticeStore: NoticeState & NoticeActions;
 }

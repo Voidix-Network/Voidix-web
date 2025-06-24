@@ -30,6 +30,7 @@ describe('EventCoordinator', () => {
       disableReconnect: false,
       maxReconnectAttempts: 3,
       reconnectIntervals: [1000, 2000, 3000],
+      SUPPORTED_PROTOCOL_VERSION: 1,
     });
     maintenanceHandler = new MaintenanceHandler();
     eventCoordinator = new EventCoordinator(eventEmitter, reconnectStrategy);

@@ -12,6 +12,16 @@ declare global {
       trackConnectionTest: (serverIP: string, latency: number, success: boolean) => void;
       track: (action: string, category?: string, label?: string, value?: number) => void;
     };
+    voidixUnifiedAnalytics?: {
+      trackBugReport: (reportType: string, severity: string) => void;
+      trackFAQView: (questionId: string, category: string) => void;
+      trackCustomEvent: (category: string, action: string, label?: string, value?: number) => void;
+      trackPagePerformance: () => void;
+    };
+    voidixWebSocket?: {
+      send: (data: string) => void;
+      readyState?: number;
+    };
   }
 }
 

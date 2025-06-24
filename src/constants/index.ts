@@ -12,8 +12,11 @@ export * from './serverGroups';
 // WebSocket配置常量
 export const WEBSOCKET_CONFIG: WebSocketConfig = {
   url: 'wss://server.voidix.top:10203',
-  maxReconnectAttempts: 3,
-  reconnectIntervals: [10000, 30000, 60000], // 10s, 30s, 60s
+  maxReconnectAttempts: 5,
+  reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
+  disableReconnect: false,
+  // 协议版本 - 必须与后端匹配
+  SUPPORTED_PROTOCOL_VERSION: 1,
   connectionTimeout: 5000, // 5秒连接超时
 };
 

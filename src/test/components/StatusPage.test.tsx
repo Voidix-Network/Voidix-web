@@ -66,6 +66,8 @@ vi.mock('@/constants', () => ({
 vi.mock('@/components', () => ({
   PageSEO: vi.fn(() => null),
   BreadcrumbNavigation: vi.fn(() => null),
+  AnimatedSection: vi.fn(({ children, className }) => <div className={className}>{children}</div>),
+  NoticeList: vi.fn(() => <div data-testid="notice-list">Notice List</div>),
   ServerCard: vi.fn(({ serverId, serverData }) => (
     <div data-testid={`server-card-${serverId}`}>
       Server: {serverId} - Players: {serverData.players}
@@ -89,7 +91,7 @@ vi.mock('@/components/seo', () => ({
       }
     }, []);
     return null;
-  }
+  },
 }));
 
 // Mock window.voidixUnifiedAnalytics

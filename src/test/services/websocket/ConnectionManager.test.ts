@@ -61,6 +61,7 @@ describe('ConnectionManager', () => {
       maxReconnectAttempts: 5,
       reconnectIntervals: [1000, 2000, 3000, 5000, 10000],
       disableReconnect: false,
+      SUPPORTED_PROTOCOL_VERSION: 1,
     };
 
     connectionManager = new ConnectionManager(config);
