@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/components';
-import { PageSEO, FAQSchema } from '@/components/seo';
+import { FAQSchema, SEO } from '@/components/seo';
+import { motion } from 'framer-motion';
+import React, { useEffect } from 'react';
 
 interface FaqItem {
   id: number;
@@ -143,7 +143,12 @@ export const FaqPage: React.FC = () => {
 
   return (
     <>
-      <PageSEO pageKey="faq" type="article" canonicalUrl="https://www.voidix.net/faq" />
+      <SEO
+        pageKey="faq"
+        type="article"
+        canonicalUrl="https://www.voidix.net/faq"
+        enableAnalytics={true}
+      />
       <FAQSchema faqItems={faqSchemaData} />
       <div className="min-h-screen bg-gray-900 pt-12 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

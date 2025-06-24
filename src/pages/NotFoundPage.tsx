@@ -1,7 +1,7 @@
+import { SEO } from '@/components/seo';
+import { ArrowLeft, Home, Search } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Home, ArrowLeft, Search } from 'lucide-react';
-import { PageSEO } from '@/components/seo';
 
 /**
  * 404错误页面组件
@@ -23,14 +23,26 @@ export const NotFoundPage: React.FC = () => {
     }
   }, []);
 
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // 如果没有历史记录，回到首页
+      window.location.href = '/';
+    }
+  };
+
   return (
     <>
-      {' '}
-      <PageSEO
+      <SEO
         title="页面未找到 - Voidix"
-        description="抱歉，您访问的页面不存在。返回首页继续探索Voidix的精彩内容。"
+        description="抱歉，您访问的页面不存在。返回首页继续探索Voidix Minecraft服务器的精彩内容。"
         keywords="404,页面未找到,Voidix"
-        additionalMeta={[{ name: 'robots', content: 'noindex, nofollow' }]}
+        enableAnalytics={true}
+        additionalMeta={[
+          { name: 'robots', content: 'noindex,nofollow' },
+          { property: 'og:type', content: 'website' },
+        ]}
       />
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
         <div className="text-center max-w-2xl mx-auto">
@@ -75,7 +87,7 @@ export const NotFoundPage: React.FC = () => {
             </Link>
 
             <button
-              onClick={() => window.history.back()}
+              onClick={handleGoBack}
               className="inline-flex items-center px-6 py-3 text-lg font-medium rounded-lg bg-gray-600 text-white hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />

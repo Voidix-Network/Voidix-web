@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/components';
-import { PageSEO } from '@/components/seo';
-import { Shield, Eye, Cookie, Database, Lock, Mail } from 'lucide-react';
+import { SEO } from '@/components/seo';
+import { motion } from 'framer-motion';
+import { Cookie, Database, Eye, Lock, Mail, Shield } from 'lucide-react';
+import React, { useEffect } from 'react';
 
 /**
  * 隐私政策页面组件
@@ -82,12 +82,15 @@ export const PrivacyPolicyPage: React.FC = () => {
 
   return (
     <>
-      <PageSEO
-        title="隐私政策 - Voidix"
-        description="了解Voidix如何收集、使用和保护您的个人信息。我们致力于保护用户隐私和数据安全。"
-        keywords="隐私政策,数据保护,Cookie政策,信息安全,Voidix隐私"
-        canonicalUrl="https://www.voidix.net/privacy"
+      <SEO
+        pageKey="privacy"
         type="article"
+        canonicalUrl="https://www.voidix.net/privacy"
+        enableAnalytics={true}
+        additionalMeta={[
+          { name: 'article:modified_time', content: new Date().toISOString() },
+          { name: 'article:section', content: 'Legal' },
+        ]}
       />
       <div className="min-h-screen bg-gray-900 pt-12 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

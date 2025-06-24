@@ -1,6 +1,6 @@
 // filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\pages\StatusPage.tsx
 import { BreadcrumbNavigation, ServerCard, ServerGroupCard } from '@/components';
-import { PageSEO } from '@/components/seo';
+import { SEO } from '@/components/seo';
 import { SERVER_DISPLAY_NAMES, SERVER_GROUPS } from '@/constants';
 import { useWebSocketStatus } from '@/hooks/useWebSocket';
 import { calculateGroupStats, formatRunningTime } from '@/utils';
@@ -132,7 +132,12 @@ export const StatusPage: React.FC = () => {
 
   return (
     <>
-      <PageSEO pageKey="status" type="website" canonicalUrl="https://www.voidix.net/status" />
+      <SEO
+        pageKey="status"
+        type="website"
+        canonicalUrl="https://www.voidix.net/status"
+        enableAnalytics={true}
+      />
       <div className="min-h-screen bg-gray-900 py-16">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* 面包屑导航 */}

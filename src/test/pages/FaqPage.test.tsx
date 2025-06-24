@@ -3,9 +3,9 @@
  * 测试FAQ页面的渲染、FAQ数据展示、事件追踪和SEO集成功能
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
 import { FaqPage } from '@/pages/FaqPage';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock 所有子组件
 vi.mock('@/components', () => ({
@@ -33,7 +33,7 @@ vi.mock('@/components', () => ({
 
 // Mock SEO组件
 vi.mock('@/components/seo', () => ({
-  PageSEO: ({ pageKey, type, canonicalUrl }: any) => (
+  SEO: ({ pageKey, type, canonicalUrl }: any) => (
     <div
       data-testid="page-seo"
       data-page-key={pageKey}

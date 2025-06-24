@@ -3,10 +3,10 @@
  * 专注于核心功能验证，移除对具体样式和布局的依赖
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { PageTestAssertions, renderWithHelmet } from '@/test/utils/routeTestUtils';
+import { fireEvent, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock React Router at the top level
 vi.mock('react-router-dom', () => ({
@@ -26,7 +26,7 @@ vi.mock('lucide-react', () => ({
 
 // Mock SEO components
 vi.mock('@/components/seo', () => ({
-  PageSEO: ({ title, description, keywords, additionalMeta }: any) => (
+  SEO: ({ title, description, keywords, additionalMeta }: any) => (
     <div
       data-testid="page-seo"
       data-title={title}
@@ -39,15 +39,20 @@ vi.mock('@/components/seo', () => ({
   ),
 }));
 
+// Mock window history
+const mockHistoryBack = vi.fn();
+Object.defineProperty(window, 'history', {
+  value: {
+    back: mockHistoryBack,
+    length: 2 // 模拟有历史记录
+  },
+  configurable: true,
+});
+
 describe('NotFoundPage - 向后兼容性优化版本', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // 设置History Mock
-    Object.defineProperty(window, 'history', {
-      value: { back: vi.fn() },
-      configurable: true,
-    });
+    mockHistoryBack.mockClear();
   });
 
   describe('基础渲染功能', () => {
@@ -112,7 +117,7 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       fireEvent.click(backButton);
 
       // 验证history.back被调用
-      expect(window.history.back).toHaveBeenCalledTimes(1);
+      expect(mockHistoryBack).toHaveBeenCalledTimes(1);
     });
 
     it('应该包含正确的外部链接属性', () => {
@@ -310,7 +315,7 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
 
       // 验证history功能
       fireEvent.click(backButton);
-      expect(window.history.back).toHaveBeenCalled();
+      expect(mockHistoryBack).toHaveBeenCalled();
     });
   });
 });

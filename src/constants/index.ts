@@ -6,15 +6,8 @@ import type {
   WebSocketConfig,
 } from '@/types';
 
-// 导出中文关键词和本土化SEO配置
-export * from './chineseKeywords';
-
 // 导出服务器分组配置
 export * from './serverGroups';
-
-// 导出反馈相关配置
-export * from './feedbackChannels';
-export * from './feedbackRequirements';
 
 // WebSocket配置常量
 export const WEBSOCKET_CONFIG: WebSocketConfig = {

@@ -1,20 +1,21 @@
-import React, { useEffect } from 'react';
+import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/components';
+import { SEO } from '@/components/seo';
+import { FEEDBACK_CHANNELS_CONFIG } from '@/components/seo/feedbackChannels';
+import { FEEDBACK_REQUIREMENTS_CONFIG } from '@/components/seo/feedbackRequirements';
 import { motion } from 'framer-motion';
-import { AnimatedSection, GradientText, BreadcrumbNavigation } from '@/components';
-import { PageSEO } from '@/components/seo';
-import { FEEDBACK_CHANNELS_CONFIG, FEEDBACK_REQUIREMENTS_CONFIG } from '@/constants';
 import {
-  MessageSquare,
+  Bug,
+  Camera,
+  CheckCircle,
+  Clock,
+  ExternalLink,
+  Github,
   Globe,
   Mail,
-  Github,
-  ExternalLink,
-  Bug,
-  Clock,
-  Camera,
+  MessageSquare,
   User,
-  CheckCircle,
 } from 'lucide-react';
+import React, { useEffect } from 'react';
 
 /**
  * Bug反馈页面组件
@@ -58,10 +59,11 @@ export const BugReportPage: React.FC = () => {
   return (
     <>
       {' '}
-      <PageSEO
+      <SEO
         pageKey="bugReport"
         type="website"
         canonicalUrl="https://www.voidix.net/bug-report"
+        enableAnalytics={true}
       />
       <div className="min-h-screen bg-gray-900">
         {' '}

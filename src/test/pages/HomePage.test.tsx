@@ -30,7 +30,7 @@ vi.mock('@/components/sections/TeamSection', () => ({
 
 // Mock SEO组件
 vi.mock('@/components/seo', () => ({
-  PageSEO: ({ pageKey, type, canonicalUrl }: any) => (
+  SEO: ({ pageKey, type, canonicalUrl }: any) => (
     <div
       data-testid="page-seo"
       data-page-key={pageKey}
