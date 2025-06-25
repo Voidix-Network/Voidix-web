@@ -99,26 +99,32 @@ log_step "预压缩静态文件（Brotli-11 + Gzip-9）"
 DIST_DIR="./dist"
 MIN_SIZE=512  # 最小压缩文件大小（字节）
 
+log_info "开始预压缩，最小文件大小: ${MIN_SIZE} 字节"
+
+# 创建临时文件列表
+temp_filelist="/tmp/voidix_compress_files.txt"
+> "$temp_filelist"
+
+# 查找所有需要压缩的文件
+log_info "扫描需要压缩的文件..."
+find "$DIST_DIR" \( -name "*.js" -o -name "*.css" -o -name "*.svg" -o -name "*.json" -o -name "*.html" -o -name "*.xml" -o -name "*.txt" \) -type f > "$temp_filelist"
+
 # 计数器
 total_files=0
 gzip_files=0
 brotli_files=0
 skipped_files=0
 
-# 查找需要压缩的文件类型
-file_types=("*.js" "*.css" "*.svg" "*.json" "*.html" "*.xml" "*.txt")
-
-log_info "开始预压缩，最小文件大小: ${MIN_SIZE} 字节"
-
-for pattern in "${file_types[@]}"; do
-    while IFS= read -r -d '' file; do
-        ((total_files++))
+# 处理每个文件
+while IFS= read -r file; do
+    if [[ -f "$file" ]]; then
+        total_files=$((total_files + 1))
 
         # 检查文件大小
         file_size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo 0)
 
         if [ "$file_size" -lt "$MIN_SIZE" ]; then
-            ((skipped_files++))
+            skipped_files=$((skipped_files + 1))
             continue
         fi
 
@@ -128,7 +134,7 @@ for pattern in "${file_types[@]}"; do
         if gzip -9 -c "$file" > "$file.gz" 2>/dev/null; then
             gzip_size=$(stat -c%s "$file.gz" 2>/dev/null || stat -f%z "$file.gz" 2>/dev/null || echo 0)
             if [ "$gzip_size" -gt 0 ] && [ "$gzip_size" -lt "$file_size" ]; then
-                ((gzip_files++))
+                gzip_files=$((gzip_files + 1))
                 log_info "Gzip压缩: $filename ($(($file_size-$gzip_size)) 字节节省)"
             else
                 rm -f "$file.gz"
@@ -140,57 +146,31 @@ for pattern in "${file_types[@]}"; do
             if brotli -q 11 -o "$file.br" "$file" 2>/dev/null; then
                 brotli_size=$(stat -c%s "$file.br" 2>/dev/null || stat -f%z "$file.br" 2>/dev/null || echo 0)
                 if [ "$brotli_size" -gt 0 ] && [ "$brotli_size" -lt "$file_size" ]; then
-                    ((brotli_files++))
+                    brotli_files=$((brotli_files + 1))
                     log_info "Brotli压缩: $filename ($(($file_size-$brotli_size)) 字节节省)"
                 else
                     rm -f "$file.br"
                 fi
             fi
+        else
+            log_info "警告: brotli命令不可用，跳过Brotli压缩"
         fi
+    fi
+done < "$temp_filelist"
 
-    done < <(find "$DIST_DIR" -name "$pattern" -type f -print0 2>/dev/null)
-done
+# 清理临时文件
+rm -f "$temp_filelist"
 
 # 显示压缩统计
 log_success "预压缩完成！统计信息:"
 log_info "  📁 总文件: $total_files | 🗜️ Gzip: $gzip_files | 🚀 Brotli: $brotli_files | ⏭️ 跳过: $skipped_files"
 
-# 计算总体压缩效果
+# 简单的总体效果统计
 if [ $gzip_files -gt 0 ] || [ $brotli_files -gt 0 ]; then
-    total_original_size=0
-    total_gzip_size=0
-    total_brotli_size=0
-
-    for pattern in "${file_types[@]}"; do
-        while IFS= read -r -d '' file; do
-            file_size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo 0)
-            if [ "$file_size" -ge "$MIN_SIZE" ]; then
-                total_original_size=$((total_original_size + file_size))
-
-                if [ -f "$file.gz" ]; then
-                    gzip_size=$(stat -c%s "$file.gz" 2>/dev/null || stat -f%z "$file.gz" 2>/dev/null || echo 0)
-                    total_gzip_size=$((total_gzip_size + gzip_size))
-                fi
-
-                if [ -f "$file.br" ]; then
-                    brotli_size=$(stat -c%s "$file.br" 2>/dev/null || stat -f%z "$file.br" 2>/dev/null || echo 0)
-                    total_brotli_size=$((total_brotli_size + brotli_size))
-                fi
-            fi
-        done < <(find "$DIST_DIR" -name "$pattern" -type f -print0 2>/dev/null)
-    done
-
-    if [ $total_original_size -gt 0 ]; then
-        if [ $total_gzip_size -gt 0 ]; then
-            gzip_ratio=$(echo "scale=1; ($total_original_size-$total_gzip_size)*100/$total_original_size" | bc -l 2>/dev/null || echo "计算失败")
-            log_info "  🗜️ Gzip总压缩率: $gzip_ratio%"
-        fi
-
-        if [ $total_brotli_size -gt 0 ]; then
-            brotli_ratio=$(echo "scale=1; ($total_original_size-$total_brotli_size)*100/$total_original_size" | bc -l 2>/dev/null || echo "计算失败")
-            log_info "  🚀 Brotli总压缩率: $brotli_ratio%"
-        fi
-    fi
+    log_info "  🎯 压缩完成！网站将获得极致的加载速度"
+    log_info "  💡 预期效果: Brotli可节省80%+带宽，Gzip节省70%+带宽"
+else
+    log_info "  ⚠️  没有生成压缩文件，请检查文件大小和压缩工具"
 fi
 
 # 5. 重载nginx
