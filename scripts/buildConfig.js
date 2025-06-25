@@ -41,6 +41,30 @@ export const PRERENDER_CONFIG = {
     { path: '/privacy', outputDir: 'privacy' },
   ],
 
+  // HTML压缩配置
+  htmlMinify: {
+    collapseWhitespace: true,
+    removeComments: true,
+    removeRedundantAttributes: true,
+    removeScriptTypeAttributes: true,
+    removeStyleLinkTypeAttributes: true,
+    minifyCSS: true,
+    minifyJS: true,
+    useShortDoctype: true,
+    removeEmptyAttributes: true,
+    removeOptionalTags: false, // 保持兼容性，避免破坏SEO标签
+    caseSensitive: false,
+    html5: true,
+    // 保留一些重要的属性
+    ignoreCustomFragments: [/\{\{[\s\S]*?\}\}/, /<\?[\s\S]*?\?>/],
+    // 不压缩pre和script内容中的空白
+    preserveLineBreaks: false,
+    // 移除属性周围的引号（当安全时）
+    removeAttributeQuotes: true,
+    // 尽可能短的布尔属性
+    collapseBooleanAttributes: true,
+  },
+
   // Puppeteer 配置
   puppeteer: {
     headless: true,
