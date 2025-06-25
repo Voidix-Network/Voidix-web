@@ -1,3 +1,4 @@
+import { minify } from 'html-minifier-terser';
 import puppeteer from 'puppeteer';
 import { createLogger } from '../utils/logger.js';
 import { wait } from '../utils/serverUtils.js';
@@ -12,6 +13,23 @@ export class PuppeteerRenderer {
   constructor(config) {
     this.config = config;
     this.browser = null;
+
+    // HTML压缩配置
+    this.minifyOptions = {
+      collapseWhitespace: true,
+      removeComments: true,
+      removeRedundantAttributes: true,
+      removeScriptTypeAttributes: true,
+      removeStyleLinkTypeAttributes: true,
+      minifyCSS: true,
+      minifyJS: true,
+      useShortDoctype: true,
+      removeEmptyAttributes: true,
+      removeOptionalTags: false, // 保持兼容性
+      caseSensitive: false,
+      html5: true,
+      ...config.htmlMinify || {}
+    };
   }
 
   /**
@@ -60,7 +78,20 @@ export class PuppeteerRenderer {
       await wait(this.config.render.waitTime);
 
       // 获取完整的HTML内容
-      const html = await page.content();
+      let html = await page.content();
+
+      // 压缩HTML
+      try {
+        const minifiedHtml = await minify(html, this.minifyOptions);
+        const originalSize = html.length;
+        const minifiedSize = minifiedHtml.length;
+        const compression = ((originalSize - minifiedSize) / originalSize * 100).toFixed(1);
+
+        logger.info(`  HTML压缩: ${originalSize} → ${minifiedSize} 字符 (减少 ${compression}%)`);
+        html = minifiedHtml;
+      } catch (minifyError) {
+        logger.warn(`HTML压缩失败，使用原始HTML: ${minifyError.message}`);
+      }
 
       // 关闭页面
       await page.close();
