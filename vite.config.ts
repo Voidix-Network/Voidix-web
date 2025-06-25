@@ -2,39 +2,10 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
-import viteCompression from 'vite-plugin-compression';
-import { constants as zlibConstants } from 'zlib';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    // Gzip 压缩 - 最广泛的兼容性
-    viteCompression({
-      algorithm: 'gzip',
-      ext: '.gz',
-      threshold: 1024,
-      compressionOptions: {
-        level: 9, // 最高压缩级别
-      },
-      filter: /\.(js|css|html|xml|txt|svg|json)$/,
-      deleteOriginFile: false, // 保留原文件用于内容协商
-    }),
-    // Brotli 压缩 - 更好的压缩率
-    viteCompression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
-      threshold: 1024,
-      compressionOptions: {
-        params: {
-          [zlibConstants.BROTLI_PARAM_QUALITY]: 11, // 最高质量
-          [zlibConstants.BROTLI_PARAM_SIZE_HINT]: 0,
-        },
-      },
-      filter: /\.(js|css|html|xml|txt|svg|json)$/,
-      deleteOriginFile: false,
-    }),
-  ], // 生产环境使用绝对路径，开发环境使用相对路径
+  plugins: [react()], // 生产环境使用绝对路径，开发环境使用相对路径
   base: process.env.NODE_ENV === 'production' ? '/' : './',
   resolve: {
     alias: {
@@ -117,7 +88,7 @@ export default defineConfig({
       output: {
         // 使用hash文件名，确保新版本立即更新
         entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js', 
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
           vendor: ['react', 'react-dom'],
