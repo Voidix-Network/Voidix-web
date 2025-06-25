@@ -14,7 +14,7 @@ export const CommunityLinksSection: React.FC = () => {
             href="https://qm.qq.com/cgi-bin/qm/qr?k=aMRoacVuxcGVSzEwfjb49oN4CWCv6yHj&jump_from=webapi&authKey=hw0EhRKGDGN1vmHD4AfK2yJCzPzSA+AXGJOEcugZpsA7KfK9GhNXpe9GNWCjCcmr"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-3 group"
+            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group"
           >
             <span>QQ群</span>
             <svg
@@ -40,7 +40,7 @@ export const CommunityLinksSection: React.FC = () => {
             href="https://discord.gg/fUMyfhuQ5b"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-3 group"
+            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group"
           >
             <span>Discord</span>
             <svg
@@ -66,7 +66,7 @@ export const CommunityLinksSection: React.FC = () => {
             href="https://github.com/Voidix-Network"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-3 group"
+            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group"
           >
             <span>GitHub</span>
             <svg

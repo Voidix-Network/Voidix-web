@@ -6,11 +6,14 @@
   "description": "Voidix官网重构项目 - React + TypeScript + Vite",
   "scripts": {
     "dev": "vite",
-    "build": "npx tsc && vite build --mode production && npm run generate:sitemap && npm run prerender:puppeteer ",
+    "build": "npx tsc && vite build --mode production && npm run generate:sitemap && npm run prerender:puppeteer && npm run compress:assets",
     "build:basic": "npx tsc && vite build",
     "build:http": "npx tsc && vite build && npm run generate:sitemap",
     "prerender:puppeteer": "node scripts/prerenderPuppeteer.js",
     "generate:sitemap": "node scripts/generateSitemap.js",
+    "compress:assets": "node scripts/compressAssetsSimple.cjs",
+    "test:compression": "node scripts/testCompression.cjs",
+    "test:compression:cleanup": "node scripts/testCompression.cjs --cleanup",
     "preview": "vite preview",
     "type-check": "npx tsc --noEmit",
     "style": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
@@ -37,6 +40,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@gfx/zopfli": "^1.0.15",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -55,7 +59,10 @@
     "tailwindcss": "^3.3.6",
     "typescript": "^5.2.2",
     "vite": "^6.3.5",
-    "vitest": "^3.2.3"
+    "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-compression2": "^2.2.0",
+    "vitest": "^3.2.3",
+    "zstd-codec": "^0.1.5"
   },
   "engines": {
     "node": ">=18.0.0"

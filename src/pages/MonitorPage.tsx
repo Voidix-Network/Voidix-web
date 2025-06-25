@@ -198,7 +198,7 @@ export const MonitorPage: React.FC = () => {
           {/* 页面标题和描述 */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-2">过去90天运行时间</h2>
-            <p className="text-gray-400">实时监控所有服务的运行状态</p>
+            <p className="text-gray-300">实时监控所有服务的运行状态</p>
           </div>
 
           {/* 服务状态列表 */}
@@ -217,7 +217,7 @@ export const MonitorPage: React.FC = () => {
               <div className="text-center py-12">
                 <div className="text-gray-400 text-6xl mb-4">📊</div>
                 <h3 className="text-xl font-semibold text-white mb-2">暂无监控数据</h3>
-                <p className="text-gray-400">请检查API配置或稍后重试</p>
+                <p className="text-gray-300">请检查API配置或稍后重试</p>
               </div>
             )}
           </div>

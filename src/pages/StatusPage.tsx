@@ -152,7 +152,7 @@ export const StatusPage: React.FC = () => {
           {/* 页面标题 */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-white mb-4">服务器状态</h1>
-            <p className="text-gray-400 text-lg">实时查看 Voidix 网络的服务器状态和统计信息</p>
+            <p className="text-gray-300 text-lg">实时查看 Voidix 网络的服务器状态和统计信息</p>
 
             {/* 连接状态指示器 */}
             <div className="mt-6 flex items-center justify-center space-x-2">
@@ -249,7 +249,7 @@ export const StatusPage: React.FC = () => {
                   {connectionStatus === 'reconnecting' ? (
                     <>
                       <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
-                      <div className="text-gray-400">正在连接到服务器...</div>
+                      <div className="text-gray-300">正在连接到服务器...</div>
                     </>
                   ) : connectionStatus === 'failed' ? (
                     <>
@@ -266,8 +266,8 @@ export const StatusPage: React.FC = () => {
                           d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      <div className="text-gray-400">无法连接到服务器</div>
-                      <p className="text-gray-500 text-sm">请检查网络连接或稍后再试</p>
+                      <div className="text-gray-300">无法连接到服务器</div>
+                      <p className="text-gray-300 text-sm">请检查网络连接或稍后再试</p>
                     </>
                   ) : (
                     <>

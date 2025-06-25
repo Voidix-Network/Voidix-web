@@ -34,6 +34,16 @@ export class ConnectionManager {
 
   constructor(config: WebSocketConfig) {
     this.config = config;
+    this.setupVisibilityChangeListener();
+  }
+
+  /**
+   * 销毁实例，清理资源
+   */
+  cleanup(): void {
+    console.log('[ConnectionManager] 正在清理资源...');
+    this.forceClose();
+    this.removeVisibilityChangeListener();
   }
 
   /**
@@ -285,4 +295,45 @@ export class ConnectionManager {
       this.setState(newState);
     }
   }
+
+  /**
+   * 设置页面可见性变化监听器
+   */
+  private setupVisibilityChangeListener(): void {
+    // 确保在浏览器环境中
+    if (typeof document === 'undefined') return;
+
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+  }
+
+  /**
+   * 移除页面可见性变化监听器
+   */
+  private removeVisibilityChangeListener(): void {
+    // 确保在浏览器环境中
+    if (typeof document === 'undefined') return;
+
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+  }
+
+  /**
+   * 处理页面可见性变化
+   */
+  private handleVisibilityChange = (): void => {
+    // 确保在浏览器环境中
+    if (typeof document === 'undefined') return;
+
+    if (document.visibilityState === 'hidden') {
+      console.log('[ConnectionManager] 页面隐藏，断开WebSocket连接');
+      this.disconnect();
+    } else if (document.visibilityState === 'visible') {
+      console.log('[ConnectionManager] 页面可见，尝试重新连接');
+      // 仅在当前未连接时重新连接
+      if (!this.isConnected && !this.isConnecting) {
+        this.connect().catch(error => {
+          console.error('[ConnectionManager] 页面可见时重新连接失败:', error);
+        });
+      }
+    }
+  };
 }

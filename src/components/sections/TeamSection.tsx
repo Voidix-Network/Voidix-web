@@ -428,7 +428,7 @@ const PlayerCovenant: React.FC = () => {
               <h3 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
                 玩家公约
               </h3>
-              <p className="text-sm text-gray-400 mt-1">Voidix社区行为准则</p>
+              <p className="text-sm text-gray-300 mt-1">Voidix社区行为准则</p>
             </div>
           </div>
           <motion.div
@@ -487,9 +487,9 @@ const PlayerCovenant: React.FC = () => {
                       <IconComponent className="h-5 w-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h5 className="font-bold text-gray-200 mb-2 group-hover:text-white transition-colors">
+                      <h4 className="font-bold text-gray-200 mb-2 group-hover:text-white transition-colors">
                         {index + 1}. {rule.title}
-                      </h5>
+                      </h4>
                       <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
                         {rule.description}
                       </p>
@@ -528,9 +528,9 @@ const PlayerCovenant: React.FC = () => {
                         <ExternalLink className="h-4 w-4 text-white" />
                       </div>
                       <div className="text-left">
-                        <h5 className="font-bold text-purple-300 group-hover:text-purple-200 transition-colors">
+                        <h4 className="font-bold text-purple-300 group-hover:text-purple-200 transition-colors">
                           查看完整玩家规则
-                        </h5>
+                        </h4>
                         <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors mt-1">
                           点击查看详细的服务器规则和管理条例
                         </p>
@@ -569,7 +569,7 @@ const PlayerCovenant: React.FC = () => {
                   <AlertTriangle className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h6 className="font-bold text-amber-300 mb-2">重要提醒</h6>
+                  <h5 className="font-bold text-amber-300 mb-2">重要提醒</h5>
                   <p className="text-amber-100/80 text-sm leading-relaxed">
                     违反公约可能导致警告、暂时封禁或永久封禁。所有管理决定都经过团队讨论并记录在案。如果您对处罚有异议，可以通过正式渠道申诉。
                   </p>
@@ -761,7 +761,7 @@ export const TeamSection: React.FC = () => {
           <h2 className="text-3xl font-bold mb-4">
             我们的<GradientText variant="primary">团队</GradientText>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-gray-300 max-w-2xl mx-auto">
             这些热爱Minecraft的开发者/管理员——与热爱游戏的你们，撑起了整个Voidix
           </p>
         </motion.div>

@@ -97,7 +97,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-medium">必要Cookie</h3>
-                  <p className="text-gray-400 text-sm">网站基本功能所需</p>
+                  <p className="text-gray-300 text-sm">网站基本功能所需</p>
                 </div>
                 <div className="w-10 h-6 bg-purple-600 rounded-full flex items-center px-1">
                   <div className="w-4 h-4 bg-white rounded-full ml-auto"></div>
@@ -107,7 +107,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-medium">分析Cookie</h3>
-                  <p className="text-gray-400 text-sm">帮助我们了解网站使用情况</p>
+                  <p className="text-gray-300 text-sm">帮助我们了解网站使用情况</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input

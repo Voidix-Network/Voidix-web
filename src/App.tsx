@@ -5,6 +5,8 @@ import {
   SEOProvider,
   VoidixSearchConsole,
 } from '@/components/seo';
+import { WebSocketComposer } from '@/services/websocket';
+import { useEffect } from 'react';
 
 /**
  * 主应用组件
@@ -20,6 +22,20 @@ import {
  * - ✅ 维护搜索引擎优化效果
  */
 function App() {
+  useEffect(() => {
+    // 初始化WebSocket服务
+    const webSocketComposer = new WebSocketComposer();
+
+    webSocketComposer.connect().catch(error => {
+      console.error('WebSocket 连接失败:', error);
+    });
+
+    // 组件卸载时清理资源
+    return () => {
+      webSocketComposer.cleanup();
+    };
+  }, []); // 空依赖数组确保只在挂载和卸载时执行
+
   return (
     <SEOProvider>
       {/* 简化的Cookie同意管理 */}

@@ -58,8 +58,9 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
 - 🎨 **精美视觉** - Tailwind CSS + Framer Motion，流畅的动画效果
 - 📱 **响应自适** - 完美适配桌面端和移动端，随时随地访问
 - 🔍 **SEO 优化** - 静态预渲染 + 完整的 SEO 配置，搜索引擎友好
+- 🗜️ **智能压缩** - 多格式压缩 (zstd/brotli/gzip) + 智能回退，85-98% 带宽节省
 - 🛠️ **工程完善** - 代码覆盖率、CI/CD、模块化架构
-- ⚡ **极致性能** - PWA、预渲染、代码分割
+- ⚡ **极致性能** - PWA、预渲染、代码分割、自动压缩
 
 ## 技术架构
 
@@ -76,6 +77,8 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
 | **React Router**          | 7.6.2    | 路由管理 |
 | **Vitest**                | 3.2.3    | 测试框架 |
 | **React Testing Library** | 16.3.0   | 组件测试 |
+| **vite-plugin-compression** | 0.5.1  | 构建压缩 |
+| **Node.js zlib**          | 内置     | 压缩算法 |
 
 ### 架构特点
 
@@ -106,10 +109,35 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
   - FAQ 常见问题解答
   - 联系方式和社交媒体链接
 
+### 🗜️ 智能压缩系统
+
+- **多格式支持**
+  - **Zstd** - 最新压缩算法，最高压缩率
+  - **Brotli** - 现代浏览器首选，平衡压缩率和速度
+  - **Gzip** - 传统兼容格式，确保向后兼容
+
+- **智能内容协商**
+  - 优先级回退：zstd > brotli > gzip > 原始文件
+  - 自动检测客户端支持的压缩格式
+  - Nginx 配置自动选择最佳压缩版本
+
+- **全面覆盖**
+  - **静态资源**：JS、CSS、HTML、XML、SVG、JSON
+  - **预渲染页面**：所有 SEO 预渲染的 HTML 文件
+  - **站点地图**：sitemap.xml 和 robots.txt
+
+- **性能优化**
+  - **85-98% 带宽节省**：CSS (85%)、JS (67-79%)、HTML (75.5%)
+  - **构建集成**：自动压缩预渲染页面和所有静态资源
+  - **CDN 友好**：压缩文件适配 CDN 分发
+  - **缓存优化**：压缩文件独立缓存策略
+  - **向后兼容**：完全兼容不支持新压缩格式的客户端
+
 ### 💻 技术特性
 
 - **PWA支持** - 支持离线访问和桌面安装
 - **SEO优化** - 完整的元数据和结构化数据
+- **智能压缩** - 自动多格式压缩，智能内容协商
 - **响应式设计** - 完美适配各种设备屏幕
 - **无障碍访问** - 遵循 WCAG 无障碍标准
 - **国际化支持** - 多语言切换（计划中）
@@ -235,7 +263,9 @@ voidix-web/
 ├── scripts/                # 构建脚本
 │   ├── utils/              # 工具模块
 │   ├── prerender/          # 预渲染模块
-│   └── sitemap/            # 站点地图生成
+│   ├── sitemap/            # 站点地图生成
+│   ├── compressAssets*.cjs # 智能压缩脚本
+│   └── testCompression.cjs # 压缩功能测试
 └── docs/                   # 文档资源
     ├── images/             # 图片资源
     ├── README.md           # 项目说明文档
@@ -254,7 +284,7 @@ voidix-web/
 - **`src/services`** - API 服务和数据处理
 - **`src/stores`** - Zustand 状态管理
 - **`src/types`** - 全局类型定义
-- **`scripts`** - 构建和部署相关脚本，已模块化重构
+- **`scripts`** - 构建和部署相关脚本，包含智能压缩、预渲染等功能
 - **`docs`** - 项目文档和资源，包含第三方许可证报告
 
 ## 脚本命令
@@ -306,11 +336,24 @@ npm run build:basic
 # HTTP 构建（包含站点地图生成）
 npm run build:http
 
-# 完整构建（包含预渲染和站点地图，推荐用于生产环境）
+# 完整构建（包含预渲染、站点地图和智能压缩，推荐用于生产环境）
 npm run build
 
 # 预览构建结果
 npm run preview
+```
+
+### 压缩相关命令
+
+```bash
+# 压缩构建资源（自动压缩所有静态文件和预渲染页面）
+npm run compress:assets
+
+# 测试压缩功能（验证压缩效果和兼容性）
+npm run test:compression
+
+# 清理压缩测试文件
+npm run test:compression:cleanup
 ```
 
 ### 专用脚本
@@ -321,6 +364,9 @@ npm run generate:sitemap
 
 # 预渲染页面
 npm run prerender:puppeteer
+
+# 压缩构建资源
+npm run compress:assets
 
 # 生成第三方许可证报告
 npm run license:report
@@ -334,34 +380,43 @@ npm run license:check
 ### 构建生产版本
 
 ```bash
-# 完整构建（推荐）
+# 完整构建（推荐，包含智能压缩）
 npm run build
 
 # 构建产物位于 dist/ 目录
+# 自动生成 .gz、.br、.zst 压缩版本
 ```
 
 ### Nginx 配置
 
-项目包含了生产环境的 Nginx 配置文件 `nginx-production.conf`：
+项目包含了完整的生产环境 Nginx 配置：
 
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    root /path/to/voidix-web/dist;
-    index index.html;
+**配置文件：**
+- `nginx-production.conf` - 站点配置（支持智能压缩）
+- `scripts/CICD/deploy.sh` - 智能部署脚本（自动生成完整 nginx 配置）
 
-    # SPA 路由支持
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+**部署步骤：**
 
-    # 静态资源缓存
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-}
+1. **使用智能部署脚本**（推荐）：
+   ```bash
+   # 进入项目目录并执行部署
+   cd /var/www/voidix.net
+   sudo ./scripts/CICD/deploy.sh
+   ```
+
+2. **手动部署**（如需要）：
+   ```bash
+   # 手动配置需要将 map 指令添加到 nginx.conf 的 http 块
+   # 请参考 NGINX_CONFIG_SETUP.md 了解详细配置
+   ```
+
+3. **主要特性**：
+   - 智能压缩内容协商 (zstd > brotli > gzip > 原始)
+   - 双证书支持 (ECC + RSA)
+   - 完整的安全头配置
+   - CDN 代理和缓存支持
+   - 预渲染页面压缩
+   - 一键部署脚本
 ```
 
 ### 部署选项

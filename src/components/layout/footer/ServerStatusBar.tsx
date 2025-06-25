@@ -29,14 +29,12 @@ export const ServerStatusBar: React.FC = () => {
             服务器状态: {connectionStatus === 'connected' ? '正常运行' : '连接中断'}
           </span>
         </div>
-        {aggregateStats.totalPlayers > 0 && (
-          <div className="text-sm text-gray-300">
-            在线玩家:{' '}
-            <span className="text-green-400 font-semibold">{aggregateStats.totalPlayers}</span>
-          </div>
-        )}
+        <div className="text-sm text-gray-300">
+          在线玩家:{' '}
+          <span className="text-green-400 font-semibold">{aggregateStats.totalPlayers}</span>
+        </div>
       </div>
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-gray-300">
         最后更新: {lastUpdateTime ? lastUpdateTime.toLocaleString('zh-CN') : '获取中...'}
       </div>
     </div>

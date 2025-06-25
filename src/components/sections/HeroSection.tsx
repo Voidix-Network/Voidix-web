@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { GradientText, ServerStatusCard } from '@/components';
 import { useServers } from '@/stores';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * 英雄区域组件 - 复现原项目的首页主要区域
@@ -39,7 +39,7 @@ export const HeroSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-6 text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto"
+          className="mt-6 text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto"
         >
           由开发者NekoEpisode和CYsonHab创建，继承VBPIXEL和EternalStar精神的公益小游戏服务器
         </motion.p>
@@ -102,7 +102,7 @@ export const HeroSection: React.FC = () => {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center p-8">
               <div className="text-2xl sm:text-3xl font-bold mb-4">探索无限可能的世界</div>
-              <p className="text-gray-400 max-w-lg mx-auto mb-6">
+              <p className="text-gray-300 max-w-lg mx-auto mb-6">
                 完全公平的游戏环境，无付费优势，只有纯粹的Minecraft乐趣
               </p>
               <div className="flex flex-row gap-3 justify-center items-center">

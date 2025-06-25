@@ -1,6 +1,6 @@
+import { LOGO_ASSETS } from '@/constants';
 import React, { useEffect } from 'react';
 import { GradientText } from './GradientText';
-import { LOGO_ASSETS } from '@/constants';
 
 // 图片预加载钩子 - 防止重复请求
 const useImagePreload = (src: string) => {
@@ -119,7 +119,7 @@ const VoidixLogoComponent: React.FC<VoidixLogoProps> = ({
           >
             Voidix
           </span>
-          <span className="text-gray-400 text-xs font-medium">Open, Free, Harmonious</span>
+          <span className="text-gray-300 text-xs font-medium">Open, Free, Harmonious</span>
         </div>
       </div>
     </>
