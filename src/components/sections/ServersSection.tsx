@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
 import { GradientText } from '@/components';
-import { Trophy, Mountain } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Mountain, Trophy } from 'lucide-react';
 
 /**
  * 服务器区域组件 - 悬停流光效果
@@ -27,7 +27,7 @@ export const ServersSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             viewport={{ once: true }}
-            className="text-gray-400 max-w-2xl mx-auto"
+            className="text-gray-300 max-w-2xl mx-auto"
           >
             我们提供多种游戏模式，所有服务器均采用公平机制设计，没有任何付费优势。
           </motion.p>

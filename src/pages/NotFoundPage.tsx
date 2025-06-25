@@ -55,8 +55,8 @@ export const NotFoundPage: React.FC = () => {
           </div>
           {/* 描述文字 */}
           <div className="mb-8 space-y-4">
-            <p className="text-lg text-gray-400">抱歉，您访问的页面不存在或已被移动。</p>
-            <p className="text-gray-500">可能是链接错误，或者页面已经不存在了。</p>
+            <p className="text-lg text-gray-300">抱歉，您访问的页面不存在或已被移动。</p>
+            <p className="text-gray-300">可能是链接错误，或者页面已经不存在了。</p>
           </div>
           {/* 建议操作 */}
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-8 border border-gray-700">

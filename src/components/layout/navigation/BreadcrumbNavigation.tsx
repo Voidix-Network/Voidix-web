@@ -1,6 +1,6 @@
+import { ChevronRight, Home } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronRight, Home } from 'lucide-react';
 
 interface BreadcrumbItem {
   label: string;
@@ -109,13 +109,13 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
             itemType="https://schema.org/ListItem"
           >
             {/* 分隔符 */}
-            {index > 0 && <ChevronRight className="w-4 h-4 text-gray-500" aria-hidden="true" />}
+            {index > 0 && <ChevronRight className="w-4 h-4 text-gray-300" aria-hidden="true" />}
 
             {/* 面包屑项 */}
             {item.href && !item.isCurrentPage ? (
               <Link
                 to={item.href}
-                className="text-gray-400 hover:text-white transition-colors flex items-center space-x-1"
+                className="text-gray-300 hover:text-white transition-colors flex items-center space-x-1"
                 itemProp="item"
               >
                 {index === 0 && <Home className="w-4 h-4" />}
@@ -124,7 +124,7 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
             ) : (
               <span
                 className={`${
-                  item.isCurrentPage ? 'text-white font-medium' : 'text-gray-400'
+                  item.isCurrentPage ? 'text-white font-medium' : 'text-gray-300'
                 } flex items-center space-x-1`}
                 itemProp="name"
                 aria-current={item.isCurrentPage ? 'page' : undefined}

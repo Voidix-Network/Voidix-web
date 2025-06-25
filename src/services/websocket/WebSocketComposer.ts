@@ -151,6 +151,17 @@ export class WebSocketComposer {
   }
 
   /**
+   * 清理资源
+   */
+  cleanup(): void {
+    this.connectionManager.cleanup();
+    this.maintenanceHandler.cleanup();
+    this.eventCoordinator.cleanup();
+    this.eventEmitter.clear();
+    console.log('[WebSocketComposer] 资源清理完成');
+  }
+
+  /**
    * 强制停止所有活动（用于测试清理）
    */
   forceStop(): void {

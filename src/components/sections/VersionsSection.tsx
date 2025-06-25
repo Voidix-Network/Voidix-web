@@ -1,7 +1,7 @@
 import { GradientText } from '@/components';
-import { useState, useEffect, useRef } from 'react';
-import { Monitor, Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Monitor, Smartphone } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Java版连接指南组件
@@ -13,7 +13,7 @@ const JavaConnectionGuide: React.FC = () => {
         <Monitor className="w-8 h-8 text-blue-400 mr-3" />
         <div>
           <h3 className="text-xl font-bold">Java版玩家连接指南</h3>
-          <p className="text-gray-400">适用于PC端Minecraft Java版</p>
+          <p className="text-gray-300">适用于PC端Minecraft Java版</p>
         </div>
       </div>
 
