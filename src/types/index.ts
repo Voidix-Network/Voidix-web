@@ -149,6 +149,18 @@ export interface WebSocketConfig {
   SUPPORTED_PROTOCOL_VERSION: number; // 协议版本
 }
 
+// 🚀 预渲染模式的全局变量类型扩展
+declare global {
+  interface Window {
+    PRERENDER_MODE?: boolean;
+    DISABLE_WEBSOCKET?: boolean;
+    voidixWebSocket?: {
+      send: (data: string) => void;
+      readyState: number;
+    };
+  }
+}
+
 // 时间常量
 export interface TimeConstants {
   SECONDS_IN_MINUTE: number;

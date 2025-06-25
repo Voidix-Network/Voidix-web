@@ -1,12 +1,12 @@
 import { WEBSOCKET_CONFIG } from '@/constants';
 import type { WebSocketConfig } from '@/types';
 import {
-  ConnectionManager,
-  EventCoordinator,
-  MaintenanceHandler,
-  MessageRouter,
-  ReconnectStrategy,
-  WebSocketEventEmitter,
+    ConnectionManager,
+    EventCoordinator,
+    MaintenanceHandler,
+    MessageRouter,
+    ReconnectStrategy,
+    WebSocketEventEmitter,
 } from './index';
 import type { WebSocketEventMap } from './types';
 
@@ -14,8 +14,12 @@ import type { WebSocketEventMap } from './types';
  * WebSocket组合器
  * 轻量级的组合工具，组装各个模块并提供统一的API
  * 替代原来的重量级WebSocketService，现在只有组装和协调职责
+ *
+ * 🔒 单例模式：防止在React.StrictMode下创建多个实例
  */
 export class WebSocketComposer {
+  private static instance: WebSocketComposer | null = null;
+
   private eventEmitter: WebSocketEventEmitter;
   private reconnectStrategy: ReconnectStrategy;
   private connectionManager: ConnectionManager;
@@ -42,6 +46,45 @@ export class WebSocketComposer {
 
     // 设置模块间的协调
     this.setupModuleCoordination();
+  }
+
+  /**
+   * 🔒 获取单例实例
+   * 确保整个应用只有一个 WebSocket 连接实例
+   */
+  static getInstance(config?: Partial<WebSocketConfig>): WebSocketComposer {
+    if (!WebSocketComposer.instance) {
+      console.log('[WebSocketComposer] 创建新的单例实例');
+      WebSocketComposer.instance = new WebSocketComposer(config);
+    } else {
+      console.log('[WebSocketComposer] 返回现有的单例实例');
+      // 如果提供了新配置，更新现有实例的配置
+      if (config) {
+        WebSocketComposer.instance.updateConfig(config);
+      }
+    }
+    return WebSocketComposer.instance;
+  }
+
+  /**
+   * 🧹 清理单例实例
+   * 主要用于测试或彻底重置
+   */
+  static destroyInstance(): void {
+    if (WebSocketComposer.instance) {
+      console.log('[WebSocketComposer] 销毁单例实例');
+      WebSocketComposer.instance.cleanup();
+      WebSocketComposer.instance = null;
+    }
+  }
+
+  /**
+   * 📝 更新配置
+   */
+  private updateConfig(newConfig: Partial<WebSocketConfig>): void {
+    this.config = { ...this.config, ...newConfig };
+    // 更新连接管理器的配置
+    this.connectionManager.updateConfig(newConfig);
   }
 
   /**
@@ -98,6 +141,12 @@ export class WebSocketComposer {
    * 建立WebSocket连接
    */
   async connect(): Promise<void> {
+    // 🚀 预渲染模式检测：跳过WebSocket连接
+    if (typeof window !== 'undefined' && window.PRERENDER_MODE) {
+      console.log('[WebSocketComposer] 预渲染模式，跳过WebSocket连接');
+      return;
+    }
+
     try {
       const ws = await this.connectionManager.connect();
 
@@ -215,4 +264,8 @@ export class WebSocketComposer {
 }
 
 // 向后兼容性别名
-export const WebSocketService = WebSocketComposer;
+// 导出 WebSocketService 作为 WebSocketComposer 的别名，并添加静态方法
+export const WebSocketService = Object.assign(WebSocketComposer, {
+  getInstance: WebSocketComposer.getInstance.bind(WebSocketComposer),
+  destroyInstance: WebSocketComposer.destroyInstance.bind(WebSocketComposer),
+});
