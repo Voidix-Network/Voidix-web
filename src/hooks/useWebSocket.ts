@@ -129,13 +129,15 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
   /**
    * 初始化WebSocket服务
+   * 🔒 使用单例模式防止重复连接
    */
   const initializeService = useCallback(() => {
     if (serviceRef.current) {
       return serviceRef.current;
     }
 
-    const service = new WebSocketService();
+    // 使用单例模式获取 WebSocket 服务实例
+    const service = WebSocketService.getInstance();
 
     // 注册事件监听器
     service.on('connected', () => {
@@ -336,10 +338,16 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     onError,
     onReconnecting,
     onConnectionFailed,
-  ]); /**
+  ]);   /**
    * 连接WebSocket
    */
   const connect = useCallback(async () => {
+    // 🚀 预渲染模式检测：跳过WebSocket连接
+    if (typeof window !== 'undefined' && window.PRERENDER_MODE) {
+      console.log('[useWebSocket] 预渲染模式，跳过WebSocket连接');
+      return;
+    }
+
     try {
       const service = initializeService();
       updateConnectionStatus('reconnecting'); // 设置为重连中状态（表示连接中）
@@ -359,11 +367,17 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       serviceRef.current.disconnect();
     }
     updateConnectionStatus('disconnected');
-  }, [updateConnectionStatus]); /**
+  }, [updateConnectionStatus]);   /**
    * 组件挂载时的副作用
    */
   useEffect(() => {
     let isCleanedUp = false;
+
+    // 🚀 预渲染模式检测：跳过自动连接
+    if (typeof window !== 'undefined' && window.PRERENDER_MODE) {
+      console.log('[useWebSocket] 预渲染模式，跳过自动连接');
+      return;
+    }
 
     if (autoConnect) {
       // 添加小延迟以避免React Strict Mode的快速重连
@@ -380,9 +394,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         isCleanedUp = true;
         clearTimeout(timeoutId);
 
+        // 🔒 使用单例模式时，只断开连接，不清理服务实例
+        // 这样可以避免React.StrictMode下的重复创建问题
         if (serviceRef.current) {
           serviceRef.current.disconnect();
-          serviceRef.current = null;
+          // 注意：不设置 serviceRef.current = null，保持对单例的引用
         }
         // 重置状态但保留数据
         // reset();
@@ -393,7 +409,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     return () => {
       if (serviceRef.current) {
         serviceRef.current.disconnect();
-        serviceRef.current = null;
+        // 🔒 使用单例模式时，保持对单例的引用
+        // serviceRef.current = null;
       }
     };
   }, [autoConnect]); // 移除connect依赖，避免重复连接
