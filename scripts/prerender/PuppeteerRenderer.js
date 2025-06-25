@@ -1,7 +1,6 @@
 import { minify } from 'html-minifier-terser';
 import puppeteer from 'puppeteer';
 import { createLogger } from '../utils/logger.js';
-import { wait } from '../utils/serverUtils.js';
 
 const logger = createLogger('PuppeteerRenderer');
 
@@ -67,17 +66,12 @@ export class PuppeteerRenderer {
 
       // 访问页面
       await page.goto(url, {
-        waitUntil: 'networkidle0',
+        // 使用 'domcontentloaded' 以便在JS执行前捕获初始HTML
+        waitUntil: 'domcontentloaded',
         timeout: this.config.render.timeout,
       });
 
-      // 等待React完全渲染
-      await page.waitForSelector('#root', { timeout: 10000 });
-
-      // 额外等待时间确保动态内容加载
-      await wait(this.config.render.waitTime);
-
-      // 获取完整的HTML内容
+      // 获取初始的、包含骨架屏的HTML
       let html = await page.content();
 
       // 压缩HTML
