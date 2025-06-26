@@ -7,7 +7,9 @@ import { ScrollToTop } from './ScrollToTop';
 
 // 懒加载页面组件 - 禁用预加载，减少DOMContentLoaded期间的网络请求
 const HomePage = React.lazy(() =>
-  import(/* webpackPreload: false */ '@/pages/HomePage').then(module => ({ default: module.HomePage }))
+  import(/* webpackPreload: false */ '@/pages/HomePage').then(module => ({
+    default: module.HomePage,
+  }))
 );
 const StatusPage = React.lazy(() =>
   import(/* webpackPreload: false */ '@/pages/StatusPage').then(module => ({
@@ -15,7 +17,9 @@ const StatusPage = React.lazy(() =>
   }))
 );
 const FaqPage = React.lazy(() =>
-  import(/* webpackPreload: false */ '@/pages/FaqPage').then(module => ({ default: module.FaqPage }))
+  import(/* webpackPreload: false */ '@/pages/FaqPage').then(module => ({
+    default: module.FaqPage,
+  }))
 );
 const BugReportPage = React.lazy(() =>
   import(/* webpackPreload: false */ '@/pages/BugReportPage').then(module => ({

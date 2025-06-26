@@ -30,11 +30,7 @@ export const DelayedNavButton: React.FC<DelayedNavButtonProps> = ({
   };
 
   return (
-    <button
-      onClick={handleClick}
-      className={className}
-      type="button"
-    >
+    <button onClick={handleClick} className={className} type="button">
       {children}
     </button>
   );

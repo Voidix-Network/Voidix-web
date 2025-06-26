@@ -57,7 +57,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({
               我们使用Cookie来改善您的浏览体验，提供个性化内容和分析网站流量。
               您可以选择接受所有Cookie或自定义设置。
               <button
-                onClick={() => window.location.href = '/privacy'}
+                onClick={() => (window.location.href = '/privacy')}
                 className="text-purple-400 hover:text-purple-300 underline ml-1 cursor-pointer bg-transparent border-none p-0"
               >
                 了解更多
