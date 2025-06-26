@@ -93,7 +93,7 @@ fi
 log_success "项目构建完成"
 
 # 4. 🏆 极致压缩静态文件（低并发专用）
-log_step "预压缩静态文件（Zstd-19 + Brotli-11 + Gzip-9）"
+log_step "预压缩静态文件（Brotli-11 + Gzip-9）"
 
 # 配置变量
 DIST_DIR="./dist"
@@ -113,7 +113,6 @@ find "$DIST_DIR" \( -name "*.js" -o -name "*.css" -o -name "*.svg" -o -name "*.j
 total_files=0
 gzip_files=0
 brotli_files=0
-zstd_files=0
 skipped_files=0
 
 # 处理每个文件
@@ -142,21 +141,6 @@ while IFS= read -r file; do
             fi
         fi
 
-        # 生成Zstd文件（最高压缩级别）
-        if command -v zstd &> /dev/null; then
-            if zstd -19 -q --rm-orig-on-error -o "$file.zst" "$file" 2>/dev/null; then
-                zstd_size=$(stat -c%s "$file.zst" 2>/dev/null || stat -f%z "$file.zst" 2>/dev/null || echo 0)
-                if [ "$zstd_size" -gt 0 ] && [ "$zstd_size" -lt "$file_size" ]; then
-                    zstd_files=$((zstd_files + 1))
-                    log_info "Zstd压缩: $filename ($(($file_size-$zstd_size)) 字节节省)"
-                else
-                    rm -f "$file.zst"
-                fi
-            fi
-        else
-            log_info "警告: zstd命令不可用，跳过Zstd压缩"
-        fi
-
         # 生成Brotli文件（最高压缩级别）
         if command -v brotli &> /dev/null; then
             if brotli -q 11 -o "$file.br" "$file" 2>/dev/null; then
@@ -179,12 +163,12 @@ rm -f "$temp_filelist"
 
 # 显示压缩统计
 log_success "预压缩完成！统计信息:"
-log_info "  📁 总文件: $total_files | 🚀 Zstd: $zstd_files | 🗜️ Brotli: $brotli_files | 📦 Gzip: $gzip_files | ⏭️ 跳过: $skipped_files"
+log_info "  📁 总文件: $total_files | 🗜️ Gzip: $gzip_files | 🚀 Brotli: $brotli_files | ⏭️ 跳过: $skipped_files"
 
 # 简单的总体效果统计
-if [ $zstd_files -gt 0 ] || [ $gzip_files -gt 0 ] || [ $brotli_files -gt 0 ]; then
+if [ $gzip_files -gt 0 ] || [ $brotli_files -gt 0 ]; then
     log_info "  🎯 压缩完成！网站将获得极致的加载速度"
-    log_info "  💡 预期效果: Zstd可节省85%+带宽，Brotli节省80%+带宽，Gzip节省70%+带宽"
+    log_info "  💡 预期效果: Brotli可节省80%+带宽，Gzip节省70%+带宽"
 else
     log_info "  ⚠️  没有生成压缩文件，请检查文件大小和压缩工具"
 fi
@@ -215,6 +199,6 @@ echo "🏆 极致性能部署成功完成"
 echo "🌐 网站地址: https://www.voidix.net"
 echo "📁 部署路径: $SERVER_PATH"
 echo "⚙️  配置文件: $NGINX_CONFIG_PATH"
-echo "🚀 压缩配置: Zstd-19 + Brotli-11 + Gzip-9 + 预压缩文件"
-echo "💡 压缩收益: 预计节省85%+带宽"
+echo "🚀 压缩配置: Brotli-11 + Gzip-9 + 预压缩文件"
+echo "💡 压缩收益: 预计节省80%+带宽"
 echo "==============================================="
