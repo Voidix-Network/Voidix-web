@@ -59,7 +59,7 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
 - 📱 **响应自适** - 完美适配桌面端和移动端，随时随地访问
 - 🔍 **SEO 优化** - 静态预渲染 + 完整的 SEO 配置，搜索引擎友好
 - 🛠️ **工程完善** - 代码覆盖率、CI/CD、模块化架构
-- ⚡ **极致性能** - PWA、预渲染、代码分割
+- ⚡ **极致性能** - 预压缩文件、智能预加载、代码分割
 
 ## 技术架构
 
@@ -83,6 +83,7 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
 - 🔒 **类型安全性** - 全面 TypeScript 支持
 - 🧪 **测试完善性** - 单元集成全覆盖
 - 📦 **代码分割化** - 按需加载提性能
+- ⚡ **性能优化** - 预压缩文件 + 预加载系统
 - 🔧 **开发友好性** - 热重载规范一致
 
 ## 功能特性
@@ -99,7 +100,7 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
 
   - 服务器详细介绍
   - 游戏模式和规则说明
-  - 社区活动公告
+  - 智能公告系统（防重复请求优化）
 
 - **用户交互**
   - 问题反馈系统
@@ -113,6 +114,13 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
 - **响应式设计** - 完美适配各种设备屏幕
 - **无障碍访问** - 遵循 WCAG 无障碍标准
 - **国际化支持** - 多语言切换（计划中）
+
+### ⚡ 性能优化
+
+- **预压缩文件** - Brotli(.br) + Gzip(.gz) 双压缩，零CPU消耗
+- **智能预加载** - HTML阶段并行预加载所有关键资源
+- **DNS预解析** - 提前解析第三方域名，减少连接延迟
+- **防重复请求** - 公告系统防抖机制，避免疯狂请求
 
 ## 快速开始
 
@@ -159,6 +167,16 @@ Minecraft 服务器**的官方网站源码仓库。本项目致力于为 Minecra
   查看生产效果
 - 📱 **移动体验**: 开发者工具模拟或手机直接访问
 - 💻 **本地运行**: 按上述步骤在本地启动项目
+
+### 性能验证
+
+```bash
+# 构建并检查预加载优化
+npm run build && npm run check:preload
+
+# 预期输出：检测到 25+ 个预加载标签
+# ✅ DNS预解析、预连接、资源预加载、模块预加载等
+```
 
 ## 开发指南
 
@@ -309,8 +327,14 @@ npm run build:http
 # 完整构建（包含预渲染和站点地图，推荐用于生产环境）
 npm run build
 
+# 完整构建（包含预渲染和站点地图，推荐用于生产环境）
+npm run build
+
 # 预览构建结果
 npm run preview
+
+# 启动本地分析服务器
+npm run build:analyze
 ```
 
 ### 专用脚本
@@ -321,6 +345,9 @@ npm run generate:sitemap
 
 # 预渲染页面
 npm run prerender:puppeteer
+
+# 检查预加载标签配置
+npm run check:preload
 
 # 生成第三方许可证报告
 npm run license:report
@@ -338,30 +365,52 @@ npm run license:check
 npm run build
 
 # 构建产物位于 dist/ 目录
+# 自动生成预压缩文件：.br (Brotli) 和 .gz (Gzip)
 ```
+
+#### 🗜️ 预压缩文件说明
+
+构建过程会自动为所有资源生成预压缩版本：
+
+- **原文件**: `index-[hash].js` (100% 大小)
+- **Gzip**: `index-[hash].js.gz` (~30% 大小)
+- **Brotli**: `index-[hash].js.br` (~25% 大小)
+
+Nginx配置会自动选择最优压缩版本，实现零CPU消耗的极致压缩。
 
 ### Nginx 配置
 
-项目包含了生产环境的 Nginx 配置文件 `nginx-production.conf`：
+项目包含了完整的生产环境 Nginx 配置文件 `nginx-production.conf`，具备以下特性：
+
+#### 🗜️ 极致压缩优化
+- **预压缩文件优先** - 自动使用 `.br` 和 `.gz` 预压缩文件，零CPU消耗
+- **双压缩支持** - Brotli (现代浏览器) + Gzip (兼容性回退)
+- **智能压缩级别** - 主站禁用实时压缩，CDN启用最高级别压缩
 
 ```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    root /path/to/voidix-web/dist;
-    index index.html;
+# 🏆 预压缩文件专用配置（零CPU消耗）
+brotli off;                 # 禁用实时压缩，强制使用预压缩文件
+brotli_static on;           # 启用静态预压缩文件支持
+gzip_static on;             # 启用Gzip预压缩文件支持
+```
 
-    # SPA 路由支持
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+#### 🚀 性能优化特性
+- **SPA路由支持** - 正确处理单页应用路由
+- **静态资源长缓存** - 1年缓存 + immutable标记
+- **CDN代理服务** - 字体、API等第三方资源代理
+- **安全头配置** - CSP、HSTS、XSS保护等
 
-    # 静态资源缓存
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-}
+#### 📦 预压缩文件生成
+构建时自动生成预压缩文件：
+
+```bash
+# 构建会自动生成 .br 和 .gz 文件
+npm run build
+
+# 生成的文件结构：
+# dist/assets/index-[hash].js      (原文件)
+# dist/assets/index-[hash].js.br   (Brotli压缩)
+# dist/assets/index-[hash].js.gz   (Gzip压缩)
 ```
 
 ### 部署选项
