@@ -95,7 +95,7 @@ export const NotFoundPage: React.FC = () => {
             </button>
 
             <button
-              onClick={() => window.location.href = '/faq'}
+              onClick={() => (window.location.href = '/faq')}
               className="inline-flex items-center px-6 py-3 text-lg font-medium rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900"
             >
               <Search className="w-5 h-5 mr-2" />
