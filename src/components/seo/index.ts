@@ -19,13 +19,14 @@ export { default as SearchEngineScript } from './SearchEngineScript';
 export { default as WebVitalsMonitor } from './WebVitalsMonitor';
 
 // 分析组件（可选）
+export { DelayedPrefetch } from './DelayedPrefetch';
 export { default as MicrosoftClarity } from './MicrosoftClarity';
 export { default as VoidixSearchConsole } from './VoidixSearchConsole';
 
 // 企业级SEO组件（大型项目）
 export {
-  generateMultilingualSitemap,
   InternationalSEO,
+  generateMultilingualSitemap,
   useLanguageSwitcher,
 } from './InternationalSEO';
 export { MinecraftServerReview, ReviewSchema } from './ReviewSchema';

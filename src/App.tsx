@@ -5,6 +5,7 @@ import {
   SEOProvider,
   VoidixSearchConsole,
 } from '@/components/seo';
+import { DelayedPrefetch } from '@/components/seo/DelayedPrefetch';
 
 /**
  * 主应用组件
@@ -30,6 +31,9 @@ function App() {
 
       {/* 搜索引擎验证 */}
       <VoidixSearchConsole />
+
+      {/* 延迟页面预获取 */}
+      <DelayedPrefetch />
 
       {/* 主路由组件 */}
       <OptimizedAppRouter />

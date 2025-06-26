@@ -81,12 +81,16 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
 
     // 分页请求公告
     requestNotices: (page: number = 1, counts: number = 5) => {
-            const state = get();
+      const state = get();
       const now = Date.now();
 
       // 防抖机制：同一页面在2秒内不重复请求
-      if (state.lastFetchTime && (now - state.lastFetchTime) < 2000 && state.currentPage === page) {
-        console.log('[NoticeStore] 防抖拦截重复请求:', { page, counts, lastFetch: state.lastFetchTime });
+      if (state.lastFetchTime && now - state.lastFetchTime < 2000 && state.currentPage === page) {
+        console.log('[NoticeStore] 防抖拦截重复请求:', {
+          page,
+          counts,
+          lastFetch: state.lastFetchTime,
+        });
         return;
       }
 
