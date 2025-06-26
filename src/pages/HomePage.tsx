@@ -1,9 +1,9 @@
 import {
-  AboutSection,
-  HeroSection,
-  ServersSection,
-  TimelineSection,
-  VersionsSection,
+    AboutSection,
+    HeroSection,
+    ServersSection,
+    TimelineSection,
+    VersionsSection,
 } from '@/components';
 import { TeamSection } from '@/components/sections/TeamSection';
 import { PerformanceOptimizer, SEO } from '@/components/seo';
@@ -21,7 +21,7 @@ export const HomePage: React.FC = () => {
         canonicalUrl="https://www.voidix.net/"
         enableAnalytics={true}
       />
-      <PerformanceOptimizer prefetchRoutes={['/status', '/faq']} />
+      <PerformanceOptimizer />
       <HeroSection />
       <AboutSection />
       <ServersSection />

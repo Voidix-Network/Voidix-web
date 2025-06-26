@@ -112,11 +112,11 @@ describe('HomePage', () => {
       expect(performanceOptimizer).toBeInTheDocument();
     });
 
-    it('应该预获取指定的路由', () => {
+    it('应该不进行立即路由预获取', () => {
       render(<HomePage />);
 
       const performanceOptimizer = screen.getByTestId('performance-optimizer');
-      expect(performanceOptimizer).toHaveAttribute('data-prefetch', '/status,/faq');
+      expect(performanceOptimizer).toHaveAttribute('data-prefetch', '');
     });
   });
 

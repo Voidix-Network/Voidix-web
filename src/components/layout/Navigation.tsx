@@ -1,8 +1,9 @@
+import { VoidixLogo } from '@/components';
+import { DelayedNavButton } from '@/components/common/DelayedNavButton';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { VoidixLogo } from '@/components';
-import { MobileMenuButton } from './navigation/MobileMenuButton';
 import { MobileMenu, NavigationItem } from './navigation/MobileMenu';
+import { MobileMenuButton } from './navigation/MobileMenuButton';
 
 /**
  * 主导航组件 - 复现原项目的导航栏设计
@@ -39,13 +40,14 @@ export const Navigation: React.FC = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-baseline space-x-8">
             {navigationItems.map(item => (
-              <button
+              <DelayedNavButton
                 key={item.href}
-                onClick={() => handleNavClick(item.href)}
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 {item.label}
-              </button>
+              </DelayedNavButton>
             ))}
           </div>
 
