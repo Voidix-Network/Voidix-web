@@ -34,7 +34,7 @@ const DEFAULT_SEO_CONFIG = {
   contactEmail: 'contact@voidix.net',
 };
 
-// 简化的分析跟踪
+// 延迟分析跟踪 - DOMContentLoaded后加载
 const initializeSimpleAnalytics = (enableAnalytics: boolean, enableDebug: boolean = false) => {
   if (!enableAnalytics || typeof window === 'undefined') return;
 
@@ -44,38 +44,49 @@ const initializeSimpleAnalytics = (enableAnalytics: boolean, enableDebug: boolea
 
   if (!hasConsent || isDev) return;
 
-  // 简化的GA4配置
-  const measurementId = 'G-SPQQPKW4VN';
+  // 等待DOM完全加载后再初始化分析脚本
+  const initAnalytics = () => {
+    const measurementId = 'G-SPQQPKW4VN';
 
-  // 只加载必要的gtag功能
-  if (!window.gtag) {
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () {
-      window.dataLayer.push(arguments);
-    };
-
-    // 延迟加载gtag.js
-    setTimeout(() => {
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-      document.head.appendChild(script);
-
-      script.onload = () => {
-        window.gtag('js', new Date());
-        window.gtag('config', measurementId, {
-          client_storage: 'none',
-          anonymize_ip: true,
-          allow_google_signals: false,
-          send_page_view: true,
-        });
-        if (enableDebug) console.log('[SEO] GA4 initialized');
+    // 只加载必要的gtag功能
+    if (!window.gtag) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () {
+        window.dataLayer.push(arguments);
       };
-    }, 2000);
+
+      // 进一步延迟加载gtag.js，避免阻塞渲染
+      setTimeout(() => {
+        const script = document.createElement('script');
+        script.async = true;
+        script.defer = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+        document.head.appendChild(script);
+
+        script.onload = () => {
+          window.gtag('js', new Date());
+          window.gtag('config', measurementId, {
+            client_storage: 'none',
+            anonymize_ip: true,
+            allow_google_signals: false,
+            send_page_view: true,
+          });
+          if (enableDebug) console.log('[SEO] GA4 延迟初始化完成');
+        };
+      }, 3000); // 增加延迟到3秒
+    }
+  };
+
+  // 确保在DOMContentLoaded之后运行
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnalytics);
+  } else {
+    // 如果DOM已经加载完成，直接执行
+    setTimeout(initAnalytics, 1000);
   }
 };
 
-// Microsoft Clarity集成
+// Microsoft Clarity延迟集成
 const initializeClarity = (enableClarity: boolean, enableDebug: boolean = false) => {
   if (!enableClarity || typeof window === 'undefined') return;
 
@@ -85,27 +96,39 @@ const initializeClarity = (enableClarity: boolean, enableDebug: boolean = false)
 
   if (!hasConsent || isDev || !clarityId) return;
 
-  // 检查Clarity是否已加载
-  if (window.clarity) {
-    if (enableDebug) console.log('[SEO] Clarity already loaded');
-    return;
+  const initClarity = () => {
+    // 检查Clarity是否已加载
+    if (window.clarity) {
+      if (enableDebug) console.log('[SEO] Clarity already loaded');
+      return;
+    }
+
+    // 延迟加载Microsoft Clarity
+    setTimeout(() => {
+      (function (c: any, l: any, a: any, r: any, i: any, t: any, y: any) {
+        c[a] =
+          c[a] ||
+          function () {
+            (c[a].q = c[a].q || []).push(arguments);
+          };
+        t = l.createElement(r);
+        t.async = 1;
+        t.defer = 1;
+        t.src = 'https://www.clarity.ms/tag/' + i;
+        y = l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t, y);
+      })(window, document, 'clarity', 'script', clarityId, null, null);
+
+      if (enableDebug) console.log('[SEO] Clarity 延迟初始化完成');
+    }, 4000); // 延迟4秒加载
+  };
+
+  // 确保在页面完全加载后运行
+  if (document.readyState === 'complete') {
+    initClarity();
+  } else {
+    window.addEventListener('load', initClarity);
   }
-
-  // 加载Microsoft Clarity
-  (function (c: any, l: any, a: any, r: any, i: any, t: any, y: any) {
-    c[a] =
-      c[a] ||
-      function () {
-        (c[a].q = c[a].q || []).push(arguments);
-      };
-    t = l.createElement(r);
-    t.async = 1;
-    t.src = 'https://www.clarity.ms/tag/' + i;
-    y = l.getElementsByTagName(r)[0];
-    y.parentNode.insertBefore(t, y);
-  })(window, document, 'clarity', 'script', clarityId, null, null);
-
-  if (enableDebug) console.log('[SEO] Clarity initialized');
 };
 
 // 统一分析API

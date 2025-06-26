@@ -73,16 +73,11 @@
     <!-- 本地字体加载 - 解决第三方Cookie问题 -->
     <!-- 字体通过CSS文件本地加载，避免第三方域名Cookie -->
 
-    <!-- 预获取可能访问的页面 - 空闲时获取 -->
-    <link rel="prefetch" href="/status" />
-    <link rel="prefetch" href="/faq" />
-    <link rel="prefetch" href="/privacy" />
-    <link rel="prefetch" href="/bug-report" />
+    <!-- 页面预获取改为完全延迟加载，避免阻塞DOMContentLoaded -->
+    <!-- 页面预获取将在window.onload后执行 -->
 
-    <!-- 预加载第三方分析脚本 - 提前下载但不执行 -->
-    <link rel="preload" href="https://lf1-cdn-tos.bytegoofy.com/goofy/ttzz/push.js?38c7b610b4424addab832189173b924c389f5b68fd5222ecfdd99c937ceaf3ddfd9a9dcb5ced4d7780eb6f3bbd089073c2a6d54440560d63862bbf4ec01bba3a" as="script" crossorigin />
-    <link rel="preload" href="https://www.googletagmanager.com/gtag/js?id=G-SPQQPKW4VN" as="script" crossorigin />
-    <link rel="preload" href="https://www.clarity.ms/tag/s3xbh0qmun" as="script" crossorigin />
+        <!-- 移除所有分析脚本的预加载/预获取，改为完全延迟加载 -->
+    <!-- 分析脚本将在DOMContentLoaded后由JavaScript动态加载 -->
 
     <!-- 💡 构建时自动注入预加载标签的位置标记 (由autoPreloadPlugin自动填充) -->
     <!-- AUTO_PRELOAD_INJECTION_POINT -->

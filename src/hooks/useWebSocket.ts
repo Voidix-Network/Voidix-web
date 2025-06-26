@@ -338,7 +338,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     onError,
     onReconnecting,
     onConnectionFailed,
-  ]);   /**
+  ]); /**
    * 连接WebSocket
    */
   const connect = useCallback(async () => {
@@ -367,7 +367,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       serviceRef.current.disconnect();
     }
     updateConnectionStatus('disconnected');
-  }, [updateConnectionStatus]);   /**
+  }, [updateConnectionStatus]); /**
    * 组件挂载时的副作用
    */
   useEffect(() => {

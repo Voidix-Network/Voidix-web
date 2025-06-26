@@ -88,7 +88,7 @@ export const NoticeList: React.FC<NoticeListProps> = ({
           const noticeStore = useNoticeStore.getState();
           const now = Date.now();
           // 只有距离上次请求超过1秒才刷新
-          if (!noticeStore.lastFetchTime || (now - noticeStore.lastFetchTime) > 1000) {
+          if (!noticeStore.lastFetchTime || now - noticeStore.lastFetchTime > 1000) {
             refreshCurrentPage();
           }
         }, 500);
@@ -118,7 +118,7 @@ export const NoticeList: React.FC<NoticeListProps> = ({
       // 检查是否刚刚请求过（避免快速重复请求）
       const now = Date.now();
       const noticeStore = useNoticeStore.getState();
-      if (!noticeStore.lastFetchTime || (now - noticeStore.lastFetchTime) > 3000) {
+      if (!noticeStore.lastFetchTime || now - noticeStore.lastFetchTime > 3000) {
         console.log('[NoticeList] 连接成功，首次请求公告');
         fetchNotices(1);
       } else {
