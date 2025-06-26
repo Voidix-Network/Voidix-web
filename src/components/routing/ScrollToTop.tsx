@@ -50,14 +50,10 @@ export const ScrollToTop: React.FC = () => {
       });
     };
 
-    // 添加小延迟确保页面内容已加载
-    // 这对于懒加载组件特别重要
-    const timeoutId = setTimeout(scrollToTop, 50);
+    // 立即执行滚动，避免不必要的延迟
+    scrollToTop();
 
-    // 清理函数
-    return () => {
-      clearTimeout(timeoutId);
-    };
+    // 无需清理函数，因为没有timeout
   }, [location.pathname]); // 仅监听pathname变化，忽略search和hash
 
   // 这是一个功能性组件，不渲染任何UI

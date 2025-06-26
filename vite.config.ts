@@ -15,8 +15,8 @@ function autoPreloadPlugin() {
       for (const [fileName, chunk] of Object.entries(bundle)) {
         if (chunk.type === 'chunk') {
           const chunkInfo = chunk as OutputChunk;
-          // 预加载主要chunks
-          if (chunkInfo.isEntry || ['vendor', 'animation', 'state'].includes(chunkInfo.name)) {
+          // 只预加载入口文件，不预加载其他chunks以减少DOMContentLoaded阻塞
+          if (chunkInfo.isEntry) {
             preloadAssets.push(`<link rel="modulepreload" href="/${fileName}" />`);
           }
         } else if (chunk.type === 'asset') {
@@ -164,7 +164,7 @@ export default defineConfig({
         unsafe_undefined: true,      // ✅ void 0替换undefined
 
         // === ✅ 高级优化选项（3项）===
-        passes: 50,                  // 🎯 50轮压缩（性能与效果的黄金平衡点）
+        passes: 100,                  // 🎯 100轮压缩（性能与效果的黄金平衡点）
         pure_getters: 'strict',      // ✅ 严格模式getter优化
         pure_new: true,              // ✅ 移除无用new调用
         keep_infinity: false,        // ✅ 用1/0代替Infinity（节省字节）
@@ -200,6 +200,8 @@ export default defineConfig({
           animation: ['framer-motion'],
           state: ['zustand'],
         },
+        // 配置异步chunk加载策略，避免过度预加载
+        experimentalMinChunkSize: 1000,
         // 压缩输出
         compact: true,
       },

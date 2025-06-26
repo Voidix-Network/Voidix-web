@@ -1,39 +1,39 @@
-import React, { Suspense, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Layout } from '@/components';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { ScrollToTop } from './ScrollToTop';
 import '@/styles/page-transitions.css';
+import React, { Suspense, useEffect, useState } from 'react';
+import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
+import { ScrollToTop } from './ScrollToTop';
 
-// 懒加载页面组件 - 提升首屏加载性能
+// 懒加载页面组件 - 禁用预加载，减少DOMContentLoaded期间的网络请求
 const HomePage = React.lazy(() =>
-  import('@/pages/HomePage').then(module => ({ default: module.HomePage }))
+  import(/* webpackPreload: false */ '@/pages/HomePage').then(module => ({ default: module.HomePage }))
 );
 const StatusPage = React.lazy(() =>
-  import('@/pages/StatusPage').then(module => ({
+  import(/* webpackPreload: false */ '@/pages/StatusPage').then(module => ({
     default: module.StatusPage,
   }))
 );
 const FaqPage = React.lazy(() =>
-  import('@/pages/FaqPage').then(module => ({ default: module.FaqPage }))
+  import(/* webpackPreload: false */ '@/pages/FaqPage').then(module => ({ default: module.FaqPage }))
 );
 const BugReportPage = React.lazy(() =>
-  import('@/pages/BugReportPage').then(module => ({
+  import(/* webpackPreload: false */ '@/pages/BugReportPage').then(module => ({
     default: module.BugReportPage,
   }))
 );
 const MonitorPage = React.lazy(() =>
-  import('@/pages/MonitorPage').then(module => ({
+  import(/* webpackPreload: false */ '@/pages/MonitorPage').then(module => ({
     default: module.MonitorPage,
   }))
 );
 const PrivacyPolicyPage = React.lazy(() =>
-  import('@/pages/PrivacyPolicyPage').then(module => ({
+  import(/* webpackPreload: false */ '@/pages/PrivacyPolicyPage').then(module => ({
     default: module.PrivacyPolicyPage,
   }))
 );
 const NotFoundPage = React.lazy(() =>
-  import('@/pages/NotFoundPage').then(module => ({
+  import(/* webpackPreload: false */ '@/pages/NotFoundPage').then(module => ({
     default: module.NotFoundPage,
   }))
 );
@@ -107,16 +107,9 @@ const RouteStateManager: React.FC<{ children: React.ReactNode }> = ({ children }
     // 重置稳定状态
     setIsRouteStable(false);
 
-    // 使用requestAnimationFrame实现更流畅的切换
-    // 这比setTimeout更高效，能在下一个渲染帧执行
+    // 使用requestAnimationFrame实现流畅切换，无额外延迟
     const frameId = requestAnimationFrame(() => {
-      // 再添加一个很小的延迟确保DOM稳定
-      const timer = setTimeout(() => {
-        setIsRouteStable(true);
-      }, 1); // 从10ms减少到1ms，几乎无感知
-
-      // 清理函数中取消定时器
-      return () => clearTimeout(timer);
+      setIsRouteStable(true);
     });
 
     return () => {
