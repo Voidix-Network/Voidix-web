@@ -80,10 +80,18 @@ export const NoticeList: React.FC<NoticeListProps> = ({
 
       console.log('[NoticeList] 收到公告更新:', type, data);
 
-      // 无论是新增还是删除，都刷新当前页
+      // 无论是新增还是删除，都刷新当前页（添加防抖）
       if (type === 'notice_update_add_respond' || type === 'notice_update_remove_respond') {
-        console.log('[NoticeList] 公告有变化，刷新当前页');
-        refreshCurrentPage();
+        console.log('[NoticeList] 公告有变化，延迟刷新当前页');
+        // 延迟刷新，避免频繁更新导致的重复请求
+        setTimeout(() => {
+          const noticeStore = useNoticeStore.getState();
+          const now = Date.now();
+          // 只有距离上次请求超过1秒才刷新
+          if (!noticeStore.lastFetchTime || (now - noticeStore.lastFetchTime) > 1000) {
+            refreshCurrentPage();
+          }
+        }, 500);
       }
     };
 
@@ -104,10 +112,18 @@ export const NoticeList: React.FC<NoticeListProps> = ({
     };
   }, [handleNoticeResponse, setError, currentPage, pageSize, refreshCurrentPage]);
 
-  // 连接成功后请求第一页公告
+  // 连接成功后请求第一页公告（添加防重复请求机制）
   useEffect(() => {
     if (connectionStatus === 'connected' && Object.keys(notices).length === 0) {
-      fetchNotices(1);
+      // 检查是否刚刚请求过（避免快速重复请求）
+      const now = Date.now();
+      const noticeStore = useNoticeStore.getState();
+      if (!noticeStore.lastFetchTime || (now - noticeStore.lastFetchTime) > 3000) {
+        console.log('[NoticeList] 连接成功，首次请求公告');
+        fetchNotices(1);
+      } else {
+        console.log('[NoticeList] 连接成功，但最近已请求过，跳过重复请求');
+      }
     }
   }, [connectionStatus, notices, fetchNotices]);
 

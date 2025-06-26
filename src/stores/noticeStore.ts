@@ -81,6 +81,15 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
 
     // 分页请求公告
     requestNotices: (page: number = 1, counts: number = 5) => {
+            const state = get();
+      const now = Date.now();
+
+      // 防抖机制：同一页面在2秒内不重复请求
+      if (state.lastFetchTime && (now - state.lastFetchTime) < 2000 && state.currentPage === page) {
+        console.log('[NoticeStore] 防抖拦截重复请求:', { page, counts, lastFetch: state.lastFetchTime });
+        return;
+      }
+
       console.log('[NoticeStore] 请求公告数据:', { page, counts });
 
       const request: NoticeRequest = {
@@ -99,6 +108,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
               error: null,
               currentPage: page,
               pageSize: counts,
+              lastFetchTime: now, // 更新请求时间
             });
           } catch (error) {
             console.error('[NoticeStore] 发送公告请求失败:', error);
@@ -157,11 +167,32 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
 
       // 检查页码偏移问题：如果请求的页面没有数据且不是第1页
       if (noticeCount === 0 && requestedPage > 1) {
-        console.warn('[NoticeStore] 检测到页码偏移，自动跳转到第1页');
-        // 自动跳转到第1页
-        setTimeout(() => {
-          get().goToPage(1);
-        }, 100);
+        console.warn('[NoticeStore] 检测到页码偏移，但不自动跳转防止循环请求');
+        // 设置为第1页状态，但不发起新请求
+        set({
+          notices: {},
+          currentPage: 1,
+          hasMore: false,
+          totalPages: 1,
+          lastFetchTime: Date.now(),
+          isLoading: false,
+          error: null,
+        });
+        return;
+      }
+
+      // 特殊处理：如果第1页也没有数据，标记为真正的"无公告"状态
+      if (noticeCount === 0 && requestedPage === 1) {
+        console.log('[NoticeStore] 第1页无公告，设置为无公告状态');
+        set({
+          notices: {},
+          currentPage: 1,
+          hasMore: false,
+          totalPages: 1,
+          lastFetchTime: Date.now(),
+          isLoading: false,
+          error: null,
+        });
         return;
       }
 

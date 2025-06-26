@@ -1,11 +1,67 @@
 /// <reference types="vitest" />
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import type { OutputAsset, OutputBundle, OutputChunk } from 'rollup';
 import { defineConfig } from 'vite';
+
+// 🚀 自动预加载插件 - 构建时注入所有关键资源的预加载标签
+function autoPreloadPlugin() {
+  return {
+    name: 'auto-preload',
+    generateBundle(_options: any, bundle: OutputBundle) {
+      // 收集所有需要预加载的资源
+      const preloadAssets: string[] = [];
+
+      for (const [fileName, chunk] of Object.entries(bundle)) {
+        if (chunk.type === 'chunk') {
+          const chunkInfo = chunk as OutputChunk;
+          // 预加载主要chunks
+          if (chunkInfo.isEntry || ['vendor', 'animation', 'state'].includes(chunkInfo.name)) {
+            preloadAssets.push(`<link rel="modulepreload" href="/${fileName}" />`);
+          }
+        } else if (chunk.type === 'asset') {
+          // 预加载CSS文件
+          if (fileName.endsWith('.css')) {
+            preloadAssets.push(`<link rel="preload" href="/${fileName}" as="style" />`);
+          }
+        }
+      }
+
+            // 修改HTML文件，注入预加载标签
+      for (const [fileName, chunk] of Object.entries(bundle)) {
+        if (fileName.endsWith('.html') && chunk.type === 'asset') {
+          const assetInfo = chunk as OutputAsset;
+          let html = assetInfo.source as string;
+
+          // 查找注入点标记
+          const injectionPoint = html.indexOf('<!-- AUTO_PRELOAD_INJECTION_POINT -->');
+          if (injectionPoint !== -1) {
+            // 替换标记为实际的预加载标签
+            const preloadHtml = `<!-- 🚀 自动生成的构建资源预加载标签 -->\n    ${preloadAssets.join('\n    ')}`;
+            html = html.replace('<!-- AUTO_PRELOAD_INJECTION_POINT -->', preloadHtml);
+          } else {
+            // 如果没有找到标记，回退到在head结束前插入
+            const insertPoint = html.indexOf('</head>');
+            if (insertPoint !== -1) {
+              const preloadHtml = `    <!-- 🚀 自动生成的预加载标签 -->\n    ${preloadAssets.join('\n    ')}\n  `;
+              html = html.slice(0, insertPoint) + preloadHtml + html.slice(insertPoint);
+            }
+          }
+
+          assetInfo.source = html;
+          console.log(`✅ [auto-preload] 已注入 ${preloadAssets.length} 个预加载标签到 ${fileName}`);
+        }
+      }
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()], // 生产环境使用绝对路径，开发环境使用相对路径
+  plugins: [
+    react(),
+    autoPreloadPlugin(), // 添加自动预加载插件
+  ], // 生产环境使用绝对路径，开发环境使用相对路径
   base: process.env.NODE_ENV === 'production' ? '/' : './',
   resolve: {
     alias: {
