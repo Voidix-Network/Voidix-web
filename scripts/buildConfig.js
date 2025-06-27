@@ -41,28 +41,29 @@ export const PRERENDER_CONFIG = {
     { path: '/privacy', outputDir: 'privacy' },
   ],
 
-  // HTML压缩配置
+  // HTML压缩配置 - SEO友好版本（移除注释但保持结构）
   htmlMinify: {
-    collapseWhitespace: true,
-    removeComments: true,
-    removeRedundantAttributes: true,
-    removeScriptTypeAttributes: true,
-    removeStyleLinkTypeAttributes: true,
-    minifyCSS: true,
-    minifyJS: true,
-    useShortDoctype: true,
-    removeEmptyAttributes: true,
-    removeOptionalTags: false, // 保持兼容性，避免破坏SEO标签
+    // SEO友好的压缩设置，移除注释但保持可读性
+    collapseWhitespace: false, // 不合并空白，保持文本可读性
+    conservativeCollapse: false, // 禁用空白合并
+    preserveLineBreaks: true, // 保留所有换行符
+    removeComments: true, // 移除所有注释
+    removeRedundantAttributes: false, // 保留所有属性
+    removeScriptTypeAttributes: false, // 保留script类型属性
+    removeStyleLinkTypeAttributes: false, // 保留样式链接类型属性
+    minifyCSS: false, // 不压缩CSS
+    minifyJS: false, // 不压缩JS
+    useShortDoctype: true, // 使用短文档类型
+    removeEmptyAttributes: false, // 保留空属性
+    removeOptionalTags: false, // 保留所有可选标签
     caseSensitive: false,
     html5: true,
-    // 保留一些重要的属性
+    // 保留重要的空白和格式
     ignoreCustomFragments: [/\{\{[\s\S]*?\}\}/, /<\?[\s\S]*?\?>/],
-    // 不压缩pre和script内容中的空白
-    preserveLineBreaks: false,
-    // 移除属性周围的引号（当安全时）
-    removeAttributeQuotes: true,
-    // 尽可能短的布尔属性
-    collapseBooleanAttributes: true,
+    removeAttributeQuotes: false, // 保留所有属性引号
+    collapseBooleanAttributes: false, // 保留布尔属性完整格式
+    // 移除所有注释，包括自定义注释
+    ignoreCustomComments: [], // 不保留任何注释
   },
 
   // Puppeteer 配置
