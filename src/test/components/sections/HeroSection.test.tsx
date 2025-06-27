@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
 import { HeroSection } from '@/components/sections/HeroSection';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock react-router-dom
 const mockNavigate = vi.fn();
@@ -77,7 +77,7 @@ describe('HeroSection', () => {
     expect(screen.getByTestId('gradient-text')).toHaveAttribute('data-variant', 'primary');
 
     // 验证副标题
-    expect(screen.getByText(/由开发者NekoEpisode和CYsonHab创建/)).toBeInTheDocument();
+    expect(screen.getByText(/由开发者NekoSora和CYsonHab创建/)).toBeInTheDocument();
   });
 
   it('应该渲染服务器状态卡片', () => {
