@@ -175,13 +175,7 @@ fi
 
 # 5. 重载nginx
 log_step "重载Nginx服务"
-systemctl reload nginx
-if systemctl is-active --quiet nginx; then
-    log_success "Nginx服务重载成功"
-else
-    log_error "Nginx服务重载失败"
-    exit 1
-fi
+nginx -s reload
 
 # 6. 简单健康检查
 log_step "健康检查"
