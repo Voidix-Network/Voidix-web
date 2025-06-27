@@ -29,7 +29,8 @@
     "analyze:ttfb": "node scripts/ttfbAnalyzer.js",
     "analyze:ttfb:prod": "node scripts/ttfbAnalyzer.js https://www.voidix.net",
     "ssl:test": "node scripts/ssl-test.js",
-    "ssl:check": "echo '请访问 https://www.ssllabs.com/ssltest/analyze.html?d=www.voidix.net 进行在线SSL评级测试'"
+    "ssl:check": "echo '请访问 https://www.ssllabs.com/ssltest/analyze.html?d=www.voidix.net 进行在线SSL评级测试'",
+    "ssl:dhparam": "bash scripts/generate-dhparam.sh"
   },
   "dependencies": {
     "clsx": "^2.0.0",
