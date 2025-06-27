@@ -101,12 +101,25 @@ describe('Navigation', () => {
   it('应该在点击导航项目时正确导航', () => {
     // Mock window.location.href
     const originalLocation = window.location;
-    delete (window as any).location;
-    window.location = { ...originalLocation, href: '' };
-
     const mockLocationSetter = vi.fn();
-    Object.defineProperty(window.location, 'href', {
+
+    // 使用 Object.defineProperty 安全地mock location
+    const mockLocation = {
+      ...originalLocation,
+      assign: vi.fn(),
+      replace: vi.fn(),
+      reload: vi.fn(),
+    };
+
+    Object.defineProperty(mockLocation, 'href', {
       set: mockLocationSetter,
+      get: () => '',
+      configurable: true,
+    });
+
+    Object.defineProperty(window, 'location', {
+      value: mockLocation,
+      writable: true,
       configurable: true,
     });
 
@@ -128,7 +141,11 @@ describe('Navigation', () => {
     expect(mockLocationSetter).toHaveBeenCalledWith('/bug-report');
 
     // 恢复原始window.location
-    window.location = originalLocation;
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true,
+    });
   });
 
   it('应该能够切换移动端菜单状态', () => {
