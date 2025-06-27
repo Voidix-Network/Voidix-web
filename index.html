@@ -87,21 +87,36 @@
       {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "Voidix",
-        "description": "专业的Minecraft小游戏服务器，提供免费的我的世界休闲体验",
+        "name": "Voidix Minecraft Server",
+        "alternateName": "Voidix",
+        "description": "Voidix是一个永久免费的Minecraft公益服务器，我们提供稳定的起床战争、空岛战争等小游戏。低延迟，致力于为玩家打造一个公平、互助、绿色的MC玩家社区。",
         "url": "https://www.voidix.net",
         "logo": "https://www.voidix.net/logo.png",
-        "sameAs": ["https://space.bilibili.com/voidix", "https://weibo.com/voidix"],
+        "founder": [
+          {
+            "@type": "Person",
+            "name": "NekoSora",
+            "jobTitle": "核心开发者"
+          },
+          {
+            "@type": "Person",
+            "name": "CYsonHab",
+            "jobTitle": "核心开发者"
+          }
+        ],
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "customer service",
           "availableLanguage": "Chinese"
         },
-        "foundingDate": "2023",
+        "foundingDate": "2025",
         "location": {
           "@type": "Place",
           "addressCountry": "CN"
-        }
+        },
+        "keywords": "Minecraft服务器,小游戏服务器,生存服务器,公益服务器,起床战争,空岛战争",
+        "serviceType": "游戏服务器",
+        "areaServed": "CN"
       }
     </script>
 
@@ -110,24 +125,60 @@
         "@context": "https://schema.org",
         "@type": "Game",
         "name": "Voidix Minecraft服务器",
-        "description": "免费的Minecraft小游戏服务器，支持跨版本兼容",
+        "description": "Voidix是一个永久免费的Minecraft公益服务器，我们提供稳定的起床战争、空岛战争等小游戏。低延迟，致力于为玩家打造一个公平、互助、绿色的MC玩家社区。",
         "gameLocation": {
           "@type": "Place",
           "addressCountry": "CN"
         },
         "numberOfPlayers": "1-200",
         "gamePlatform": ["PC Java版", "基岩版"],
-        "genre": "沙盒游戏",
+        "genre": ["沙盒游戏", "小游戏", "生存游戏"],
+        "gameItem": [
+          {
+            "@type": "Thing",
+            "name": "小游戏服务器",
+            "description": "minigame.voidix.net - 起床战争、空岛战争等小游戏"
+          },
+          {
+            "@type": "Thing",
+            "name": "生存服务器",
+            "description": "survival.voidix.net - 纯净生存体验"
+          }
+        ],
         "offers": {
           "@type": "Offer",
           "price": "0",
           "priceCurrency": "CNY",
           "availability": "https://schema.org/InStock"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Voidix Team"
+        }
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Voidix Minecraft公益服务器",
+        "url": "https://www.voidix.net",
+        "description": "Voidix是一个永久免费的Minecraft公益服务器，我们提供稳定的起床战争、空岛战争等小游戏。低延迟，致力于为玩家打造一个公平、互助、绿色的MC玩家社区。",
+        "inLanguage": "zh-CN",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Voidix Team"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.voidix.net/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
         }
       }
     </script>
   </head>
-  <body class="bg-[#111827] text-gray-100 font-['Inter']">
+    <body class="bg-[#111827] text-gray-100 font-['Inter']">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
