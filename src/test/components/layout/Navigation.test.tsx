@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
 import { Navigation } from '@/components/layout/Navigation';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock react-router-dom
 const mockNavigate = vi.fn();
@@ -99,22 +99,36 @@ describe('Navigation', () => {
   });
 
   it('应该在点击导航项目时正确导航', () => {
+    // Mock window.location.href
+    const originalLocation = window.location;
+    delete (window as any).location;
+    window.location = { ...originalLocation, href: '' };
+
+    const mockLocationSetter = vi.fn();
+    Object.defineProperty(window.location, 'href', {
+      set: mockLocationSetter,
+      configurable: true,
+    });
+
     renderNavigation();
 
     // 点击桌面端的状态页链接（第一个）
     const statusLinks = screen.getAllByText('状态页');
     fireEvent.click(statusLinks[0]);
-    expect(mockNavigate).toHaveBeenCalledWith('/status');
+    expect(mockLocationSetter).toHaveBeenCalledWith('/status');
 
     // 点击常见问题
     const faqLinks = screen.getAllByText('常见问题');
     fireEvent.click(faqLinks[0]);
-    expect(mockNavigate).toHaveBeenCalledWith('/faq');
+    expect(mockLocationSetter).toHaveBeenCalledWith('/faq');
 
     // 点击Bug反馈
     const bugLinks = screen.getAllByText('Bug反馈');
     fireEvent.click(bugLinks[0]);
-    expect(mockNavigate).toHaveBeenCalledWith('/bug-report');
+    expect(mockLocationSetter).toHaveBeenCalledWith('/bug-report');
+
+    // 恢复原始window.location
+    window.location = originalLocation;
   });
 
   it('应该能够切换移动端菜单状态', () => {

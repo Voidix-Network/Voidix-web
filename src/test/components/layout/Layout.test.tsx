@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
 import { Layout } from '@/components/layout/Layout';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 // Mock child components
 vi.mock('@/components/layout/Navigation', () => ({
@@ -83,7 +83,7 @@ describe('Layout', () => {
     );
 
     const outerDiv = container.firstChild;
-    expect(outerDiv).toHaveClass('min-h-screen', 'bg-[#111827]', 'text-gray-100', "font-['Inter']");
+    expect(outerDiv).toHaveClass('min-h-screen', 'bg-[#0f172a]', 'text-white', "font-['Inter']");
   });
 
   it('应该在没有 className 时也能正常工作', () => {

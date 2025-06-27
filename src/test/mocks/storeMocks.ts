@@ -3,8 +3,8 @@
  * 为测试环境提供统一的store mock
  */
 
+import type { AggregateStats, ConnectionStatus, PlayerIgnInfo, ServerInfo } from '@/types';
 import { vi } from 'vitest';
-import type { ConnectionStatus, AggregateStats, ServerInfo, PlayerIgnInfo } from '@/types';
 
 // 默认的mock状态
 const defaultMockState = {
@@ -223,3 +223,40 @@ export const defaultHookMocks = {
   useServerPlayerIgns: mockUseServerPlayerIgns,
   usePlayerIgnStore: mockUsePlayerIgnStore,
 };
+
+// NoticeStore Mock
+export const createMockNoticeStore = (overrides: any = {}) => {
+  const defaultState = {
+    notices: {},
+    isLoading: false,
+    error: null,
+    lastFetchTime: Date.now(),
+    currentPage: 1,
+    hasMore: true,
+    totalPages: 1,
+    pageSize: 5,
+  };
+
+  const state = { ...defaultState, ...overrides };
+
+  return {
+    ...state,
+    setNotices: vi.fn(),
+    addNotice: vi.fn(),
+    removeNotice: vi.fn(),
+    setLoading: vi.fn(),
+    setError: vi.fn(),
+    updatePage: vi.fn(),
+    setHasMore: vi.fn(),
+    reset: vi.fn(),
+    requestNotices: vi.fn(),
+    handleNoticeResponse: vi.fn(),
+    goToPage: vi.fn(),
+    nextPage: vi.fn(),
+    prevPage: vi.fn(),
+    refreshCurrentPage: vi.fn(),
+    debugWebSocketStatus: vi.fn(),
+  };
+};
+
+export const mockNoticeStore = createMockNoticeStore();

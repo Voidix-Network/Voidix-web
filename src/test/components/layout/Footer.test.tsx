@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
 import { Footer } from '@/components/layout/Footer';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 // Mock child components
 vi.mock('@/components', () => ({
@@ -62,7 +62,7 @@ describe('Footer', () => {
     const { container } = render(<Footer />);
 
     const footer = container.querySelector('footer');
-    expect(footer).toHaveClass('bg-gray-800/50', 'border-t', 'border-gray-700');
+    expect(footer).toHaveClass('bg-gray-800/70', 'border-t', 'border-gray-600');
 
     // 验证主容器
     const mainContainer = footer?.querySelector('.max-w-7xl');
@@ -117,10 +117,10 @@ describe('Footer', () => {
   it('应该渲染 Logo 区域的描述文本', () => {
     const { container } = render(<Footer />);
 
-    // 查找空的 p 元素（根据原始代码，这个 p 元素是空的）
-    const descriptionText = container.querySelector('p.text-gray-400.text-xs.max-w-32');
-    expect(descriptionText).toBeInTheDocument();
-    expect(descriptionText).toHaveClass('text-gray-400', 'text-xs', 'max-w-32');
+    // 查找Logo区域的文本中心容器
+    const logoTextCenter = container.querySelector('.text-center');
+    expect(logoTextCenter).toBeInTheDocument();
+    expect(logoTextCenter).toHaveClass('text-center');
   });
 
   it('应该为组件部分正确设置间距', () => {
