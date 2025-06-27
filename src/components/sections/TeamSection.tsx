@@ -599,8 +599,8 @@ export const TeamSection: React.FC = () => {
 
   const teamMembers: TeamMember[] = [
     {
-              name: 'NekoSora',
-        displayName: 'NekoSora',
+      name: 'NekoSora',
+      displayName: 'NekoSora',
       role: '核心开发者',
       roleColor: 'text-violet-400',
       description: '项目创始人，主导服务器架构设计和核心插件开发',
@@ -643,7 +643,7 @@ export const TeamSection: React.FC = () => {
       gradientFrom: 'from-purple-900/40',
       gradientTo: 'to-fuchsia-900/40',
       textColor: 'text-fuchsia-400',
-      abbreviation: 'Almost Declaes',
+      abbreviation: 'Almost',
       minecraftUsername: 'Almost_Declaes',
       contributions: [
         '2025-至今: 服务器玩法顾问',
