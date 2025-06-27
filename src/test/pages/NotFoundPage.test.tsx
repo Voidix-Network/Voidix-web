@@ -183,12 +183,11 @@ describe('NotFoundPage', () => {
       expect(backButton).toBeInTheDocument();
     });
 
-    it('应该包含常见问题链接', () => {
+    it('应该包含常见问题按钮', () => {
       render(<NotFoundPage />);
 
-      const faqLink = screen.getByRole('link', { name: /常见问题/ });
-      expect(faqLink).toBeInTheDocument();
-      expect(faqLink).toHaveAttribute('href', '/faq');
+      const faqButton = screen.getByRole('button', { name: /常见问题/ });
+      expect(faqButton).toBeInTheDocument();
     });
 
     it('应该在点击返回上页时调用history.back', () => {
@@ -206,12 +205,12 @@ describe('NotFoundPage', () => {
 
       const homeLink = screen.getByRole('link', { name: /返回首页/ });
       const backButton = screen.getByRole('button', { name: /返回上页/ });
-      const faqLink = screen.getByRole('link', { name: /常见问题/ });
+      const faqButton = screen.getByRole('button', { name: /常见问题/ });
 
       // 验证样式类存在
       expect(homeLink.className).toContain('bg-gradient-to-r');
       expect(backButton.className).toContain('bg-gray-600');
-      expect(faqLink.className).toContain('border-gray-600');
+      expect(faqButton.className).toContain('border-gray-600');
     });
   });
 
@@ -230,11 +229,11 @@ describe('NotFoundPage', () => {
       // 验证图标与对应的文字在同一个容器中
       const homeLink = screen.getByRole('link', { name: /返回首页/ });
       const backButton = screen.getByRole('button', { name: /返回上页/ });
-      const faqLink = screen.getByRole('link', { name: /常见问题/ });
+      const faqButton = screen.getByRole('button', { name: /常见问题/ });
 
       expect(homeLink.querySelector('[data-testid="lucide-icon"]')).toBeInTheDocument();
       expect(backButton.querySelector('[data-testid="lucide-icon"]')).toBeInTheDocument();
-      expect(faqLink.querySelector('[data-testid="lucide-icon"]')).toBeInTheDocument();
+      expect(faqButton.querySelector('[data-testid="lucide-icon"]')).toBeInTheDocument();
     });
   });
 
@@ -303,7 +302,7 @@ describe('NotFoundPage', () => {
       // 验证按钮和链接的语义化
       expect(screen.getByRole('button', { name: /返回上页/ })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /返回首页/ })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /常见问题/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /常见问题/ })).toBeInTheDocument();
     });
 
     it('应该设置正确的focus样式', () => {
@@ -311,12 +310,12 @@ describe('NotFoundPage', () => {
 
       const homeLink = screen.getByRole('link', { name: /返回首页/ });
       const backButton = screen.getByRole('button', { name: /返回上页/ });
-      const faqLink = screen.getByRole('link', { name: /常见问题/ });
+      const faqButton = screen.getByRole('button', { name: /常见问题/ });
 
       // 验证focus样式类存在
       expect(homeLink.className).toContain('focus:outline-none');
       expect(backButton.className).toContain('focus:outline-none');
-      expect(faqLink.className).toContain('focus:outline-none');
+      expect(faqButton.className).toContain('focus:outline-none');
     });
 
     it('应该提供清晰的错误信息', () => {
@@ -343,7 +342,7 @@ describe('NotFoundPage', () => {
       expect(screen.getByText('404')).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /返回首页/ })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /返回上页/ })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /常见问题/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /常见问题/ })).toBeInTheDocument();
     });
 
     it('应该处理Router Link组件的正常渲染', () => {
@@ -351,7 +350,7 @@ describe('NotFoundPage', () => {
 
       // 验证Router Link mock正常工作
       const routerLinks = screen.getAllByTestId('router-link');
-      expect(routerLinks).toHaveLength(2); // 返回首页 + 常见问题
+      expect(routerLinks).toHaveLength(1); // 只有返回首页是Link
     });
   });
 });
