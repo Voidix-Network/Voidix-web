@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
 import { GradientText } from '@/components';
-import { useServerStoreCompat } from '@/stores';
 import { MINIGAME_KEYS } from '@/constants';
+import { useServerStoreCompat } from '@/stores';
+import { motion } from 'framer-motion';
 
 /**
  * 智能格式化运行时间显示
@@ -219,7 +219,7 @@ export const AboutSection: React.FC = () => {
                 </span>
               </h2>
               <p className="text-gray-400 mb-6">
-                Voidix是一个由开发者NekoEpisode和CYsonHab创建的公益小游戏Minecraft服务器，继承VBPIXEL和EternalStar的精神。我们坚持无商业化运营，致力于为所有玩家提供公平与和谐的游戏环境。
+                Voidix是一个由开发者NekoSora和CYsonHab创建的公益小游戏Minecraft服务器，继承VBPIXEL和EternalStar的精神。我们坚持无商业化运营，致力于为所有玩家提供公平与和谐的游戏环境。
               </p>
 
               {/* 桌面端统计 */}
