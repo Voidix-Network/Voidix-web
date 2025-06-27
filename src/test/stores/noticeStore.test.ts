@@ -307,15 +307,19 @@ describe('NoticeStore', () => {
       expect(state.totalPages).toBe(2);
     });
 
-    it('应该处理空页面自动跳转', async () => {
-      const goToPageSpy = vi.spyOn(useNoticeStore.getState(), 'goToPage');
+    it('应该处理空页面状态重置', async () => {
+      // 先设置一个非第1页的状态
+      useNoticeStore.getState().updatePage(2);
 
+      // 处理空响应
       useNoticeStore.getState().handleNoticeResponse({}, 2, 5);
 
-      // 等待异步操作完成
-      await new Promise(resolve => setTimeout(resolve, 150));
-
-      expect(goToPageSpy).toHaveBeenCalledWith(1);
+      const state = useNoticeStore.getState();
+      // 验证状态被重置为第1页，但不发起新请求
+      expect(state.currentPage).toBe(1);
+      expect(state.notices).toEqual({});
+      expect(state.hasMore).toBe(false);
+      expect(state.totalPages).toBe(1);
     });
   });
 

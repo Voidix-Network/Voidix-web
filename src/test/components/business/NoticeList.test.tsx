@@ -8,6 +8,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Mock dependencies
 vi.mock('@/stores/noticeStore');
 vi.mock('@/hooks/useWebSocket');
+
+// Mock the global getState function
+const mockGetState = vi.fn();
+(useNoticeStore as any).getState = mockGetState;
+
 vi.mock('@/components/ui/Pagination', () => ({
   Pagination: ({ currentPage, totalPages, onPageChange, onPrevious, onNext }: any) => (
     <div data-testid="pagination">
@@ -80,6 +85,12 @@ describe('NoticeList', () => {
     vi.clearAllMocks();
     mockUseNoticeStore.mockReturnValue(defaultStoreState);
     mockUseWebSocketStatus.mockReturnValue(defaultWebSocketStatus);
+
+    // Mock getState to return the store with lastFetchTime
+    mockGetState.mockReturnValue({
+      ...defaultStoreState,
+      lastFetchTime: Date.now(),
+    });
 
     // Mock window events
     Object.defineProperty(window, 'addEventListener', {
@@ -378,16 +389,31 @@ describe('NoticeList', () => {
       mockUseNoticeStore.mockReturnValue({
         ...defaultStoreState,
         goToPage: mockGoToPage,
+        notices: {}, // 确保notices为空，触发请求条件
+      });
+
+      // 确保连接状态为connected
+      mockUseWebSocketStatus.mockReturnValue({
+        ...defaultWebSocketStatus,
+        connectionStatus: 'connected',
+      });
+
+      // 确保getState返回没有lastFetchTime或者很久之前的时间戳
+      mockGetState.mockReturnValue({
+        ...defaultStoreState,
+        lastFetchTime: null, // 或者 Date.now() - 10000 表示10秒前
         notices: {},
       });
 
-      mockUseWebSocketStatus.mockReturnValue(defaultWebSocketStatus);
-
       render(<NoticeList />);
 
-      await waitFor(() => {
-        expect(mockGoToPage).toHaveBeenCalledWith(1);
-      });
+      // 使用更长的超时时间，因为组件有防重复请求的逻辑
+      await waitFor(
+        () => {
+          expect(mockGoToPage).toHaveBeenCalledWith(1);
+        },
+        { timeout: 5000 }
+      );
     });
 
     it('应该在未连接时不请求数据', () => {

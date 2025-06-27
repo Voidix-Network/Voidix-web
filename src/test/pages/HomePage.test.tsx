@@ -40,11 +40,11 @@ vi.mock('@/components/seo', () => ({
       PageSEO
     </div>
   ),
-  PerformanceOptimizer: ({ preloadImages, prefetchRoutes }: any) => (
+  PerformanceOptimizer: ({ preloadImages = [], prefetchRoutes = [] }: any) => (
     <div
       data-testid="performance-optimizer"
-      data-preload={preloadImages?.join(',')}
-      data-prefetch={prefetchRoutes?.join(',')}
+      data-preload={preloadImages.length > 0 ? preloadImages.join(',') : undefined}
+      data-prefetch={prefetchRoutes.length > 0 ? prefetchRoutes.join(',') : undefined}
     >
       PerformanceOptimizer
     </div>
@@ -116,7 +116,9 @@ describe('HomePage', () => {
       render(<HomePage />);
 
       const performanceOptimizer = screen.getByTestId('performance-optimizer');
-      expect(performanceOptimizer).toHaveAttribute('data-prefetch', '');
+      // 验证组件存在且没有设置data-prefetch属性（因为默认为空数组）
+      expect(performanceOptimizer).toBeInTheDocument();
+      expect(performanceOptimizer).not.toHaveAttribute('data-prefetch');
     });
   });
 

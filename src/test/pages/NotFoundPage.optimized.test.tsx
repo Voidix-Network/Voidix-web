@@ -106,7 +106,7 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       PageTestAssertions.assertNavigationFunctionality([
         { text: /返回首页|home/i, href: '/', isButton: false },
         { text: /返回上页|back/i, isButton: true },
-        { text: /常见问题|faq/i, href: '/faq', isButton: false },
+        { text: /常见问题|faq/i, isButton: true },
       ]);
     });
 
@@ -125,10 +125,10 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
 
       // 验证链接的基本功能，不依赖具体样式
       const homeLink = screen.getByRole('link', { name: /返回首页|home/i });
-      const faqLink = screen.getByRole('link', { name: /常见问题|faq/i });
+      const faqButton = screen.getByRole('button', { name: /常见问题|faq/i });
 
       expect(homeLink).toHaveAttribute('href', '/');
-      expect(faqLink).toHaveAttribute('href', '/faq');
+      expect(faqButton).toBeInTheDocument();
     });
   });
 
@@ -210,7 +210,7 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
 
       // 验证语义化元素
       expect(screen.getByRole('button', { name: /返回上页|back/i })).toBeInTheDocument();
-      expect(screen.getAllByRole('link')).toHaveLength(2); // 首页 + FAQ
+      expect(screen.getAllByRole('link')).toHaveLength(1); // 只有首页是链接，FAQ是按钮
     });
 
     it('应该提供键盘导航支持', () => {
@@ -244,8 +244,8 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       // 验证关键元素都已渲染
       expect(screen.getByTestId('page-seo')).toBeInTheDocument();
       expect(screen.getByText('404')).toBeInTheDocument();
-      expect(screen.getAllByRole('link')).toHaveLength(2);
-      expect(screen.getAllByRole('button')).toHaveLength(1);
+      expect(screen.getAllByRole('link')).toHaveLength(1);
+      expect(screen.getAllByRole('button')).toHaveLength(2); // 返回上页 + 常见问题
     });
 
     it('应该正确处理Router组件', () => {
@@ -253,7 +253,7 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
 
       // 验证Router Mock正常工作
       const routerLinks = screen.getAllByTestId('router-link');
-      expect(routerLinks).toHaveLength(2); // 返回首页 + 常见问题
+      expect(routerLinks).toHaveLength(1); // 只有返回首页是router-link
     });
   });
 
@@ -275,8 +275,8 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       expect(screen.getByText(/页面.*走丢/i)).toBeInTheDocument();
 
       // 验证导航元素在各种情况下都可用
-      expect(screen.getAllByRole('link')).toHaveLength(2);
-      expect(screen.getAllByRole('button')).toHaveLength(1);
+      expect(screen.getAllByRole('link')).toHaveLength(1);
+      expect(screen.getAllByRole('button')).toHaveLength(2);
     });
   });
 
@@ -289,8 +289,8 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       const currentLinks = screen.getAllByRole('link');
       const currentButtons = screen.getAllByRole('button');
 
-      expect(currentLinks.length).toBeGreaterThanOrEqual(2);
-      expect(currentButtons.length).toBeGreaterThanOrEqual(1);
+      expect(currentLinks.length).toBeGreaterThanOrEqual(1);
+      expect(currentButtons.length).toBeGreaterThanOrEqual(2);
     });
 
     it('应该能适应SEO需求的变化', () => {
@@ -308,7 +308,7 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       renderWithHelmet(<NotFoundPage />);
 
       // 验证路由相关功能的稳定性
-      expect(screen.getAllByTestId('router-link')).toHaveLength(2);
+      expect(screen.getAllByTestId('router-link')).toHaveLength(1);
 
       const backButton = screen.getByRole('button', { name: /返回上页|back/i });
       expect(backButton).toBeInTheDocument();
