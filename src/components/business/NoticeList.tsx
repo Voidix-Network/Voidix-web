@@ -25,7 +25,8 @@ export const NoticeList: React.FC<NoticeListProps> = ({
     error,
     currentPage,
     totalPages,
-    pageSize: storePageSize,
+    hasMore,
+    totalCount,
     goToPage,
     nextPage,
     prevPage,
@@ -37,14 +38,12 @@ export const NoticeList: React.FC<NoticeListProps> = ({
 
   const { connectionStatus } = useWebSocketStatus();
 
-  // 转换公告数据为数组并按序号排序
+  // 转换公告数据为数组并按时间降序排序（最新的在前面）
   const noticeList = Object.entries(notices)
     .map(([id, notice]) => ({ id, ...notice }))
     .sort((a, b) => {
-      // 按序号排序（序号越小越新）
-      const idA = parseInt(a.id);
-      const idB = parseInt(b.id);
-      return idA - idB;
+      // 按时间降序排序（时间越大越新，排在前面）
+      return b.time - a.time;
     });
 
   // 获取公告数据
@@ -62,7 +61,15 @@ export const NoticeList: React.FC<NoticeListProps> = ({
     if (typeof window === 'undefined') return;
 
     const handleNoticeReturn = (event: CustomEvent) => {
-      const { notices: newNotices, error_msg } = event.detail;
+      const { notices: newNotices, error_msg, notice_total_count } = event.detail;
+
+      console.log('[NoticeList] 收到公告返回事件:', {
+        noticesCount: newNotices ? Object.keys(newNotices).length : 0,
+        notice_total_count,
+        currentPage,
+        pageSize,
+        error_msg,
+      });
 
       if (error_msg) {
         setError(error_msg);
@@ -70,8 +77,14 @@ export const NoticeList: React.FC<NoticeListProps> = ({
       }
 
       if (newNotices) {
-        // 使用新的处理方法
-        handleNoticeResponse(newNotices, currentPage, pageSize);
+        // 使用新的处理方法，传递总数用于精确分页计算
+        console.log('[NoticeList] 调用handleNoticeResponse:', {
+          newNotices,
+          currentPage,
+          pageSize,
+          notice_total_count,
+        });
+        handleNoticeResponse(newNotices, currentPage, pageSize, notice_total_count);
       }
     };
 
@@ -160,13 +173,36 @@ export const NoticeList: React.FC<NoticeListProps> = ({
                 </button>
                 {/* 调试按钮仅在开发环境显示 */}
                 {import.meta.env.DEV && (
-                  <button
-                    onClick={debugWebSocketStatus}
-                    className="text-yellow-400 hover:text-yellow-300 text-xs transition-colors"
-                    title="调试WebSocket状态"
-                  >
-                    调试
-                  </button>
+                  <>
+                    <button
+                      onClick={debugWebSocketStatus}
+                      className="text-yellow-400 hover:text-yellow-300 text-xs transition-colors"
+                      title="调试WebSocket状态"
+                    >
+                      调试WS
+                    </button>
+                    <button
+                      onClick={() => {
+                        console.log('[NoticeList] 当前分页状态调试:', {
+                          currentPage,
+                          totalPages,
+                          hasMore,
+                          noticeCount: Object.keys(notices).length,
+                          totalCount,
+                          isLoading,
+                          error,
+                          pageSize,
+                        });
+                        alert(
+                          `分页状态: ${currentPage}/${totalPages}, 公告数: ${Object.keys(notices).length}, 总数: ${totalCount}, hasMore: ${hasMore}`
+                        );
+                      }}
+                      className="text-green-400 hover:text-green-300 text-xs transition-colors"
+                      title="调试分页状态"
+                    >
+                      调试分页
+                    </button>
+                  </>
                 )}
               </>
             )}
@@ -267,12 +303,12 @@ export const NoticeList: React.FC<NoticeListProps> = ({
       </div>
 
       {/* 分页控件 - 根据内容位置自然对齐 */}
-      {(totalPages > 1 || currentPage > 1) && (
+      {totalPages > 1 && (
         <div className="mt-8">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            hasMore={storePageSize > currentPage}
+            hasMore={hasMore}
             isLoading={isLoading}
             onPageChange={handlePageChange}
             onPrevious={prevPage}

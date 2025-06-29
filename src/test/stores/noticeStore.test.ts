@@ -38,6 +38,7 @@ describe('NoticeStore', () => {
       expect(state.hasMore).toBe(true);
       expect(state.totalPages).toBe(1);
       expect(state.pageSize).toBe(5);
+      expect(state.totalCount).toBeUndefined();
     });
 
     it('应该能够设置公告数据', () => {
@@ -137,6 +138,7 @@ describe('NoticeStore', () => {
       expect(state.currentPage).toBe(1);
       expect(state.hasMore).toBe(true);
       expect(state.totalPages).toBe(1);
+      expect(state.totalCount).toBeUndefined();
     });
   });
 
@@ -149,6 +151,14 @@ describe('NoticeStore', () => {
     it('应该能够设置hasMore状态', () => {
       useNoticeStore.getState().setHasMore(false);
       expect(useNoticeStore.getState().hasMore).toBe(false);
+    });
+
+    it('应该能够设置总公告数', () => {
+      useNoticeStore.getState().setTotalCount(10);
+      expect(useNoticeStore.getState().totalCount).toBe(10);
+
+      useNoticeStore.getState().setTotalCount(25);
+      expect(useNoticeStore.getState().totalCount).toBe(25);
     });
 
     it('应该能够跳转到指定页面', () => {
@@ -320,6 +330,41 @@ describe('NoticeStore', () => {
       expect(state.notices).toEqual({});
       expect(state.hasMore).toBe(false);
       expect(state.totalPages).toBe(1);
+    });
+
+    it('应该使用精确总数计算分页', () => {
+      const mockNotices: Record<string, Notice> = {
+        '1': { title: '公告1', text: '内容1', time: Date.now(), color: '#000' },
+        '2': { title: '公告2', text: '内容2', time: Date.now(), color: '#000' },
+        '3': { title: '公告3', text: '内容3', time: Date.now(), color: '#000' },
+      };
+
+      // 使用精确总数（比如有6个公告，每页5个，应该有2页）
+      useNoticeStore.getState().handleNoticeResponse(mockNotices, 1, 5, 6);
+
+      const state = useNoticeStore.getState();
+      expect(state.notices).toEqual(mockNotices);
+      expect(state.currentPage).toBe(1);
+      expect(state.totalPages).toBe(2); // Math.ceil(6 / 5) = 2
+      expect(state.hasMore).toBe(true); // 第1页，还有第2页
+      expect(state.isLoading).toBe(false);
+    });
+
+    it('应该使用存储的总数计算分页', () => {
+      // 先设置总数
+      useNoticeStore.getState().setTotalCount(8);
+
+      const mockNotices: Record<string, Notice> = {
+        '1': { title: '公告1', text: '内容1', time: Date.now(), color: '#000' },
+        '2': { title: '公告2', text: '内容2', time: Date.now(), color: '#000' },
+      };
+
+      // 不传递精确总数，应该使用存储的总数
+      useNoticeStore.getState().handleNoticeResponse(mockNotices, 1, 5);
+
+      const state = useNoticeStore.getState();
+      expect(state.totalPages).toBe(2); // Math.ceil(8 / 5) = 2
+      expect(state.hasMore).toBe(true);
     });
   });
 

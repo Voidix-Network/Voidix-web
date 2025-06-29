@@ -81,6 +81,9 @@ export class MessageRouter {
           `[MessageRouter] 协议版本不匹配！服务器版本: ${serverProtocolVersion}, 客户端支持版本: ${supportedVersion}`
         );
 
+        // 标记为已验证，避免重复弹错误
+        this.protocolVersionVerified = true;
+
         // 发出协议版本错误事件，触发连接断开
         this.eventEmitter.emit('protocolVersionMismatch', {
           serverVersion: serverProtocolVersion,
@@ -124,6 +127,13 @@ export class MessageRouter {
       isMaintenance: maintenanceResult.isMaintenance,
       maintenanceStartTime: maintenanceResult.maintenanceStartTime,
     };
+
+    // 处理公告总数（如果存在）
+    if (data.notice_total_count !== undefined) {
+      console.log('[MessageRouter] full消息中包含公告总数:', data.notice_total_count);
+      const noticeStore = useNoticeStore.getState();
+      noticeStore.setTotalCount(data.notice_total_count);
+    }
 
     // 移除重复的玩家数据处理，统一由aggregatedStore处理
     if (import.meta.env.DEV) {
@@ -274,7 +284,7 @@ export class MessageRouter {
     console.log('[MessageRouter] 处理公告返回:', data);
 
     try {
-      const { notices, error_msg, page = 1, counts = 5 } = data;
+      const { notices, error_msg, page = 1, counts = 5, notice_total_count } = data;
 
       if (error_msg) {
         console.error('[MessageRouter] 公告请求错误:', error_msg);
@@ -301,10 +311,11 @@ export class MessageRouter {
         });
 
         console.log('[MessageRouter] 处理后的公告数据:', processedNotices);
+        console.log('[MessageRouter] 公告总数:', notice_total_count);
 
         // 使用新的分页响应处理方法
         const noticeStore = useNoticeStore.getState();
-        noticeStore.handleNoticeResponse(processedNotices, page, counts);
+        noticeStore.handleNoticeResponse(processedNotices, page, counts, notice_total_count);
 
         // 同时发送事件以保持兼容性
         this.eventEmitter.emit('noticeReturn', {
@@ -312,6 +323,7 @@ export class MessageRouter {
           error_msg,
           page,
           counts,
+          notice_total_count,
         });
       } else {
         console.warn('[MessageRouter] 收到的公告数据格式无效:', data);

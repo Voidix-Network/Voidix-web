@@ -16,7 +16,7 @@ export const WEBSOCKET_CONFIG: WebSocketConfig = {
   reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
   disableReconnect: false,
   // 协议版本 - 必须与后端匹配
-  SUPPORTED_PROTOCOL_VERSION: 1,
+  SUPPORTED_PROTOCOL_VERSION: 2,
   connectionTimeout: 5000, // 5秒连接超时
 };
 

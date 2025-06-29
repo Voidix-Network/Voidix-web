@@ -142,7 +142,7 @@ describe('WebSocketService', () => {
         totalRunningTime: 7200,
         isMaintenance: false,
         maintenanceStartTime: null,
-        protocol_version: 1,
+        protocol_version: 2,
       };
 
       mockWs.simulateMessage(fullMessage);

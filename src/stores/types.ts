@@ -117,6 +117,7 @@ export interface NoticeState {
   hasMore: boolean;
   totalPages: number;
   pageSize: number;
+  totalCount?: number; // 从full消息中获取的总公告数
 }
 
 export interface NoticeActions {
@@ -127,12 +128,14 @@ export interface NoticeActions {
   setError: (error: string | null) => void;
   updatePage: (page: number) => void;
   setHasMore: (hasMore: boolean) => void;
+  setTotalCount: (totalCount: number) => void; // 新增：设置总公告数
   reset: () => void;
   requestNotices: (page?: number, counts?: number) => void;
   handleNoticeResponse: (
     notices: Record<string, Notice>,
     requestedPage: number,
-    pageSize: number
+    pageSize: number,
+    noticeTotalCount?: number
   ) => void;
   goToPage: (page: number) => void;
   nextPage: () => void;
