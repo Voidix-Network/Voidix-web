@@ -1,8 +1,9 @@
+import { MINIGAME_KEYS, SERVER_DISPLAY_NAMES } from '@/constants';
+import type { AggregateStats, ServerData, ServerInfo } from '@/types';
+import { getServerDisplayName } from '@/utils/serverUtils';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import type { ServerDataState, ServerDataActions } from './types';
-import type { ServerInfo, ServerData, AggregateStats } from '@/types';
-import { MINIGAME_KEYS, SERVER_DISPLAY_NAMES } from '@/constants';
+import type { ServerDataActions, ServerDataState } from './types';
 
 /**
  * 服务器数据初始状态
@@ -34,8 +35,7 @@ export const useServerDataStore = create<ServerDataState & ServerDataActions>()(
 
       if (!currentServer) {
         // 如果服务器不存在，创建一个基础的服务器记录
-        const displayName =
-          SERVER_DISPLAY_NAMES[serverId as keyof typeof SERVER_DISPLAY_NAMES] || serverId;
+        const displayName = getServerDisplayName(serverId, SERVER_DISPLAY_NAMES);
 
         const newServer: ServerInfo = {
           id: serverId,
@@ -85,8 +85,7 @@ export const useServerDataStore = create<ServerDataState & ServerDataActions>()(
      * @param data - 原始服务器数据
      */
     updateServerFromData: (serverId: string, data: ServerData) => {
-      const displayName =
-        SERVER_DISPLAY_NAMES[serverId as keyof typeof SERVER_DISPLAY_NAMES] || serverId;
+      const displayName = getServerDisplayName(serverId, SERVER_DISPLAY_NAMES);
 
       // 智能判断服务器在线状态
       const isServerOnline =
@@ -151,8 +150,7 @@ export const useServerDataStore = create<ServerDataState & ServerDataActions>()(
       const currentServers = get().servers;
       const updates = serverEntries.reduce(
         (acc, [serverId, data]) => {
-          const displayName =
-            SERVER_DISPLAY_NAMES[serverId as keyof typeof SERVER_DISPLAY_NAMES] || serverId;
+          const displayName = getServerDisplayName(serverId, SERVER_DISPLAY_NAMES);
 
           const isServerOnline =
             data.isOnline !== undefined

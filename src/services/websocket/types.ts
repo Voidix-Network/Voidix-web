@@ -215,6 +215,9 @@ export interface MaintenanceStateChangeData {
 export interface NoticeReturnEventData {
   notices: Record<string, any>;
   error_msg?: string;
+  page?: number;
+  counts?: number;
+  notice_total_count?: number; // 公告总数，用于精确计算总页数
 }
 
 /**

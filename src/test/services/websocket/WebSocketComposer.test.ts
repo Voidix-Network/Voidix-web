@@ -217,7 +217,7 @@ describe('WebSocketComposer', () => {
         players: { online: '10', currentPlayers: {} },
         runningTime: 3600,
         isMaintenance: false,
-        protocol_version: 1,
+        protocol_version: 2,
       };
 
       mockWs.simulateMessage(messageData);

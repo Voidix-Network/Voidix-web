@@ -31,7 +31,7 @@ describe('MessageRouter', () => {
         type: 'full',
         servers: {},
         players: { online: '0' },
-        protocol_version: 1, // 添加协议版本
+        protocol_version: 2, // 添加协议版本
       };
       const event = new MessageEvent('message', {
         data: JSON.stringify(messageData),
@@ -96,7 +96,7 @@ describe('MessageRouter', () => {
         totalRunningTime: 7200,
         isMaintenance: false,
         maintenanceStartTime: null,
-        protocol_version: 1, // 添加协议版本
+        protocol_version: 2, // 添加协议版本
       };
       const event = new MessageEvent('message', {
         data: JSON.stringify(messageData),
@@ -119,7 +119,7 @@ describe('MessageRouter', () => {
       const messageData = {
         type: 'full',
         servers: {}, // 提供空的servers对象以通过验证
-        protocol_version: 1, // 添加协议版本
+        protocol_version: 2, // 添加协议版本
         // 缺少players字段
       };
       const event = new MessageEvent('message', {

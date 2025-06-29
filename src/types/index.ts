@@ -67,6 +67,7 @@ export interface WebSocketMessage {
   error_msg?: string;
   page?: number;
   counts?: number;
+  notice_total_count?: number; // 公告总数，用于精确计算总页数
 }
 
 // 原始服务器数据结构（用于full消息）

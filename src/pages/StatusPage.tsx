@@ -7,9 +7,9 @@ import {
   ServerGroupCard,
 } from '@/components';
 import { SEO } from '@/components/seo';
-import { SERVER_DISPLAY_NAMES, SERVER_GROUPS } from '@/constants';
+import { SERVER_DISPLAY_NAMES, getDynamicServerGroups } from '@/constants';
 import { useWebSocketStatus } from '@/hooks/useWebSocket';
-import { calculateGroupStats, formatRunningTime } from '@/utils';
+import { calculateGroupStats, formatRunningTime, getServerDisplayName } from '@/utils';
 import React, { useEffect, useState } from 'react';
 
 /**
@@ -93,7 +93,7 @@ export const StatusPage: React.FC = () => {
 
         // 跟踪组详情查看事件
         if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-          const groupInfo = SERVER_GROUPS[groupKey as keyof typeof SERVER_GROUPS];
+          const groupInfo = dynamicServerGroups[groupKey as keyof typeof dynamicServerGroups];
           const groupStats = calculateGroupStats(groupInfo.servers, servers);
           window.voidixUnifiedAnalytics.trackCustomEvent(
             'server_group',
@@ -135,6 +135,9 @@ export const StatusPage: React.FC = () => {
       );
     }
   }, [servers, aggregateStats]);
+
+  // 动态获取服务器分组
+  const dynamicServerGroups = getDynamicServerGroups(Object.keys(servers));
 
   return (
     <>
@@ -292,7 +295,7 @@ export const StatusPage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {Object.entries(SERVER_GROUPS).map(([groupKey, groupInfo]) => {
+                {Object.entries(dynamicServerGroups).map(([groupKey, groupInfo]) => {
                   const groupStats = calculateGroupStats(groupInfo.servers, servers);
                   return (
                     <ServerGroupCard
@@ -304,7 +307,7 @@ export const StatusPage: React.FC = () => {
                     >
                       {groupInfo.servers.map(serverId => {
                         const serverData = servers[serverId];
-                        const displayName = (SERVER_DISPLAY_NAMES as any)[serverId] || serverId;
+                        const displayName = getServerDisplayName(serverId, SERVER_DISPLAY_NAMES);
                         return (
                           <ServerCard
                             key={serverId}

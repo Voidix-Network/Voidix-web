@@ -19,6 +19,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
     // 新增分页相关状态
     totalPages: 1,
     pageSize: 5,
+    totalCount: undefined,
 
     // Actions
     setNotices: (notices: Record<string, Notice>) => {
@@ -66,6 +67,11 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
       set({ hasMore });
     },
 
+    setTotalCount: (totalCount: number) => {
+      console.log('[NoticeStore] 设置总公告数:', totalCount);
+      set({ totalCount });
+    },
+
     reset: () => {
       console.log('[NoticeStore] 重置store状态');
       set({
@@ -76,6 +82,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         currentPage: 1,
         hasMore: true,
         totalPages: 1,
+        totalCount: undefined,
       });
     },
 
@@ -141,31 +148,71 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
     handleNoticeResponse: (
       notices: Record<string, Notice>,
       requestedPage: number,
-      pageSize: number
+      pageSize: number,
+      noticeTotalCount?: number
     ) => {
       const noticeCount = Object.keys(notices).length;
 
-      // 如果返回的公告数量少于请求的数量，说明这是最后一页
-      const isLastPage = noticeCount < pageSize;
+      let isLastPage: boolean;
+      let totalPages: number;
 
-      // 更智能的总页数计算
-      let estimatedTotalPages: number;
-      if (isLastPage) {
-        // 如果是最后一页，总页数就是当前页
-        estimatedTotalPages = requestedPage;
+      if (noticeTotalCount !== undefined) {
+        // 如果有精确的总数，直接计算总页数
+        totalPages = Math.max(1, Math.ceil(noticeTotalCount / pageSize));
+        isLastPage = requestedPage >= totalPages;
+
+        console.log('[NoticeStore] 使用精确总数计算分页:', {
+          noticeTotalCount,
+          pageSize,
+          calculatedTotalPages: totalPages,
+          requestedPage,
+          isLastPage,
+        });
       } else {
-        // 如果不是最后一页，保守估计还有下一页
-        const { totalPages: currentTotal } = get();
-        // 取当前已知最大页数和请求页数+1的较大值
-        estimatedTotalPages = Math.max(currentTotal, requestedPage + 1);
+        // 尝试使用存储的总数
+        const { totalCount } = get();
+        if (totalCount !== undefined) {
+          totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+          isLastPage = requestedPage >= totalPages;
+
+          console.log('[NoticeStore] 使用存储的总数计算分页:', {
+            totalCount,
+            pageSize,
+            calculatedTotalPages: totalPages,
+            requestedPage,
+            isLastPage,
+          });
+        } else {
+          // 回退到估算逻辑（向后兼容）
+          if (noticeCount < pageSize) {
+            isLastPage = true;
+            totalPages = requestedPage;
+          } else if (noticeCount === pageSize && requestedPage === 1) {
+            isLastPage = true;
+            totalPages = 1;
+          } else {
+            isLastPage = false;
+            const { totalPages: currentTotal } = get();
+            totalPages = Math.max(currentTotal, requestedPage + 1);
+          }
+
+          console.log('[NoticeStore] 使用估算逻辑计算分页:', {
+            noticeCount,
+            pageSize,
+            requestedPage,
+            isLastPage,
+            estimatedTotalPages: totalPages,
+          });
+        }
       }
 
       console.log('[NoticeStore] 处理分页响应:', {
         requestedPage,
         pageSize,
         noticeCount,
+        noticeTotalCount,
         isLastPage,
-        estimatedTotalPages,
+        totalPages,
         currentTotalPages: get().totalPages,
       });
 
@@ -204,7 +251,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         notices,
         currentPage: requestedPage,
         hasMore: !isLastPage,
-        totalPages: estimatedTotalPages,
+        totalPages: totalPages,
         lastFetchTime: Date.now(),
         isLoading: false,
         error: null,
@@ -258,7 +305,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
       console.log('[NoticeStore] 智能更新公告');
       const { currentPage, pageSize } = get();
 
-      // 直接使用新数据，并重新评估分页状态
+      // 直接使用新数据，并重新评估分页状态（没有总数时使用估算逻辑）
       get().handleNoticeResponse(newNotices, currentPage, pageSize);
     },
 
@@ -295,6 +342,8 @@ if (import.meta.env.DEV) {
         currentPage: state.currentPage,
         totalPages: state.totalPages,
         hasMore: state.hasMore,
+        pageSize: state.pageSize,
+        totalCount: state.totalCount,
       });
     }
   );

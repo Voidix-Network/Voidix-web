@@ -165,7 +165,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 
       {/* 页面信息 */}
       <div className="ml-4 text-xs text-gray-500">
-        第 {currentPage} 页{totalPages > 1 && ` / 共 ${hasMore ? `${totalPages}+` : totalPages} 页`}
+        第 {currentPage} 页{totalPages > 1 && ` / 共 ${hasMore ? `${totalPages}` : totalPages} 页`}
       </div>
 
       {/* 快速跳转 */}
