@@ -27,9 +27,16 @@ vi.mock('@/utils', () => ({
     const names = {
       survival: '生存服务器',
       creative: '创造服务器',
-      lobby1: '小游戏大厅',
       login: '登录服务器',
     };
+    // 处理动态lobby编号
+    if (serverId.toLowerCase().startsWith('lobby')) {
+      const match = serverId.match(/lobby(\d+)/i);
+      if (match) {
+        return `${match[1]}号主大厅`;
+      }
+      return '主大厅';
+    }
     return names[serverId as keyof typeof names] || serverId;
   }),
 }));
@@ -52,20 +59,33 @@ vi.mock('@/constants', () => ({
       color: 'green',
     },
   },
-  getDynamicServerGroups: vi.fn((serverIds: string[]) => ({
-    survival: {
-      name: 'survival.voidix.net',
-      description: '生存服务器',
-      address: 'survival.voidix.net',
-      servers: ['survival'],
-    },
-    minigame: {
-      name: 'minigame.voidix.net',
-      description: '小游戏服务器',
-      address: 'minigame.voidix.net',
-      servers: serverIds.filter((id: string) => id !== 'survival'),
-    },
-  })),
+  getDynamicServerGroups: vi.fn((serverIds: string[]) => {
+    const lobbyServers = serverIds.filter((id: string) => id.toLowerCase().startsWith('lobby'));
+    const otherMinigameServers = serverIds.filter(
+      (id: string) => !id.toLowerCase().startsWith('lobby') && id !== 'survival'
+    );
+
+    return {
+      survival: {
+        name: 'survival.voidix.net',
+        description: '生存服务器',
+        address: 'survival.voidix.net',
+        servers: ['survival'],
+      },
+      lobby: {
+        name: 'minigame.voidix.net',
+        description: '小游戏大厅',
+        address: 'minigame.voidix.net',
+        servers: lobbyServers,
+      },
+      minigame: {
+        name: 'minigame.voidix.net',
+        description: '小游戏服务器',
+        address: 'minigame.voidix.net',
+        servers: otherMinigameServers,
+      },
+    };
+  }),
   LOGO_ASSETS: {
     PWA_ICON: '/android-chrome-512x512.png',
     BRAND_LOGO: '/logo.png',

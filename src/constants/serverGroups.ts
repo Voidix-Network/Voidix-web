@@ -13,50 +13,45 @@ export const SERVER_GROUPS = {
     address: 'survival.voidix.net',
     servers: ['survival'],
   },
+  lobby: {
+    name: 'minigame.voidix.net',
+    description: '小游戏大厅',
+    address: 'minigame.voidix.net',
+    servers: [], // 动态填充lobby服务器
+  },
   minigame: {
     name: 'minigame.voidix.net',
     description: '小游戏服务器',
     address: 'minigame.voidix.net',
-    // 按重要性排序：登录服务器和大厅在最上，起床战争成组，其他游戏在后
-    servers: [
-      'login',
-      'lobby1',
-      'bedwars',
-      'bedwars_solo',
-      'bedwars_other',
-      'thepit',
-      'knockioffa',
-    ],
+    // 移除lobby服务器，只保留其他游戏服务器
+    servers: ['login', 'bedwars', 'bedwars_solo', 'bedwars_other', 'thepit', 'knockioffa'],
   },
 };
 
 /**
  * 动态获取服务器分组配置
- * 根据实际服务器数据动态调整分组
+ * 根据实际服务器数据动态调整分组，将小游戏大厅单独分组
  * @param serverIds 所有可用的服务器ID列表
- * @returns 动态调整后的服务器分组配置
+ * @returns 动态调整后的服务器分组配置，包含三个分组：生存、小游戏大厅、小游戏
  */
 export const getDynamicServerGroups = (serverIds: string[]) => {
-  // 找出所有的lobby服务器
-  const lobbyServers = serverIds.filter(serverId => isLobbyServer(serverId));
+  // 找出所有的lobby服务器并按字母顺序排序
+  const lobbyServers = serverIds.filter(serverId => isLobbyServer(serverId)).sort();
 
   // 找出非lobby的小游戏服务器
   const otherMinigameServers = SERVER_GROUPS.minigame.servers.filter(
-    serverId => !isLobbyServer(serverId)
+    serverId => !isLobbyServer(serverId) && serverIds.includes(serverId)
   );
-
-  // 构建动态的小游戏服务器列表
-  const dynamicMinigameServers = [
-    'login', // 登录服务器始终在最前
-    ...lobbyServers.sort(), // 所有lobby服务器，按字母顺序排序
-    ...otherMinigameServers.filter(serverId => serverId !== 'login'), // 其他游戏服务器
-  ];
 
   return {
     survival: SERVER_GROUPS.survival,
+    lobby: {
+      ...SERVER_GROUPS.lobby,
+      servers: lobbyServers,
+    },
     minigame: {
       ...SERVER_GROUPS.minigame,
-      servers: dynamicMinigameServers,
+      servers: otherMinigameServers,
     },
   };
 };
