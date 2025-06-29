@@ -524,7 +524,7 @@ const PlayerCovenant: React.FC = () => {
                 >
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
                         <ExternalLink className="h-4 w-4 text-white" />
                       </div>
                       <div className="text-left">
