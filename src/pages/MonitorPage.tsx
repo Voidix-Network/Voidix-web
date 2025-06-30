@@ -4,6 +4,7 @@
  * 显示UptimeRobot监控状态的主页面，类似Discord状态页面的设计风格
  */
 
+import { BreadcrumbNavigation } from '@/components';
 import { ServiceItem } from '@/components/business/ServiceItem';
 import { SEO } from '@/components/seo';
 import { EnhancedMonitor, uptimeRobotApi } from '@/services/uptimeRobotApi';
@@ -114,74 +115,75 @@ export const MonitorPage: React.FC = () => {
         canonicalUrl="https://www.voidix.net/monitor"
         enableAnalytics={true}
       />
-      <div className="min-h-screen bg-gray-900">
-        {/* 页面头部 */}
-        <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-b border-gray-700/50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-[#6a93ff] to-[#7367f0] bg-clip-text text-transparent">
-                  监控系统
-                </h1>
-                <div className="flex items-center gap-2 mt-2">
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      overallStatus.text === '全部正常'
-                        ? 'bg-green-400'
-                        : overallStatus.text === '部分故障'
-                          ? 'bg-red-400'
-                          : 'bg-yellow-400'
-                    }`}
-                  />
-                  <span className={`text-lg font-semibold ${overallStatus.color}`}>
-                    {overallStatus.text}
-                  </span>
-                </div>
-              </div>
+      <div className="min-h-screen bg-gray-900 pt-12 pb-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <BreadcrumbNavigation className="mb-8" />
 
-              <div className="flex items-center gap-4">
-                {/* 最后更新时间 */}
-                {lastUpdate && (
-                  <span className="text-sm text-gray-400">
-                    最后更新: {lastUpdate.toLocaleTimeString('zh-CN')}
-                  </span>
-                )}
-
-                {/* 刷新按钮 */}
-                <button
-                  onClick={handleRefresh}
-                  disabled={loading}
-                  className={`
-                    px-4 py-2 rounded-lg border transition-colors
-                    ${
-                      loading
-                        ? 'bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed'
-                        : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500'
-                    }
-                  `}
-                  title="刷新数据"
-                >
-                  <svg
-                    className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          {/* 页面头部 */}
+          <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-b border-gray-700/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-8">
+            <div className="py-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-[#6a93ff] to-[#7367f0] bg-clip-text text-transparent">
+                    监控系统
+                  </h1>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div
+                      className={`w-3 h-3 rounded-full ${
+                        overallStatus.text === '全部正常'
+                          ? 'bg-green-400'
+                          : overallStatus.text === '部分故障'
+                            ? 'bg-red-400'
+                            : 'bg-yellow-400'
+                      }`}
                     />
-                  </svg>
-                </button>
+                    <span className={`text-lg font-semibold ${overallStatus.color}`}>
+                      {overallStatus.text}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  {/* 最后更新时间 */}
+                  {lastUpdate && (
+                    <span className="text-sm text-gray-400">
+                      最后更新: {lastUpdate.toLocaleTimeString('zh-CN')}
+                    </span>
+                  )}
+
+                  {/* 刷新按钮 */}
+                  <button
+                    onClick={handleRefresh}
+                    disabled={loading}
+                    className={`
+                      px-4 py-2 rounded-lg border transition-colors
+                      ${
+                        loading
+                          ? 'bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed'
+                          : 'bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500'
+                      }
+                    `}
+                    title="刷新数据"
+                  >
+                    <svg
+                      className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* 主要内容 */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* 错误提示（非致命错误） */}
           {error && monitors.length > 0 && (
             <div className="mb-6 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
@@ -221,14 +223,14 @@ export const MonitorPage: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
 
-        {/* 页面底部信息 */}
-        <div className="bg-gray-800/50 border-t border-gray-700/50 mt-12">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between text-sm text-gray-400">
-              <span className="text-gray-500">监控服务运行状态，检测频率 5 分钟</span>
-              <span>数据每分钟自动更新</span>
+          {/* 页面底部信息 */}
+          <div className="bg-gray-800/50 border-t border-gray-700/50 mt-12 -mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="px-4 sm:px-6 lg:px-8 py-6">
+              <div className="flex items-center justify-between text-sm text-gray-400">
+                <span className="text-gray-500">监控服务运行状态，检测频率 5 分钟</span>
+                <span>数据每分钟自动更新</span>
+              </div>
             </div>
           </div>
         </div>

@@ -109,28 +109,34 @@
           "availableLanguage": "Chinese"
         },
         "foundingDate": "2025",
-        "location": {
-          "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
           "addressCountry": "CN"
         },
         "keywords": "Minecraft服务器,小游戏服务器,生存服务器,公益服务器,起床战争,空岛战争",
-        "serviceType": "游戏服务器",
-        "areaServed": "CN"
+        "areaServed": {
+          "@type": "Country",
+          "name": "China"
+        }
       }
     </script>
 
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Game",
+        "@type": "VideoGame",
         "name": "Voidix Minecraft服务器",
         "description": "Voidix是一个永久免费的Minecraft公益服务器，我们提供稳定的起床战争、空岛战争等小游戏。低延迟，致力于为玩家打造一个公平、互助、绿色的MC玩家社区。",
         "gameLocation": {
           "@type": "Place",
-          "addressCountry": "CN"
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "CN"
+          }
         },
         "numberOfPlayers": "1-200",
-        "gamePlatform": ["PC Java版", "基岩版"],
+        "playMode": "https://schema.org/MultiPlayer",
+        "gamePlatform": ["PC", "Java Edition"],
         "genre": ["沙盒游戏", "小游戏", "生存游戏"],
         "gameItem": [
           {
