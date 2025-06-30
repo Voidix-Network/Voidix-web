@@ -74,15 +74,17 @@ show_help() {
     echo "  -h, --help     显示此帮助信息"
     echo ""
     echo "组合选项："
-    echo "  --git-build    Git更新 + 构建"
-    echo "  --nginx-reload Nginx配置更新 + 重载"
-    echo "  --build-reload 构建 + 重载"
+    echo "  --git-build        Git更新 + 构建"
+    echo "  --git-build-reload Git更新 + 构建 + 重载"
+    echo "  --nginx-reload     Nginx配置更新 + 重载"
+    echo "  --build-reload     构建 + 重载"
     echo ""
     echo "示例："
-    echo "  $0              # 完整部署（默认）"
-    echo "  $0 --nginx      # 只更新Nginx配置"
-    echo "  $0 --build      # 只构建项目"
-    echo "  $0 --git-build  # 更新代码并构建"
+    echo "  $0                     # 完整部署（默认）"
+    echo "  $0 --nginx             # 只更新Nginx配置"
+    echo "  $0 --build             # 只构建项目"
+    echo "  $0 --git-build         # 更新代码并构建"
+    echo "  $0 --git-build-reload  # 更新代码、构建并重载"
     echo ""
     echo "注意：所有操作都需要root权限"
 }
@@ -105,9 +107,44 @@ update_git() {
     log_info "暂存本地更改..."
     git stash push -m "Auto-stash before deployment $(date '+%Y-%m-%d %H:%M:%S')" || true
 
+    # 获取远程更新
+    log_info "获取远程更新..."
+    git fetch origin
+
+    # 检查当前分支状态
+    CURRENT_BRANCH=$(git branch --show-current)
+
+    if [[ -z "$CURRENT_BRANCH" ]]; then
+        # 处理detached HEAD状态
+        log_info "检测到detached HEAD状态，切换到主分支..."
+
+        # 尝试确定目标分支（优先级：master > main > ci/deploy）
+        TARGET_BRANCH=""
+        if git show-ref --verify --quiet refs/remotes/origin/master; then
+            TARGET_BRANCH="master"
+        elif git show-ref --verify --quiet refs/remotes/origin/main; then
+            TARGET_BRANCH="main"
+        elif git show-ref --verify --quiet refs/remotes/origin/ci/deploy; then
+            TARGET_BRANCH="ci/deploy"
+        else
+            log_error "无法找到有效的目标分支"
+            git stash pop || true
+            exit 1
+        fi
+
+        log_info "切换到分支: $TARGET_BRANCH"
+        if ! git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"; then
+            log_error "分支切换失败"
+            git stash pop || true
+            exit 1
+        fi
+
+        CURRENT_BRANCH="$TARGET_BRANCH"
+    fi
+
     # 获取最新代码
-    log_info "拉取最新代码..."
-    if ! git pull origin $(git branch --show-current); then
+    log_info "拉取最新代码到分支: $CURRENT_BRANCH"
+    if ! git pull origin "$CURRENT_BRANCH"; then
         log_error "Git pull失败"
         # 尝试恢复暂存的更改
         git stash pop || true
@@ -352,6 +389,14 @@ main() {
                 DO_BUILD=true
                 DO_COMPRESS=true
                 DO_PERMISSIONS=true
+                DO_FULL_DEPLOY=false
+                ;;
+            --git-build-reload)
+                DO_GIT=true
+                DO_BUILD=true
+                DO_COMPRESS=true
+                DO_PERMISSIONS=true
+                DO_RELOAD=true
                 DO_FULL_DEPLOY=false
                 ;;
             --nginx-reload)
