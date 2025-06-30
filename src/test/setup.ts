@@ -52,8 +52,28 @@ console.error = (...args: any[]) => {
   return originalConsoleError.apply(console, args);
 };
 
+// Mock window.location to use production URL in tests
+Object.defineProperty(window, 'location', {
+  value: {
+    href: 'https://www.voidix.net/',
+    origin: 'https://www.voidix.net',
+    protocol: 'https:',
+    host: 'www.voidix.net',
+    hostname: 'www.voidix.net',
+    port: '',
+    pathname: '/',
+    search: '',
+    hash: '',
+    assign: vi.fn(),
+    replace: vi.fn(),
+    reload: vi.fn(),
+  },
+  writable: true,
+  configurable: true,
+});
+
 // 初始化所有必要的Mock对象
 initializeBrowserMocks();
 initializeWebSocketMocks();
 
-console.log('✅ 测试环境初始化完成');
+console.log('✅ 测试环境初始化完成 - window.location已设置为生产URL');

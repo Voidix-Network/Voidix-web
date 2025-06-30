@@ -31,8 +31,10 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
     // 路径映射
     const pathMap: Record<string, string> = {
       status: '服务器状态',
+      monitor: '监控系统',
       faq: '常见问题',
       'bug-report': 'Bug反馈',
+      privacy: '隐私政策',
     };
 
     let currentPath = '';
@@ -52,39 +54,94 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
 
   const breadcrumbs = items || generateBreadcrumbs();
 
-  // 生成结构化数据
+  // 生成结构化数据（全局唯一，强化去重）
   React.useEffect(() => {
     if (breadcrumbs.length <= 1) return;
+
+    // 获取正确的域名（强制使用生产域名避免测试URL）
+    const getBaseUrl = () => {
+      // 始终使用生产域名，避免测试域名出现在结构化数据中
+      return 'https://www.voidix.net';
+    };
+
+    const baseUrl = getBaseUrl();
 
     const breadcrumbSchema = {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
-      itemListElement: breadcrumbs.map((item, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        name: item.label,
-        ...(item.href && { item: `https://www.voidix.net${item.href}` }),
-      })),
+      itemListElement: breadcrumbs.map((item, index) => {
+        const listItem: any = {
+          '@type': 'ListItem',
+          position: index + 1,
+          name: item.label,
+        };
+
+        // 为每个面包屑项添加item属性，确保URL正确
+        if (item.href) {
+          listItem.item = {
+            '@type': 'Thing',
+            '@id': `${baseUrl}${item.href}`,
+          };
+        } else if (item.isCurrentPage && index > 0) {
+          // 当前页面使用当前路径
+          listItem.item = {
+            '@type': 'Thing',
+            '@id': `${baseUrl}${location.pathname}`,
+          };
+        }
+
+        return listItem;
+      }),
     };
 
-    // 创建或更新面包屑结构化数据
-    const existingScript = document.querySelector('script[data-schema="breadcrumb"]');
-    if (existingScript) {
-      existingScript.remove();
-    }
+    // 强化去重：移除所有可能的面包屑结构化数据
+    const removeExistingBreadcrumbs = () => {
+      // 通过data-schema属性移除
+      const schemaScripts = document.querySelectorAll('script[data-schema="breadcrumb"]');
+      schemaScripts.forEach(script => script.remove());
 
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.setAttribute('data-schema', 'breadcrumb');
-    script.textContent = JSON.stringify(breadcrumbSchema);
-    document.head.appendChild(script);
+      // 通过内容特征移除BreadcrumbList
+      const allScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      allScripts.forEach(script => {
+        try {
+          const data = JSON.parse(script.textContent || '');
+          if (data['@type'] === 'BreadcrumbList') {
+            script.remove();
+          }
+        } catch {
+          // 忽略无效JSON
+        }
+      });
+    };
+
+    removeExistingBreadcrumbs();
+
+    // 短暂延迟确保DOM操作完成
+    const timeoutId = setTimeout(() => {
+      // 再次检查并移除重复
+      removeExistingBreadcrumbs();
+
+      // 创建新的面包屑结构化数据
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.setAttribute('data-schema', 'breadcrumb');
+      script.setAttribute('data-component', 'BreadcrumbNavigation');
+      script.textContent = JSON.stringify(breadcrumbSchema, null, 0);
+
+      // 插入到head的特定位置
+      const head = document.head;
+      const existingMeta = head.querySelector('meta[name="viewport"]');
+      if (existingMeta && existingMeta.nextSibling) {
+        head.insertBefore(script, existingMeta.nextSibling);
+      } else {
+        head.appendChild(script);
+      }
+    }, 10);
 
     // 清理函数
     return () => {
-      const scriptToRemove = document.querySelector('script[data-schema="breadcrumb"]');
-      if (scriptToRemove) {
-        scriptToRemove.remove();
-      }
+      clearTimeout(timeoutId);
+      removeExistingBreadcrumbs();
     };
   }, [breadcrumbs]);
 
@@ -95,19 +152,9 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
 
   return (
     <nav aria-label="面包屑导航" className={`flex items-center space-x-2 text-sm ${className}`}>
-      <ol
-        className="flex items-center space-x-2"
-        itemScope
-        itemType="https://schema.org/BreadcrumbList"
-      >
+      <ol className="flex items-center space-x-2">
         {breadcrumbs.map((item, index) => (
-          <li
-            key={index}
-            className="flex items-center space-x-2"
-            itemProp="itemListElement"
-            itemScope
-            itemType="https://schema.org/ListItem"
-          >
+          <li key={index} className="flex items-center space-x-2">
             {/* 分隔符 */}
             {index > 0 && <ChevronRight className="w-4 h-4 text-gray-300" aria-hidden="true" />}
 
@@ -116,26 +163,21 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
               <Link
                 to={item.href}
                 className="text-gray-300 hover:text-white transition-colors flex items-center space-x-1"
-                itemProp="item"
               >
                 {index === 0 && <Home className="w-4 h-4" />}
-                <span itemProp="name">{item.label}</span>
+                <span>{item.label}</span>
               </Link>
             ) : (
               <span
                 className={`${
                   item.isCurrentPage ? 'text-white font-medium' : 'text-gray-300'
                 } flex items-center space-x-1`}
-                itemProp="name"
                 aria-current={item.isCurrentPage ? 'page' : undefined}
               >
                 {index === 0 && <Home className="w-4 h-4" />}
                 <span>{item.label}</span>
               </span>
             )}
-
-            {/* 隐藏的位置信息用于结构化数据 */}
-            <meta itemProp="position" content={String(index + 1)} />
           </li>
         ))}
       </ol>
