@@ -3,8 +3,8 @@
 # =============================================================================
 # Voidix网站部署脚本 v2.0 - 模块化版本
 # =============================================================================
-# 功能：Git更新 → 更新配置 → 构建 → 极致压缩 → 部署 → 重载
-# 特色：集成Git自动更新 + Brotli-11 + Gzip-9极致压缩（适合低并发高性能服务器）
+# 功能：Git更新 → 更新配置 → 构建 → 压缩 → 部署 → 重载
+# 特色：集成Git自动更新 + Brotli + Gzip预压缩（适合低并发服务器）
 # 模块化：支持单独执行各个部署步骤
 # 域名：www.voidix.net
 # 目标路径：/var/www/voidix.net
@@ -173,9 +173,9 @@ build_project() {
     log_success "项目构建完成"
 }
 
-# 4. 🏆 极致压缩静态文件模块
+# 4. 压缩静态文件模块
 compress_files() {
-    log_module "预压缩静态文件（Brotli-11 + Gzip-9）"
+    log_module "预压缩静态文件（Brotli + Gzip）"
     cd "$SERVER_PATH"
 
     # 配置变量
@@ -255,8 +255,8 @@ compress_files() {
 
     # 简单的总体效果统计
     if [ $gzip_files -gt 0 ] || [ $brotli_files -gt 0 ]; then
-        log_info "  🎯 压缩完成！网站将获得极致的加载速度"
-        log_info "  💡 预期效果: Brotli可节省80%+带宽，Gzip节省70%+带宽"
+        log_info "  ✅ 压缩完成，提升网站加载速度"
+        log_info "  💡 预期效果: Brotli可节省约80%带宽，Gzip节省约70%带宽"
     else
         log_info "  ⚠️  没有生成压缩文件，请检查文件大小和压缩工具"
     fi
@@ -297,13 +297,13 @@ set_permissions() {
 show_completion() {
     echo ""
     echo "==============================================="
-    echo "🏆 部署成功完成"
+    echo "✅ 部署完成"
     echo "🌐 网站地址: https://www.voidix.net"
     echo "📁 部署路径: $SERVER_PATH"
     echo "⚙️  配置文件: $NGINX_CONFIG_PATH"
     echo "🔄 Git更新: 自动暂存本地更改 + 拉取最新代码"
-    echo "🚀 压缩配置: Brotli-11 + Gzip-9 + 预压缩文件"
-    echo "💡 压缩收益: 预计节省80%+带宽"
+    echo "📦 压缩配置: Brotli + Gzip 预压缩文件"
+    echo "💡 压缩收益: 预计节省约80%带宽"
     echo "==============================================="
 }
 
@@ -378,7 +378,7 @@ main() {
     # 检查权限
     check_permissions
 
-    echo "🏆 开始部署..."
+    echo "📦 开始部署..."
 
     # 根据参数执行相应操作
     if [ "$DO_FULL_DEPLOY" = true ]; then
@@ -399,7 +399,7 @@ main() {
         [ "$DO_PERMISSIONS" = true ] && set_permissions
         [ "$DO_RELOAD" = true ] && reload_nginx
 
-        log_success "🏆 指定操作完成！"
+        log_success "✅ 指定操作完成"
     fi
 }
 

@@ -1,4 +1,4 @@
-name: 🧠 智能生产环境部署
+name: 🚀 自动化生产环境部署
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
 jobs:
   # 直接部署 - 代码已通过PR检查
   deploy:
-    name: 🚀 智能生产环境部署
+    name: 🚀 自动化生产环境部署
     runs-on: ubuntu-latest
     environment: production
     outputs:
@@ -35,10 +35,10 @@ jobs:
           restore-keys: |
             voidix-deployment-
 
-      - name: 🔍 智能分析变更并确定部署策略
+      - name: 🔍 分析变更并确定部署策略
         id: changes
         run: |
-          echo "🔍 智能分析代码变更..."
+          echo "🔍 分析代码变更..."
 
           # 获取上一次成功部署的提交哈希
           LAST_DEPLOY_SHA=""
@@ -168,7 +168,7 @@ jobs:
           ^CONTRIBUTING\.
           "
 
-          # 🧠 智能分析变更类型
+          # 分析变更类型
           NGINX_CHANGES=false
           FRONTEND_CHANGES=false
           CONFIG_CHANGES=false
@@ -178,7 +178,7 @@ jobs:
           DEPLOYMENT_REQUIRED=false
 
           echo ""
-          echo "🧠 智能分析变更类型..."
+          echo "📋 分析变更类型..."
 
           while IFS= read -r file; do
             if [[ -n "$file" ]]; then
@@ -250,7 +250,7 @@ jobs:
             fi
           done <<< "$CHANGED_FILES"
 
-          # 🎯 智能决策部署策略
+          # 决策部署策略
           if [[ "$DEPLOYMENT_REQUIRED" == false ]]; then
             echo ""
             echo "⏭️ 未检测到需要部署的代码变更，跳过部署"
@@ -268,7 +268,7 @@ jobs:
           echo "🚀 部署脚本: $SCRIPT_CHANGES"
           echo "📦 依赖变更: $DEPENDENCY_CHANGES"
 
-          # 🧠 智能选择部署策略
+          # 选择部署策略
           DEPLOY_STRATEGY=""
           STRATEGY_DESCRIPTION=""
 
@@ -329,10 +329,10 @@ jobs:
           echo "🔑 添加服务器到已知主机列表..."
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: 🚀 智能部署到生产服务器
+      - name: 🚀 部署到生产服务器
         if: steps.changes.outputs.deploy_needed == 'true'
         run: |
-          echo "🚀 开始智能部署到生产服务器..."
+          echo "🚀 开始部署到生产服务器..."
           echo "🎯 部署策略: ${{ steps.changes.outputs.deploy_strategy }}"
           echo "📝 策略描述: ${{ steps.changes.outputs.strategy_description }}"
 
@@ -341,13 +341,13 @@ jobs:
             set -e
 
             # 显示部署信息
-            echo "🏆 Smart Production Deployment Started"
-            echo "📅 Time: $(date)"
-            echo "🖥️  Server: $(hostname)"
-            echo "👤 User: $(whoami)"
-            echo "📁 Target: ${{ env.DEPLOY_PATH }}"
-            echo "🎯 Strategy: ${{ steps.changes.outputs.deploy_strategy }}"
-            echo "📝 Description: ${{ steps.changes.outputs.strategy_description }}"
+            echo "🚀 生产环境部署开始"
+            echo "📅 时间: $(date)"
+            echo "🖥️  服务器: $(hostname)"
+            echo "👤 用户: $(whoami)"
+            echo "📁 目标: ${{ env.DEPLOY_PATH }}"
+            echo "🎯 策略: ${{ steps.changes.outputs.deploy_strategy }}"
+            echo "📝 描述: ${{ steps.changes.outputs.strategy_description }}"
             echo ""
 
             # 切换到部署目录
@@ -391,9 +391,9 @@ jobs:
             echo "🔧 设置脚本执行权限..."
             chmod +x "$DEPLOY_SCRIPT_PATH"
 
-            # 🧠 根据策略智能执行部署
+            # 根据策略执行部署
             DEPLOY_STRATEGY="${{ steps.changes.outputs.deploy_strategy }}"
-            echo "🔥 执行智能部署策略: $DEPLOY_STRATEGY"
+            echo "🔥 执行部署策略: $DEPLOY_STRATEGY"
 
             if [[ "$DEPLOY_STRATEGY" == "full" ]]; then
               echo "🌟 执行完整部署..."
@@ -417,11 +417,11 @@ jobs:
             fi
 
             echo ""
-            echo "🎉 Smart Deployment completed successfully!"
-            echo "🌐 Website: https://www.voidix.net"
-            echo "⏰ Completed at: $(date)"
-            echo "📝 Deployment commit: ${{ github.sha }}"
-            echo "🎯 Used strategy: $DEPLOY_STRATEGY"
+            echo "🎉 部署成功完成!"
+            echo "🌐 网站: https://www.voidix.net"
+            echo "⏰ 完成时间: $(date)"
+            echo "📝 部署提交: ${{ github.sha }}"
+            echo "🎯 使用策略: $DEPLOY_STRATEGY"
           DEPLOY_SCRIPT
 
       - name: 📝 记录部署提交
@@ -440,28 +440,28 @@ jobs:
           path: .deployment_record
           key: voidix-deployment-${{ github.sha }}
 
-      - name: ⏭️ 智能部署跳过通知
+      - name: ⏭️ 部署跳过通知
         if: steps.changes.outputs.deploy_needed == 'false'
         run: |
-          echo "⏭️ 智能部署已跳过"
+          echo "⏭️ 部署已跳过"
           echo "📋 原因: 未检测到需要重新部署的代码变更"
           echo "💡 只有文档、测试文件或配置文件发生了变更"
-          echo "🧠 智能分析确保资源高效利用"
+          echo "🔍 自动分析确保资源高效利用"
 
-      - name: ✅ 智能部署成功通知
+      - name: ✅ 部署成功通知
         if: success() && steps.changes.outputs.deploy_needed == 'true'
         run: |
-          echo "🎉 智能部署成功完成！"
+          echo "🎉 部署成功完成！"
           echo "🌐 网站地址: https://www.voidix.net"
           echo "📅 部署时间: $(date)"
           echo "🎯 使用策略: ${{ steps.changes.outputs.deploy_strategy }}"
           echo "📝 策略描述: ${{ steps.changes.outputs.strategy_description }}"
-          echo "⚡ 智能化部署提升效率和稳定性"
+          echo "⚡ 自动化部署提升效率和稳定性"
 
-      - name: ❌ 智能部署失败通知
+      - name: ❌ 部署失败通知
         if: failure() && steps.changes.outputs.deploy_needed == 'true'
         run: |
-          echo "❌ 智能部署失败！"
+          echo "❌ 部署失败！"
           echo "🎯 尝试的策略: ${{ steps.changes.outputs.deploy_strategy }}"
           echo "📝 策略描述: ${{ steps.changes.outputs.strategy_description }}"
           echo "📋 请查看上述错误信息进行排查"
@@ -494,17 +494,17 @@ jobs:
             echo "⚠️ HTTPS检查异常"
           fi
 
-      - name: 📊 智能部署总结
+      - name: 📊 部署总结
         run: |
           echo ""
           echo "================================================="
-          echo "🏆 智能部署完成总结"
+          echo "✅ 部署完成总结"
           echo "================================================="
           echo "📅 部署时间: $(date)"
           echo "🌐 网站地址: https://www.voidix.net"
-          echo "🔄 部署方式: 智能化自动CICD"
+          echo "🔄 部署方式: 自动化CICD"
           echo "🎯 使用策略: ${{ needs.deploy.outputs.deploy_strategy || '完整部署' }}"
           echo "📝 策略描述: ${{ needs.deploy.outputs.strategy_description || '标准部署流程' }}"
           echo "✅ 状态: 成功完成"
-          echo "⚡ 效率优化: 根据变更类型智能选择部署方式"
+          echo "⚡ 效率优化: 根据变更类型自动选择部署方式"
           echo "================================================="
