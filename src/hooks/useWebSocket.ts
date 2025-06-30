@@ -1,5 +1,6 @@
 import { WebSocketService } from '@/services/websocket';
 import { useServerStore } from '@/stores';
+import { useAggregatedStore } from '@/stores/aggregatedStore';
 import type { ConnectionStatus } from '@/types';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -44,19 +45,26 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
   const serviceRef = useRef<InstanceType<typeof WebSocketService> | null>(null);
 
+  const aggregatedStore = useAggregatedStore();
+
   let store;
   try {
     store = useServerStore();
   } catch (error) {
     console.error('[useWebSocket] Store获取失败:', error);
-    store = null;
+    store = {
+      connectionStatus: 'disconnected' as ConnectionStatus,
+      updateConnectionStatus: () => {
+        console.warn('[useWebSocket] updateConnectionStatus方法不可用');
+      },
+    };
   }
 
   // 安全检查：确保store存在且包含必要方法
   if (!store) {
     console.error('[useWebSocket] Store未初始化');
     return {
-      connectionStatus: 'disconnected',
+      connectionStatus: 'disconnected' as ConnectionStatus,
       isConnected: false,
       reconnectAttempts: 0,
       connect: async () => {
@@ -70,7 +78,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
   }
 
   // 安全地获取store方法，提供默认值
-  const connectionStatus = store.connectionStatus || 'disconnected';
+  const connectionStatus = store.connectionStatus || ('disconnected' as ConnectionStatus);
   const updateConnectionStatus =
     store.updateConnectionStatus ||
     (() => {
@@ -126,6 +134,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     (() => {
       console.warn('[useWebSocket] updatePlayerIgn方法不可用');
     });
+
+  // 初始化聚合Store（确保连接状态监听器被设置）
+  useEffect(() => {
+    aggregatedStore.initialize();
+  }, []);
 
   /**
    * 初始化WebSocket服务
@@ -507,7 +520,7 @@ export function useWebSocketStatus() {
   }
 
   return {
-    connectionStatus: store.connectionStatus || 'disconnected',
+    connectionStatus: store.connectionStatus || ('disconnected' as ConnectionStatus),
     servers: store.servers || {},
     aggregateStats: store.aggregateStats || { totalPlayers: 0, onlineServers: 0, totalUptime: 0 },
     isMaintenance: store.isMaintenance || false,

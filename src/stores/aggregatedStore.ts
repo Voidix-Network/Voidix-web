@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import type { FullUpdateData } from './types';
 import { useConnectionStore } from './connectionStore';
-import { useServerDataStore } from './serverDataStore';
-import { usePlayerTrackingStore } from './playerTrackingStore';
+import { useNoticeStore } from './noticeStore';
 import { usePlayerIgnStore } from './playerIgnStore';
+import { usePlayerTrackingStore } from './playerTrackingStore';
+import { useServerDataStore } from './serverDataStore';
+import type { FullUpdateData } from './types';
 import { useUptimeStore } from './uptimeStore';
 
 /**
@@ -30,6 +31,9 @@ interface AggregatedStoreActions {
   handlePlayerRemove: (playerId: string) => void;
   handlePlayerMove: (playerId: string, fromServer: string, toServer: string) => void;
 
+  // 连接状态控制运行时间跟踪
+  handleConnectionStatusChange: (status: string) => void;
+
   // 初始化和重置
   initialize: () => void;
   reset: () => void;
@@ -50,32 +54,31 @@ export const useAggregatedStore = create<AggregatedStoreState & AggregatedStoreA
      * @param data - 完整更新数据
      */
     handleFullUpdate: (data: FullUpdateData) => {
-      // 获取所有子store的实例
-      const connectionStore = useConnectionStore.getState();
       const serverDataStore = useServerDataStore.getState();
       const uptimeStore = useUptimeStore.getState();
+      const connectionStore = useConnectionStore.getState();
 
-      // 更新服务器数据
-      if (data.servers) {
+      if (import.meta.env.DEV) {
+        console.log('[AggregatedStore] 处理完整状态更新', data);
+      }
+
+      // 批量更新服务器数据
+      if (data.servers && Object.keys(data.servers).length > 0) {
         serverDataStore.updateMultipleServers(data.servers);
       }
 
-      // 更新总玩家数
-      if (data.players?.online) {
-        serverDataStore.updateTotalPlayers(data.players.online);
-      }
-
       // 更新运行时间
-      if (data.runningTime !== undefined && data.totalRunningTime !== undefined) {
-        // 确保转换为数字类型，WebSocket传来的可能是字符串
-        const runningTimeNum =
-          typeof data.runningTime === 'string' ? parseInt(data.runningTime, 10) : data.runningTime;
-        const totalRunningTimeNum =
+      if (data.runningTime !== undefined || data.totalRunningTime !== undefined) {
+        const runningTime =
+          typeof data.runningTime === 'string' ? parseInt(data.runningTime) : data.runningTime;
+        const totalRunningTime =
           typeof data.totalRunningTime === 'string'
-            ? parseInt(data.totalRunningTime, 10)
+            ? parseInt(data.totalRunningTime)
             : data.totalRunningTime;
 
-        uptimeStore.updateRunningTime(runningTimeNum, totalRunningTimeNum);
+        if (runningTime !== undefined && totalRunningTime !== undefined) {
+          uptimeStore.updateRunningTime(runningTime, totalRunningTime);
+        }
       }
 
       // 更新维护状态
@@ -88,8 +91,12 @@ export const useAggregatedStore = create<AggregatedStoreState & AggregatedStoreA
       // 更新全局数据更新时间
       connectionStore.updateLastUpdateTime();
 
-      // 如果不在维护模式，启动实时运行时间跟踪
-      if (!data.isMaintenance && !connectionStore.forceShowMaintenance) {
+      // 只有在连接正常且不在维护模式时才启动实时运行时间跟踪
+      const isConnected = connectionStore.connectionStatus === 'connected';
+      const shouldTrackTime =
+        isConnected && !data.isMaintenance && !connectionStore.forceShowMaintenance;
+
+      if (shouldTrackTime) {
         uptimeStore.startRealtimeUptimeTracking();
       } else {
         uptimeStore.stopRealtimeUptimeTracking();
@@ -276,38 +283,88 @@ export const useAggregatedStore = create<AggregatedStoreState & AggregatedStoreA
     },
 
     /**
-     * 初始化聚合Store
+     * 处理连接状态变化，控制运行时间跟踪
+     * @param status - 新的连接状态
      */
-    initialize: () => {
-      set({ isInitialized: true });
+    handleConnectionStatusChange: (status: string) => {
+      const uptimeStore = useUptimeStore.getState();
+      const connectionStore = useConnectionStore.getState();
 
       if (import.meta.env.DEV) {
-        console.log('[AggregatedStore] 聚合Store已初始化');
+        console.log('[AggregatedStore] 连接状态变化:', status);
+      }
+
+      // 当连接断开时，停止运行时间跟踪
+      if (status !== 'connected') {
+        uptimeStore.stopRealtimeUptimeTracking();
+        if (import.meta.env.DEV) {
+          console.log('[AggregatedStore] 连接断开，停止运行时间跟踪');
+        }
+      } else {
+        // 连接恢复时，如果不在维护模式，重新启动运行时间跟踪
+        if (!connectionStore.isMaintenance && !connectionStore.forceShowMaintenance) {
+          uptimeStore.startRealtimeUptimeTracking();
+          if (import.meta.env.DEV) {
+            console.log('[AggregatedStore] 连接恢复，重新启动运行时间跟踪');
+          }
+        }
       }
     },
 
     /**
-     * 重置所有store状态
+     * 初始化聚合Store
+     * 设置各种监听器和状态同步
      */
-    reset: () => {
-      const connectionStore = useConnectionStore.getState();
-      const serverDataStore = useServerDataStore.getState();
-      const playerTrackingStore = usePlayerTrackingStore.getState();
-      const playerIgnStore = usePlayerIgnStore.getState();
-      const uptimeStore = useUptimeStore.getState();
-
-      // 重置所有子store
-      connectionStore.updateConnectionStatus('disconnected');
-      serverDataStore.reset();
-      playerTrackingStore.reset();
-      playerIgnStore.reset();
-      uptimeStore.reset();
-
-      set({ isInitialized: false });
+    initialize: () => {
+      if (get().isInitialized) {
+        return;
+      }
 
       if (import.meta.env.DEV) {
-        console.log('[AggregatedStore] 所有store状态已重置');
+        console.log('[AggregatedStore] 初始化聚合Store');
       }
+
+      // 监听连接状态变化，控制运行时间跟踪
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      void useConnectionStore.subscribe(
+        state => state.connectionStatus,
+        connectionStatus => {
+          get().handleConnectionStatusChange(connectionStatus);
+        }
+      );
+
+      // 存储取消订阅函数（如果需要清理的话）
+      // 在实际应用中，这个订阅通常会持续整个应用生命周期
+
+      set({ isInitialized: true });
+    },
+
+    /**
+     * 重置聚合Store
+     * 清理所有状态和监听器
+     */
+    reset: () => {
+      const serverDataStore = useServerDataStore.getState();
+      const uptimeStore = useUptimeStore.getState();
+      const connectionStore = useConnectionStore.getState();
+      const noticeStore = useNoticeStore.getState();
+      const playerIgnStore = usePlayerIgnStore.getState();
+      const playerTrackingStore = usePlayerTrackingStore.getState();
+
+      // 停止运行时间跟踪
+      uptimeStore.stopRealtimeUptimeTracking();
+
+      // 重置各个子store
+      serverDataStore.reset();
+      uptimeStore.reset();
+      noticeStore.reset();
+      playerIgnStore.reset();
+      playerTrackingStore.reset();
+
+      // 重置连接状态
+      connectionStore.updateConnectionStatus('disconnected');
+
+      set({ isInitialized: false });
     },
   }))
 );

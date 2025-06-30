@@ -60,7 +60,12 @@ export const getServerDisplayName = (
 ): string => {
   // 检查是否为大厅服务器
   if (isLobbyServer(serverId)) {
-    return '小游戏大厅';
+    // 提取lobby服务器的数字编号
+    const match = serverId.match(/lobby(\d+)/i);
+    if (match) {
+      return `${match[1]}号主大厅`;
+    }
+    return '主大厅';
   }
 
   // 使用备用名称映射或原始ID

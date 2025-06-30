@@ -40,7 +40,6 @@ export const SERVER_DISPLAY_NAMES = {
   bedwars_other: '起床战争 (其他)',
   survival: '生存服务器',
   login: '登录服务器',
-  lobby1: '小游戏大厅', // 修正：实际服务器名称是lobby1
   thepit: '天坑乱斗 (thepit)',
   knockioffa: '击退战场 (knockioffa)',
 } as const;
