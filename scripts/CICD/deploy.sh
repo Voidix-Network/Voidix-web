@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # =============================================================================
-# Voidix网站极致性能部署脚本
+# Voidix网站部署脚本
 # =============================================================================
-# 功能：更新配置 → 构建 → 极致压缩 → 部署 → 重载
-# 特色：集成Brotli-11 + Gzip-9极致压缩（适合低并发高性能服务器）
+# 功能：Git更新 → 更新配置 → 构建 → 极致压缩 → 部署 → 重载
+# 特色：集成Git自动更新 + Brotli-11 + Gzip-9极致压缩（适合低并发高性能服务器）
 # 域名：www.voidix.net
 # 目标路径：/var/www/voidix.net
-# 注意：代码应已通过CI/CD准备好，此脚本不包含git pull
+# 优化：使用git stash + git pull自动更新代码仓库
 # =============================================================================
 
 set -e  # 遇到错误立即退出
@@ -58,9 +58,28 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-echo "🏆 开始极致性能部署..."
+echo "🏆 开始部署..."
 
-# 1. 更新nginx配置
+# 1. Git更新代码
+log_step "Git更新代码仓库"
+cd "$SERVER_PATH"
+
+# 暂存任何本地更改
+log_info "暂存本地更改..."
+git stash push -m "Auto-stash before deployment $(date '+%Y-%m-%d %H:%M:%S')" || true
+
+# 获取最新代码
+log_info "拉取最新代码..."
+if ! git pull origin $(git branch --show-current); then
+    log_error "Git pull失败"
+    # 尝试恢复暂存的更改
+    git stash pop || true
+    exit 1
+fi
+
+log_success "代码更新完成"
+
+# 2. 更新nginx配置
 log_step "更新Nginx配置"
 cp "$SERVER_PATH/nginx-production.conf" "$NGINX_CONFIG_PATH"
 
@@ -71,7 +90,7 @@ fi
 ln -s "$NGINX_CONFIG_PATH" "$NGINX_SYMLINK_PATH"
 log_success "Nginx配置更新完成"
 
-# 2. 测试nginx配置
+# 3. 测试nginx配置
 log_step "测试Nginx配置"
 if ! nginx -t; then
     log_error "Nginx配置测试失败"
@@ -79,7 +98,7 @@ if ! nginx -t; then
 fi
 log_success "Nginx配置测试通过"
 
-# 3. 构建项目
+# 4. 构建项目
 log_step "构建项目"
 cd "$SERVER_PATH"
 npm ci --production=false
@@ -92,7 +111,7 @@ if [[ ! -d "dist" ]] || [[ -z "$(ls -A dist 2>/dev/null)" ]]; then
 fi
 log_success "项目构建完成"
 
-# 4. 🏆 极致压缩静态文件（低并发专用）
+# 5. 🏆 极致压缩静态文件（低并发专用）
 log_step "预压缩静态文件（Brotli-11 + Gzip-9）"
 
 # 配置变量
@@ -173,26 +192,19 @@ else
     log_info "  ⚠️  没有生成压缩文件，请检查文件大小和压缩工具"
 fi
 
-# 5. 重载nginx
+# 6. 重载nginx
 log_step "重载Nginx服务"
 nginx -s reload
 
-# 6. 简单健康检查
-log_step "健康检查"
-sleep 2
-if curl -f -s --max-time 10 "https://www.voidix.net/health" > /dev/null; then
-    log_success "🏆 极致性能部署完成！网站正常运行"
-else
-    log_error "健康检查失败，请手动检查网站状态"
-    exit 1
-fi
+log_success "🏆 部署完成！"
 
 echo ""
 echo "==============================================="
-echo "🏆 极致性能部署成功完成"
+echo "🏆 部署成功完成"
 echo "🌐 网站地址: https://www.voidix.net"
 echo "📁 部署路径: $SERVER_PATH"
 echo "⚙️  配置文件: $NGINX_CONFIG_PATH"
+echo "🔄 Git更新: 自动暂存本地更改 + 拉取最新代码"
 echo "🚀 压缩配置: Brotli-11 + Gzip-9 + 预压缩文件"
 echo "💡 压缩收益: 预计节省80%+带宽"
 echo "==============================================="

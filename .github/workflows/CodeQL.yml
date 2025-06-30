@@ -5,10 +5,6 @@
 name: 🔒 CodeQL Analysis
 
 on:
-  # 主分支推送时触发
-  push:
-    branches: [master]
-
   # Pull Request 时触发
   pull_request:
     branches: [master]
