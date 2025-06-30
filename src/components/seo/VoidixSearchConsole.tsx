@@ -9,10 +9,6 @@ interface VoidixSearchConsoleProps {
   enableSogouVerification?: boolean;
   enableShenmaVerification?: boolean;
   enableBytedanceVerification?: boolean;
-  /**
-   * 用户是否已同意分析/市场营销跟踪
-   */
-  hasConsented?: boolean;
 }
 
 /**
@@ -35,7 +31,6 @@ export const VoidixSearchConsole: React.FC<VoidixSearchConsoleProps> = ({
   enableSogouVerification = true,
   enableShenmaVerification = true,
   enableBytedanceVerification = true,
-  hasConsented = false, // 保留参数以防向后兼容，但不使用
 }) => {
   const verificationCodes = {
     google:
