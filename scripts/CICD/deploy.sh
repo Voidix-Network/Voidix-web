@@ -107,9 +107,44 @@ update_git() {
     log_info "暂存本地更改..."
     git stash push -m "Auto-stash before deployment $(date '+%Y-%m-%d %H:%M:%S')" || true
 
+    # 获取远程更新
+    log_info "获取远程更新..."
+    git fetch origin
+
+    # 检查当前分支状态
+    CURRENT_BRANCH=$(git branch --show-current)
+
+    if [[ -z "$CURRENT_BRANCH" ]]; then
+        # 处理detached HEAD状态
+        log_info "检测到detached HEAD状态，切换到主分支..."
+
+        # 尝试确定目标分支（优先级：master > main > ci/deploy）
+        TARGET_BRANCH=""
+        if git show-ref --verify --quiet refs/remotes/origin/master; then
+            TARGET_BRANCH="master"
+        elif git show-ref --verify --quiet refs/remotes/origin/main; then
+            TARGET_BRANCH="main"
+        elif git show-ref --verify --quiet refs/remotes/origin/ci/deploy; then
+            TARGET_BRANCH="ci/deploy"
+        else
+            log_error "无法找到有效的目标分支"
+            git stash pop || true
+            exit 1
+        fi
+
+        log_info "切换到分支: $TARGET_BRANCH"
+        if ! git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"; then
+            log_error "分支切换失败"
+            git stash pop || true
+            exit 1
+        fi
+
+        CURRENT_BRANCH="$TARGET_BRANCH"
+    fi
+
     # 获取最新代码
-    log_info "拉取最新代码..."
-    if ! git pull origin $(git branch --show-current); then
+    log_info "拉取最新代码到分支: $CURRENT_BRANCH"
+    if ! git pull origin "$CURRENT_BRANCH"; then
         log_error "Git pull失败"
         # 尝试恢复暂存的更改
         git stash pop || true
