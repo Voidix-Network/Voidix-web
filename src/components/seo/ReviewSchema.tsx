@@ -122,10 +122,10 @@ export const ReviewSchema: React.FC<ReviewSchemaProps> = ({
           '@type': 'VideoGame',
           name: 'Minecraft',
           genre: ['沙盒游戏', '建造游戏', '多人在线游戏'],
-          platform: 'Minecraft Java Edition',
+          gamePlatform: ['PC', 'Java Edition'],
         },
         serverStatus: 'active',
-        playMode: 'MultiPlayer',
+        playMode: 'https://schema.org/MultiPlayer',
         ...(itemDescription && { description: itemDescription }),
         ...(finalAggregateRating && {
           aggregateRating: {

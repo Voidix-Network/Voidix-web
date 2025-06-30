@@ -85,6 +85,7 @@ export const PrivacyPolicyPage: React.FC = () => {
       <SEO
         pageKey="privacy"
         type="article"
+        url="https://www.voidix.net/privacy"
         canonicalUrl="https://www.voidix.net/privacy"
         enableAnalytics={true}
         additionalMeta={[

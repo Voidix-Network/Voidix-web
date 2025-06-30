@@ -5,7 +5,7 @@
 import { MonitorPage } from '@/pages/MonitorPage';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock the entire API service module with factory functions
@@ -451,5 +451,166 @@ describe('MonitorPage', () => {
 
       expect(statusElements.length).toBeGreaterThan(0);
     }, 5000);
+  });
+});
+
+/**
+ * MonitorPage 面包屑测试
+ */
+describe('MonitorPage 面包屑测试', () => {
+  let helmetContext: any;
+  let mockGetMonitors: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    // 清理DOM中的所有JSON-LD script标签
+    document.querySelectorAll('script[type="application/ld+json"]').forEach(script => {
+      script.remove();
+    });
+
+    // 获取mock函数
+    const mockedModule = await import('@/services/uptimeRobotApi');
+    mockGetMonitors = (mockedModule as any).__mockGetMonitors;
+
+    // 为面包屑测试提供简单的空数据，避免API调用干扰
+    mockGetMonitors.mockResolvedValue([]);
+
+    helmetContext = {};
+  });
+
+  afterEach(() => {
+    // 测试后清理
+    document.querySelectorAll('script[type="application/ld+json"]').forEach(script => {
+      script.remove();
+    });
+  });
+
+  /**
+   * 获取页面上的BreadcrumbList数据
+   */
+  const getBreadcrumbListData = () => {
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+
+    for (const script of scripts) {
+      try {
+        const data = JSON.parse(script.textContent || '');
+        if (data['@type'] === 'BreadcrumbList') {
+          return data;
+        }
+      } catch (error) {
+        // 忽略无效JSON
+      }
+    }
+
+    return null;
+  };
+
+  /**
+   * 渲染页面助手
+   */
+  const renderPageWithRouter = (initialPath = '/monitor') => {
+    return render(
+      <HelmetProvider context={helmetContext}>
+        <MemoryRouter initialEntries={[initialPath]}>
+          <MonitorPage />
+        </MemoryRouter>
+      </HelmetProvider>
+    );
+  };
+
+  it('MonitorPage应该显示正确的面包屑导航', async () => {
+    renderPageWithRouter('/monitor');
+
+    // 等待组件挂载和useEffect执行
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const breadcrumbData = getBreadcrumbListData();
+
+    expect(breadcrumbData).toBeTruthy();
+    expect(breadcrumbData['@type']).toBe('BreadcrumbList');
+    expect(breadcrumbData.itemListElement).toHaveLength(2);
+
+    // 检查首页链接
+    const homeItem = breadcrumbData.itemListElement[0];
+    expect(homeItem.name).toBe('首页');
+    expect(homeItem.position).toBe(1);
+    expect(homeItem.item).toBeTruthy();
+    expect(homeItem.item['@type']).toBe('Thing');
+    expect(homeItem.item['@id']).toBe('https://www.voidix.net/');
+
+    // 检查监控页面链接
+    const monitorItem = breadcrumbData.itemListElement[1];
+    expect(monitorItem.name).toBe('监控系统');
+    expect(monitorItem.position).toBe(2);
+    // 当前页面也应该有item属性指向正确的URL
+    expect(monitorItem.item).toBeTruthy();
+    expect(monitorItem.item['@type']).toBe('Thing');
+    expect(monitorItem.item['@id']).toBe('https://www.voidix.net/monitor');
+  });
+
+  it('MonitorPage面包屑应该使用正确的中文标签', async () => {
+    renderPageWithRouter('/monitor');
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const breadcrumbData = getBreadcrumbListData();
+    const jsonString = JSON.stringify(breadcrumbData);
+
+    // 确保使用中文标签
+    expect(jsonString).toContain('监控系统');
+    expect(jsonString).toContain('首页');
+
+    // 确保使用正确的生产域名
+    expect(jsonString).toContain('https://www.voidix.net');
+  });
+
+  it('MonitorPage应该只有一个BreadcrumbList数据', async () => {
+    renderPageWithRouter('/monitor');
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+    let breadcrumbCount = 0;
+
+    scripts.forEach(script => {
+      try {
+        const data = JSON.parse(script.textContent || '');
+        if (data['@type'] === 'BreadcrumbList') {
+          breadcrumbCount++;
+        }
+      } catch (error) {
+        // 忽略无效JSON
+      }
+    });
+
+    expect(breadcrumbCount).toBe(1);
+  });
+
+  it('MonitorPage面包屑应该符合Schema.org标准', async () => {
+    renderPageWithRouter('/monitor');
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const breadcrumbData = getBreadcrumbListData();
+
+    expect(breadcrumbData).toBeTruthy();
+
+    // 基本Schema.org属性
+    expect(breadcrumbData['@context']).toBe('https://schema.org');
+    expect(breadcrumbData['@type']).toBe('BreadcrumbList');
+    expect(breadcrumbData.itemListElement).toBeTruthy();
+    expect(Array.isArray(breadcrumbData.itemListElement)).toBe(true);
+
+    // 检查每个面包屑项
+    breadcrumbData.itemListElement.forEach((item: any, index: number) => {
+      expect(item['@type']).toBe('ListItem');
+      expect(item.position).toBe(index + 1);
+      expect(item.name).toBeTruthy();
+      expect(typeof item.name).toBe('string');
+
+      // 如果有item属性，检查其格式
+      if (item.item) {
+        expect(item.item['@type']).toBe('Thing');
+        expect(item.item['@id']).toBeTruthy();
+        expect(typeof item.item['@id']).toBe('string');
+        expect(item.item['@id']).toMatch(/^https:\/\//);
+      }
+    });
   });
 });

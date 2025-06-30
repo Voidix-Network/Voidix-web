@@ -144,6 +144,7 @@ export const StatusPage: React.FC = () => {
       <SEO
         pageKey="status"
         type="website"
+        url="https://www.voidix.net/status"
         canonicalUrl="https://www.voidix.net/status"
         enableAnalytics={true}
       />

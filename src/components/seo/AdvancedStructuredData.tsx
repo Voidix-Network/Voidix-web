@@ -97,8 +97,8 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     name: 'Voidix Minecraft Server',
     description: '公益、开放、包容的Minecraft多人游戏服务器，提供丰富小游戏与优质社区体验',
     genre: ['沙盒游戏', '建造游戏', '多人在线游戏', '公益服务器'],
-    platform: 'Minecraft Java Edition',
-    playMode: 'MultiPlayer',
+    gamePlatform: ['PC', 'Java Edition'],
+    playMode: 'https://schema.org/MultiPlayer',
     applicationCategory: 'Game',
     operatingSystem: 'Java',
     publisher: {
@@ -188,37 +188,7 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
     privacyPolicy: `${websiteUrl}/privacy`,
   };
 
-  // FAQPage Schema - 常见问题页面
-  const faqPageSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: '如何连接到Voidix服务器？',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: '打开Minecraft客户端，点击多人游戏，添加服务器，输入Voidix服务器地址即可连接。',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Voidix服务器支持哪些游戏模式？',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Voidix支持生存模式、创造模式、小游戏模式等多种游戏模式，满足不同玩家的需求。',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Voidix服务器是否免费？',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: '是的，Voidix是完全免费的Minecraft服务器，所有玩家都可以免费加入游戏。',
-        },
-      },
-    ],
-  };
+  // 注意：FAQPage结构化数据由专门的FAQSchema组件管理，避免重复
 
   // 条件格式化：开发环境格式化便于调试，生产环境压缩节省体积
   const formatJson = (data: any) => {
@@ -231,7 +201,6 @@ export const AdvancedStructuredData: React.FC<AdvancedStructuredDataProps> = ({
       <script type="application/ld+json">{formatJson(websiteSchema)}</script>
       <script type="application/ld+json">{formatJson(gameSchema)}</script>
       <script type="application/ld+json">{formatJson(softwareApplicationSchema)}</script>
-      <script type="application/ld+json">{formatJson(faqPageSchema)}</script>
 
       {/* 额外的meta标签 */}
       <meta name="application-name" content={organizationName} />

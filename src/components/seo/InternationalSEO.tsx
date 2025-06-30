@@ -45,8 +45,12 @@ export const InternationalSEO: React.FC<InternationalSEOProps> = ({
   const generateHreflangTags = () => {
     if (!enableHreflang || availableLanguages.length <= 1) return [];
 
-    const baseUrl = window.location.origin;
-    const currentPath = window.location.pathname;
+    const baseUrl =
+      typeof window !== 'undefined' && window.location.origin
+        ? window.location.origin
+        : 'https://www.voidix.net';
+    const currentPath =
+      typeof window !== 'undefined' && window.location.pathname ? window.location.pathname : '/';
 
     const hreflangTags = availableLanguages.map(lang => {
       let href = `${baseUrl}${lang.url}`;
@@ -223,7 +227,11 @@ export const useLanguageSwitcher = (
   const switchLanguage = (languageCode: string) => {
     const targetLanguage = availableLanguages.find(lang => lang.code === languageCode);
     if (targetLanguage) {
-      const targetUrl = `${window.location.origin}${targetLanguage.url}`;
+      const baseUrl =
+        typeof window !== 'undefined' && window.location.origin
+          ? window.location.origin
+          : 'https://www.voidix.net';
+      const targetUrl = `${baseUrl}${targetLanguage.url}`;
 
       // 平滑切换到目标语言
       window.location.href = targetUrl;
@@ -231,7 +239,8 @@ export const useLanguageSwitcher = (
   };
 
   const getCurrentLanguage = () => {
-    const path = window.location.pathname;
+    const path =
+      typeof window !== 'undefined' && window.location.pathname ? window.location.pathname : '/';
     return (
       availableLanguages.find(
         lang => path.startsWith(lang.url) || (lang.url === '/' && path === '/')
@@ -251,7 +260,9 @@ export const useLanguageSwitcher = (
 export const generateMultilingualSitemap = (
   routes: string[],
   languages: Array<{ code: string; url: string; region?: string }>,
-  baseUrl: string = window.location.origin
+  baseUrl: string = typeof window !== 'undefined' && window.location.origin
+    ? window.location.origin
+    : 'https://www.voidix.net'
 ): string => {
   const sitemapEntries = routes.flatMap(route => {
     return languages.map(lang => {
