@@ -1,4 +1,4 @@
-name: 🚀 Production Deployment
+name: 🧠 智能生产环境部署
 
 on:
   push:
@@ -12,19 +12,21 @@ env:
 jobs:
   # 直接部署 - 代码已通过PR检查
   deploy:
-    name: 🚀 Deploy to Production
+    name: 🚀 智能生产环境部署
     runs-on: ubuntu-latest
     environment: production
     outputs:
       deployed: ${{ steps.changes.outputs.deploy_needed }}
+      deploy_strategy: ${{ steps.changes.outputs.deploy_strategy }}
+      strategy_description: ${{ steps.changes.outputs.strategy_description }}
 
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 检出代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # 获取完整历史
 
-      - name: 📁 Restore Deployment Record
+      - name: 📁 恢复部署记录
         uses: actions/cache/restore@v3
         id: cache-restore
         with:
@@ -33,10 +35,10 @@ jobs:
           restore-keys: |
             voidix-deployment-
 
-      - name: 🔍 Check for Code Changes
+      - name: 🔍 智能分析变更并确定部署策略
         id: changes
         run: |
-          echo "🔍 检查代码变更..."
+          echo "🔍 智能分析代码变更..."
 
           # 获取上一次成功部署的提交哈希
           LAST_DEPLOY_SHA=""
@@ -122,6 +124,7 @@ jobs:
           if [[ "$LAST_DEPLOY_SHA" == "${{ github.sha }}" ]]; then
             echo "🔄 当前提交与上次部署相同，跳过部署"
             echo "deploy_needed=false" >> $GITHUB_OUTPUT
+            echo "deploy_strategy=skip" >> $GITHUB_OUTPUT
             exit 0
           else
             echo "🔍 比较上次部署到当前的变更"
@@ -134,11 +137,13 @@ jobs:
           # 如果没有检测到任何变更文件，根据情况决定
           if [[ -z "$CHANGED_FILES" ]]; then
             if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-              echo "⚠️ 手动触发且未检测到文件变更，执行部署"
+              echo "⚠️ 手动触发且未检测到文件变更，执行完整部署"
               echo "deploy_needed=true" >> $GITHUB_OUTPUT
+              echo "deploy_strategy=full" >> $GITHUB_OUTPUT
             else
               echo "⏭️ 自动触发且未检测到文件变更，跳过部署"
               echo "deploy_needed=false" >> $GITHUB_OUTPUT
+              echo "deploy_strategy=skip" >> $GITHUB_OUTPUT
             fi
             exit 0
           fi
@@ -163,73 +168,186 @@ jobs:
           ^CONTRIBUTING\.
           "
 
-          # 检查是否有需要部署的实质性变更
+          # 🧠 智能分析变更类型
+          NGINX_CHANGES=false
+          FRONTEND_CHANGES=false
+          CONFIG_CHANGES=false
+          ASSETS_CHANGES=false
+          SCRIPT_CHANGES=false
+          DEPENDENCY_CHANGES=false
           DEPLOYMENT_REQUIRED=false
+
+          echo ""
+          echo "🧠 智能分析变更类型..."
 
           while IFS= read -r file; do
             if [[ -n "$file" ]]; then
-              echo "🔍 检查文件: $file"
+              echo "🔍 分析文件: $file"
 
               # 检查文件是否匹配排除模式
               SHOULD_EXCLUDE=false
               while IFS= read -r pattern; do
-                if [[ -n "$pattern" ]]; then
-                  echo "  测试模式: '$pattern'"
-                  if [[ "$file" =~ $pattern ]]; then
-                    echo "  ✅ 匹配成功: $file =~ $pattern"
-                    SHOULD_EXCLUDE=true
-                    break
-                  else
-                    echo "  ❌ 匹配失败: $file !~ $pattern"
-                  fi
+                if [[ -n "$pattern" && "$file" =~ $pattern ]]; then
+                  SHOULD_EXCLUDE=true
+                  break
                 fi
               done <<< "$EXCLUDED_PATTERNS"
 
-              if [[ "$SHOULD_EXCLUDE" == false ]]; then
-                echo "✅ 发现需要部署的变更: $file"
-                DEPLOYMENT_REQUIRED=true
-                break
-              else
-                echo "⏭️ 跳过非部署相关文件: $file"
+              if [[ "$SHOULD_EXCLUDE" == true ]]; then
+                echo "  ⏭️ 跳过非部署相关文件"
+                continue
               fi
+
+              DEPLOYMENT_REQUIRED=true
+
+              # 分析文件类型
+              case "$file" in
+                # Nginx 配置文件
+                nginx*.conf|nginx.conf|nginx-*.conf)
+                  echo "  🌐 Nginx配置文件"
+                  NGINX_CHANGES=true
+                  ;;
+
+                # 前端源代码
+                src/*.ts|src/*.tsx|src/*.js|src/*.jsx|src/components/*|src/pages/*|src/hooks/*|src/stores/*|src/services/*|src/utils/*|src/types/*|src/styles/*|src/constants/*)
+                  echo "  ⚛️ 前端源代码"
+                  FRONTEND_CHANGES=true
+                  ;;
+
+                # 静态资源
+                public/*|src/assets/*|*.png|*.jpg|*.jpeg|*.gif|*.svg|*.ico|*.webp)
+                  echo "  🖼️ 静态资源"
+                  ASSETS_CHANGES=true
+                  ;;
+
+                # 配置文件
+                vite.config.*|postcss.config.*|tailwind.config.*|tsconfig.*|package.json|package-lock.json|yarn.lock|pnpm-lock.yaml)
+                  echo "  ⚙️ 配置文件"
+                  CONFIG_CHANGES=true
+                  if [[ "$file" =~ package.*\.json|.*lock.*|yarn\.lock ]]; then
+                    DEPENDENCY_CHANGES=true
+                    echo "  📦 依赖变更"
+                  fi
+                  ;;
+
+                # 部署脚本
+                scripts/CICD/*|scripts/*)
+                  echo "  🚀 部署脚本"
+                  SCRIPT_CHANGES=true
+                  ;;
+
+                # 其他前端相关文件
+                index.html|src/*)
+                  echo "  ⚛️ 前端相关文件"
+                  FRONTEND_CHANGES=true
+                  ;;
+
+                *)
+                  echo "  📄 其他文件"
+                  FRONTEND_CHANGES=true  # 默认当作前端变更
+                  ;;
+              esac
             fi
           done <<< "$CHANGED_FILES"
 
-          if [[ "$DEPLOYMENT_REQUIRED" == true ]]; then
-            echo "🚀 检测到代码变更，继续部署"
-            echo "deploy_needed=true" >> $GITHUB_OUTPUT
-          else
+          # 🎯 智能决策部署策略
+          if [[ "$DEPLOYMENT_REQUIRED" == false ]]; then
+            echo ""
             echo "⏭️ 未检测到需要部署的代码变更，跳过部署"
             echo "deploy_needed=false" >> $GITHUB_OUTPUT
+            echo "deploy_strategy=skip" >> $GITHUB_OUTPUT
+            exit 0
           fi
 
-      - name: 🔧 Setup SSH Key
+          echo ""
+          echo "📊 变更分析结果:"
+          echo "🌐 Nginx配置: $NGINX_CHANGES"
+          echo "⚛️ 前端代码: $FRONTEND_CHANGES"
+          echo "⚙️ 配置文件: $CONFIG_CHANGES"
+          echo "🖼️ 静态资源: $ASSETS_CHANGES"
+          echo "🚀 部署脚本: $SCRIPT_CHANGES"
+          echo "📦 依赖变更: $DEPENDENCY_CHANGES"
+
+          # 🧠 智能选择部署策略
+          DEPLOY_STRATEGY=""
+          STRATEGY_DESCRIPTION=""
+
+          if [[ "$NGINX_CHANGES" == true && "$FRONTEND_CHANGES" == false && "$CONFIG_CHANGES" == false ]]; then
+            # 只有Nginx配置变更
+            DEPLOY_STRATEGY="--nginx-reload"
+            STRATEGY_DESCRIPTION="🌐 Nginx配置优化部署"
+
+          elif [[ "$NGINX_CHANGES" == false && "$FRONTEND_CHANGES" == true && "$DEPENDENCY_CHANGES" == false ]]; then
+            # 只有前端代码变更，无依赖变更
+            DEPLOY_STRATEGY="--git-build-reload"
+            STRATEGY_DESCRIPTION="⚛️ 前端代码快速部署"
+
+          elif [[ "$NGINX_CHANGES" == false && "$ASSETS_CHANGES" == true && "$FRONTEND_CHANGES" == false ]]; then
+            # 只有静态资源变更
+            DEPLOY_STRATEGY="--build-reload"
+            STRATEGY_DESCRIPTION="🖼️ 静态资源优化部署"
+
+          elif [[ "$NGINX_CHANGES" == true && "$FRONTEND_CHANGES" == true && "$DEPENDENCY_CHANGES" == false ]]; then
+            # Nginx + 前端变更，无依赖变更
+            DEPLOY_STRATEGY="--git-build-reload"
+            STRATEGY_DESCRIPTION="🌐⚛️ 配置+代码联合部署"
+
+          elif [[ "$DEPENDENCY_CHANGES" == true ]]; then
+            # 有依赖变更，需要完整部署
+            DEPLOY_STRATEGY="full"
+            STRATEGY_DESCRIPTION="📦 依赖更新完整部署"
+
+          elif [[ "$SCRIPT_CHANGES" == true ]]; then
+            # 部署脚本变更，完整部署
+            DEPLOY_STRATEGY="full"
+            STRATEGY_DESCRIPTION="🚀 部署脚本更新完整部署"
+
+          else
+            # 混合变更或其他情况，完整部署
+            DEPLOY_STRATEGY="full"
+            STRATEGY_DESCRIPTION="🔄 混合变更完整部署"
+          fi
+
+          echo ""
+          echo "🎯 选择的部署策略: $DEPLOY_STRATEGY"
+          echo "📝 策略描述: $STRATEGY_DESCRIPTION"
+          echo ""
+
+          echo "deploy_needed=true" >> $GITHUB_OUTPUT
+          echo "deploy_strategy=$DEPLOY_STRATEGY" >> $GITHUB_OUTPUT
+          echo "strategy_description=$STRATEGY_DESCRIPTION" >> $GITHUB_OUTPUT
+
+      - name: 🔧 配置SSH密钥
         if: steps.changes.outputs.deploy_needed == 'true'
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 🌐 Add Server to Known Hosts
+      - name: 🌐 添加服务器到已知主机
         if: steps.changes.outputs.deploy_needed == 'true'
         run: |
-          echo "🔑 Adding server to known hosts..."
+          echo "🔑 添加服务器到已知主机列表..."
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: 🚀 Deploy to Production Server
+      - name: 🚀 智能部署到生产服务器
         if: steps.changes.outputs.deploy_needed == 'true'
         run: |
-          echo "🚀 开始部署到生产服务器..."
+          echo "🚀 开始智能部署到生产服务器..."
+          echo "🎯 部署策略: ${{ steps.changes.outputs.deploy_strategy }}"
+          echo "📝 策略描述: ${{ steps.changes.outputs.strategy_description }}"
 
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} << 'DEPLOY_SCRIPT'
             # 设置错误时立即退出
             set -e
 
             # 显示部署信息
-            echo "🏆 Production Deployment Started"
+            echo "🏆 Smart Production Deployment Started"
             echo "📅 Time: $(date)"
             echo "🖥️  Server: $(hostname)"
             echo "👤 User: $(whoami)"
             echo "📁 Target: ${{ env.DEPLOY_PATH }}"
+            echo "🎯 Strategy: ${{ steps.changes.outputs.deploy_strategy }}"
+            echo "📝 Description: ${{ steps.changes.outputs.strategy_description }}"
             echo ""
 
             # 切换到部署目录
@@ -273,18 +391,40 @@ jobs:
             echo "🔧 设置脚本执行权限..."
             chmod +x "$DEPLOY_SCRIPT_PATH"
 
-            # 运行部署脚本（确保在正确目录下执行）
-            echo "🔥 Running deployment script from $(pwd)..."
-            sudo "$DEPLOY_SCRIPT_PATH"
+            # 🧠 根据策略智能执行部署
+            DEPLOY_STRATEGY="${{ steps.changes.outputs.deploy_strategy }}"
+            echo "🔥 执行智能部署策略: $DEPLOY_STRATEGY"
+
+            if [[ "$DEPLOY_STRATEGY" == "full" ]]; then
+              echo "🌟 执行完整部署..."
+              sudo "$DEPLOY_SCRIPT_PATH"
+
+            elif [[ "$DEPLOY_STRATEGY" == "--nginx-reload" ]]; then
+              echo "🌐 执行Nginx配置优化部署..."
+              sudo "$DEPLOY_SCRIPT_PATH" --nginx-reload
+
+            elif [[ "$DEPLOY_STRATEGY" == "--git-build-reload" ]]; then
+              echo "⚛️ 执行代码快速部署..."
+              sudo "$DEPLOY_SCRIPT_PATH" --git-build-reload
+
+            elif [[ "$DEPLOY_STRATEGY" == "--build-reload" ]]; then
+              echo "🖼️ 执行静态资源优化部署..."
+              sudo "$DEPLOY_SCRIPT_PATH" --build-reload
+
+            else
+              echo "⚠️ 未知部署策略，执行完整部署..."
+              sudo "$DEPLOY_SCRIPT_PATH"
+            fi
 
             echo ""
-            echo "🎉 Deployment completed successfully!"
+            echo "🎉 Smart Deployment completed successfully!"
             echo "🌐 Website: https://www.voidix.net"
             echo "⏰ Completed at: $(date)"
             echo "📝 Deployment commit: ${{ github.sha }}"
+            echo "🎯 Used strategy: $DEPLOY_STRATEGY"
           DEPLOY_SCRIPT
 
-      - name: 📝 Record Deployment Commit
+      - name: 📝 记录部署提交
         if: success() && steps.changes.outputs.deploy_needed == 'true'
         run: |
           echo "📝 记录本次部署commit..."
@@ -293,43 +433,50 @@ jobs:
           echo "🏷️  ${{ github.ref_name }}" >> .deployment_record
           echo "✅ 部署记录已保存"
 
-      - name: 💾 Save Deployment Record
+      - name: 💾 保存部署记录
         if: success() && steps.changes.outputs.deploy_needed == 'true'
         uses: actions/cache/save@v3
         with:
           path: .deployment_record
           key: voidix-deployment-${{ github.sha }}
 
-      - name: ⏭️ Deployment Skipped Notification
+      - name: ⏭️ 智能部署跳过通知
         if: steps.changes.outputs.deploy_needed == 'false'
         run: |
-          echo "⏭️ 部署已跳过"
+          echo "⏭️ 智能部署已跳过"
           echo "📋 原因: 未检测到需要重新部署的代码变更"
           echo "💡 只有文档、测试文件或配置文件发生了变更"
+          echo "🧠 智能分析确保资源高效利用"
 
-      - name: ✅ Deployment Success Notification
+      - name: ✅ 智能部署成功通知
         if: success() && steps.changes.outputs.deploy_needed == 'true'
         run: |
-          echo "🎉 部署成功完成！"
+          echo "🎉 智能部署成功完成！"
           echo "🌐 网站地址: https://www.voidix.net"
           echo "📅 部署时间: $(date)"
+          echo "🎯 使用策略: ${{ steps.changes.outputs.deploy_strategy }}"
+          echo "📝 策略描述: ${{ steps.changes.outputs.strategy_description }}"
+          echo "⚡ 智能化部署提升效率和稳定性"
 
-      - name: ❌ Deployment Failure Notification
+      - name: ❌ 智能部署失败通知
         if: failure() && steps.changes.outputs.deploy_needed == 'true'
         run: |
-          echo "❌ 部署失败！请检查日志。"
-          echo "📋 请查看上述错误信息进行排查。"
+          echo "❌ 智能部署失败！"
+          echo "🎯 尝试的策略: ${{ steps.changes.outputs.deploy_strategy }}"
+          echo "📝 策略描述: ${{ steps.changes.outputs.strategy_description }}"
+          echo "📋 请查看上述错误信息进行排查"
+          echo "💡 可以尝试手动触发完整部署: workflow_dispatch"
           exit 1
 
   # 部署后验证
   post-deployment-verification:
-    name: 🔍 Post-deployment Verification
+    name: 🔍 部署后验证
     runs-on: ubuntu-latest
     needs: [deploy]
     if: success() && needs.deploy.outputs.deployed == 'true'
 
     steps:
-      - name: 🌐 Website Accessibility Check
+      - name: 🌐 网站可访问性检查
         run: |
           echo "🌐 检查网站可访问性..."
 
@@ -347,14 +494,17 @@ jobs:
             echo "⚠️ HTTPS检查异常"
           fi
 
-      - name: 📊 Deployment Summary
+      - name: 📊 智能部署总结
         run: |
           echo ""
-          echo "==============================================="
-          echo "🏆 部署完成总结"
-          echo "==============================================="
+          echo "================================================="
+          echo "🏆 智能部署完成总结"
+          echo "================================================="
           echo "📅 部署时间: $(date)"
           echo "🌐 网站地址: https://www.voidix.net"
-          echo "🔄 部署方式: 自动化CICD"
+          echo "🔄 部署方式: 智能化自动CICD"
+          echo "🎯 使用策略: ${{ needs.deploy.outputs.deploy_strategy || '完整部署' }}"
+          echo "📝 策略描述: ${{ needs.deploy.outputs.strategy_description || '标准部署流程' }}"
           echo "✅ 状态: 成功完成"
-          echo "==============================================="
+          echo "⚡ 效率优化: 根据变更类型智能选择部署方式"
+          echo "================================================="
