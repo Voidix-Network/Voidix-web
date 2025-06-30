@@ -74,15 +74,17 @@ show_help() {
     echo "  -h, --help     显示此帮助信息"
     echo ""
     echo "组合选项："
-    echo "  --git-build    Git更新 + 构建"
-    echo "  --nginx-reload Nginx配置更新 + 重载"
-    echo "  --build-reload 构建 + 重载"
+    echo "  --git-build        Git更新 + 构建"
+    echo "  --git-build-reload Git更新 + 构建 + 重载"
+    echo "  --nginx-reload     Nginx配置更新 + 重载"
+    echo "  --build-reload     构建 + 重载"
     echo ""
     echo "示例："
-    echo "  $0              # 完整部署（默认）"
-    echo "  $0 --nginx      # 只更新Nginx配置"
-    echo "  $0 --build      # 只构建项目"
-    echo "  $0 --git-build  # 更新代码并构建"
+    echo "  $0                     # 完整部署（默认）"
+    echo "  $0 --nginx             # 只更新Nginx配置"
+    echo "  $0 --build             # 只构建项目"
+    echo "  $0 --git-build         # 更新代码并构建"
+    echo "  $0 --git-build-reload  # 更新代码、构建并重载"
     echo ""
     echo "注意：所有操作都需要root权限"
 }
@@ -352,6 +354,14 @@ main() {
                 DO_BUILD=true
                 DO_COMPRESS=true
                 DO_PERMISSIONS=true
+                DO_FULL_DEPLOY=false
+                ;;
+            --git-build-reload)
+                DO_GIT=true
+                DO_BUILD=true
+                DO_COMPRESS=true
+                DO_PERMISSIONS=true
+                DO_RELOAD=true
                 DO_FULL_DEPLOY=false
                 ;;
             --nginx-reload)
