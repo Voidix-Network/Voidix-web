@@ -35,14 +35,14 @@ export const VoidixSearchConsole: React.FC<VoidixSearchConsoleProps> = ({
   enableSogouVerification = true,
   enableShenmaVerification = true,
   enableBytedanceVerification = true,
-  hasConsented = false, // 默认值为 false
+  hasConsented = false, // 保留参数以防向后兼容，但不使用
 }) => {
   const verificationCodes = {
     google:
       import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ||
       'x62Vza2dGv7nroz1AUYAkN0JkN69WgemhDZer5xQO1U',
     bing: import.meta.env.VITE_BING_SITE_VERIFICATION || 'D46ABE4CE43F5A97CFCBCE9695BD272A',
-    baidu: import.meta.env.VITE_BAIDU_SITE_VERIFICATION || '2b3c4d5e6f7g8h9i',
+    baidu: import.meta.env.VITE_BAIDU_SITE_VERIFICATION || 'codeva-ZQn2BDBrNs',
     yandex: import.meta.env.VITE_YANDEX_SITE_VERIFICATION || 'c8c53fe069c3a36c',
     sogou: import.meta.env.VITE_SOGOU_SITE_VERIFICATION || 'yv6aPUmTyn',
     shenma:
@@ -53,44 +53,40 @@ export const VoidixSearchConsole: React.FC<VoidixSearchConsoleProps> = ({
 
   return (
     <Helmet>
-      {/* 只有在获得用户同意后才渲染验证标签 */}
-      {hasConsented && (
-        <>
-          {/* Google Search Console 验证 */}
-          {enableGoogleVerification && verificationCodes.google && (
-            <meta name="google-site-verification" content={verificationCodes.google} />
-          )}
+      {/* 搜索引擎验证标签无条件渲染 - 这些不是跟踪工具，只是所有权验证 */}
+      {/* Google Search Console 验证 */}
+      {enableGoogleVerification && verificationCodes.google && (
+        <meta name="google-site-verification" content={verificationCodes.google} />
+      )}
 
-          {/* Bing Webmaster Tools 验证 */}
-          {enableBingVerification && verificationCodes.bing && (
-            <meta name="msvalidate.01" content={verificationCodes.bing} />
-          )}
+      {/* Bing Webmaster Tools 验证 */}
+      {enableBingVerification && verificationCodes.bing && (
+        <meta name="msvalidate.01" content={verificationCodes.bing} />
+      )}
 
-          {/* 百度站长平台验证 */}
-          {enableBaiduVerification && (
-            <meta name="baidu-site-verification" content={verificationCodes.baidu} />
-          )}
+      {/* 百度站长平台验证 */}
+      {enableBaiduVerification && (
+        <meta name="baidu-site-verification" content={verificationCodes.baidu} />
+      )}
 
-          {/* Yandex Webmaster 验证 */}
-          {enableYandexVerification && verificationCodes.yandex && (
-            <meta name="yandex-verification" content={verificationCodes.yandex} />
-          )}
+      {/* Yandex Webmaster 验证 */}
+      {enableYandexVerification && verificationCodes.yandex && (
+        <meta name="yandex-verification" content={verificationCodes.yandex} />
+      )}
 
-          {/* 搜狗站长平台验证 */}
-          {enableSogouVerification && verificationCodes.sogou && (
-            <meta name="sogou_site_verification" content={verificationCodes.sogou} />
-          )}
+      {/* 搜狗站长平台验证 */}
+      {enableSogouVerification && verificationCodes.sogou && (
+        <meta name="sogou_site_verification" content={verificationCodes.sogou} />
+      )}
 
-          {/* 神马搜索验证 */}
-          {enableShenmaVerification && verificationCodes.shenma && (
-            <meta name="shenma-site-verification" content={verificationCodes.shenma} />
-          )}
+      {/* 神马搜索验证 */}
+      {enableShenmaVerification && verificationCodes.shenma && (
+        <meta name="shenma-site-verification" content={verificationCodes.shenma} />
+      )}
 
-          {/* 字节跳动搜索验证（今日头条搜索） */}
-          {enableBytedanceVerification && (
-            <meta name="bytedance-verification-code" content={verificationCodes.bytedance} />
-          )}
-        </>
+      {/* 字节跳动搜索验证（今日头条搜索） */}
+      {enableBytedanceVerification && (
+        <meta name="bytedance-verification-code" content={verificationCodes.bytedance} />
       )}
 
       {/* 网站所有权和爬虫指令 */}
