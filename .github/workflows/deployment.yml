@@ -168,19 +168,20 @@ jobs:
 
           while IFS= read -r file; do
             if [[ -n "$file" ]]; then
-              # 特殊处理：deployment.yml本身的变更需要部署
-              if [[ "$file" == ".github/workflows/deployment.yml" ]]; then
-                echo "✅ 发现部署工作流变更: $file"
-                DEPLOYMENT_REQUIRED=true
-                break
-              fi
+              echo "🔍 检查文件: $file"
 
               # 检查文件是否匹配排除模式
               SHOULD_EXCLUDE=false
               while IFS= read -r pattern; do
-                if [[ -n "$pattern" && "$file" =~ $pattern ]]; then
-                  SHOULD_EXCLUDE=true
-                  break
+                if [[ -n "$pattern" ]]; then
+                  echo "  测试模式: '$pattern'"
+                  if [[ "$file" =~ $pattern ]]; then
+                    echo "  ✅ 匹配成功: $file =~ $pattern"
+                    SHOULD_EXCLUDE=true
+                    break
+                  else
+                    echo "  ❌ 匹配失败: $file !~ $pattern"
+                  fi
                 fi
               done <<< "$EXCLUDED_PATTERNS"
 
