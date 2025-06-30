@@ -151,14 +151,38 @@ export class PuppeteerRenderer {
       try {
         await page.waitForFunction(
           () => {
-            // 检查React是否渲染完成
+            // 检查React是否渲染完成，特别检查主要内容是否存在
             const root = document.querySelector('#root');
-            return root && root.children.length > 0;
+            if (!root || root.children.length === 0) return false;
+
+            // 检查是否还在显示加载状态
+            const loadingElement = document.querySelector('.loading-fade-in');
+            if (loadingElement) return false;
+
+            // 检查主要内容是否已渲染
+            const mainContent = document.querySelector('main');
+            if (!mainContent) return false;
+
+            // 检查h1标签是否存在（为了SEO）
+            const h1Element = document.querySelector('h1');
+            if (!h1Element) return false;
+
+            return true;
           },
-          { timeout: 2000 } // 最多等待2秒
+          { timeout: 8000 } // 增加到8秒等待时间
         );
+
+        // 额外等待一些动画完成
+        await page.waitForTimeout(1000);
+
       } catch (timeoutError) {
         logger.warn(`等待渲染完成超时: ${routePath}, 继续使用当前状态`);
+
+        // 超时后检查当前状态
+        const hasH1 = await page.$('h1');
+        if (!hasH1) {
+          logger.error(`⚠️ 未检测到h1标签: ${routePath}`);
+        }
       }
 
       // 获取初始的、包含骨架屏的HTML
