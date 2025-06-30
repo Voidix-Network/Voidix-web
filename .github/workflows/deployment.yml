@@ -124,7 +124,9 @@ jobs:
           EXCLUDED_PATTERNS="
           \.md$
           ^docs/
-          ^\.github/workflows/(?!deployment\.yml)
+          ^\.github/workflows/
+          ^\.github/ISSUE_TEMPLATE/
+          ^\.github/pull_request_template\.md$
           ^\.gitignore$
           ^LICENSE
           ^codecov\.yml$
@@ -133,6 +135,9 @@ jobs:
           ^src/test/
           \.eslintrc
           \.prettierrc
+          ^README\.
+          ^CHANGELOG\.
+          ^CONTRIBUTING\.
           "
 
           # 检查是否有需要部署的实质性变更
@@ -199,15 +204,47 @@ jobs:
             # 切换到部署目录
             cd ${{ env.DEPLOY_PATH }}
 
+            # 验证这是一个git仓库
+            if [[ ! -d ".git" ]]; then
+              echo "❌ 错误：${{ env.DEPLOY_PATH }} 不是一个git仓库"
+              exit 1
+            fi
+
+            # 确保在正确的工作目录
+            CURRENT_DIR=$(pwd)
+            if [[ "$CURRENT_DIR" != "${{ env.DEPLOY_PATH }}" ]]; then
+              echo "❌ 错误：当前目录 $CURRENT_DIR 不是预期的 ${{ env.DEPLOY_PATH }}"
+              exit 1
+            fi
+
+            echo "✅ 目录验证通过：$CURRENT_DIR"
+
             # 显示当前分支信息
             echo "📊 Current Status:"
             echo "🌿 Current branch: $(git branch --show-current)"
             echo "📝 Latest commit: $(git log -1 --oneline)"
             echo ""
 
-            # 运行部署脚本
-            echo "🔥 Running deployment script..."
-            sudo ./scripts/CICD/deploy.sh
+            # 检查部署脚本是否存在
+            DEPLOY_SCRIPT_PATH="./scripts/CICD/deploy.sh"
+            if [[ ! -f "$DEPLOY_SCRIPT_PATH" ]]; then
+              echo "❌ 部署脚本不存在: $DEPLOY_SCRIPT_PATH"
+              echo "📁 当前目录内容:"
+              ls -la
+              echo "📁 scripts目录内容:"
+              ls -la scripts/ 2>/dev/null || echo "scripts目录不存在"
+              echo "📁 scripts/CICD目录内容:"
+              ls -la scripts/CICD/ 2>/dev/null || echo "scripts/CICD目录不存在"
+              exit 1
+            fi
+
+            # 确保脚本有执行权限
+            echo "🔧 设置脚本执行权限..."
+            chmod +x "$DEPLOY_SCRIPT_PATH"
+
+            # 运行部署脚本（确保在正确目录下执行）
+            echo "🔥 Running deployment script from $(pwd)..."
+            sudo "$DEPLOY_SCRIPT_PATH"
 
             echo ""
             echo "🎉 Deployment completed successfully!"
