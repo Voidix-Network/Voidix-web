@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
 import { ServerStatusCard } from '@/components/business/ServerStatusCard';
 import type { ServerStatus } from '@/types';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
 // 引入测试设置
 import '@/test/setup';
@@ -25,7 +25,7 @@ describe('ServerStatusCard', () => {
       expect(screen.getByText('minigame.voidix.net')).toBeInTheDocument();
 
       // 验证兼容性文本
-      expect(screen.getByText('兼容 1.7.2-最新版')).toBeInTheDocument();
+      expect(screen.getByText('兼容 1.8-1.8.9')).toBeInTheDocument();
     });
 
     it('应该渲染SURVIVAL类型的服务器卡片', () => {
@@ -147,8 +147,34 @@ describe('ServerStatusCard', () => {
         <ServerStatusCard type="MINIGAME" address="test.voidix.net" status="online" players={5} />
       );
 
-      const compatibilityElement = screen.getByText('兼容 1.7.2-最新版');
+      const compatibilityElement = screen.getByText('兼容 1.8-1.8.9');
       expect(compatibilityElement).toHaveClass('mt-2', 'text-xs', 'text-gray-300');
+    });
+
+    it('应该为SURVIVAL服务器显示正确的兼容版本', () => {
+      render(
+        <ServerStatusCard
+          type="SURVIVAL"
+          address="survival.voidix.net"
+          status="online"
+          players={10}
+        />
+      );
+
+      expect(screen.getByText('兼容 1.7.2-latest')).toBeInTheDocument();
+    });
+
+    it('应该为MINIGAME服务器显示正确的兼容版本', () => {
+      render(
+        <ServerStatusCard
+          type="MINIGAME"
+          address="minigame.voidix.net"
+          status="online"
+          players={15}
+        />
+      );
+
+      expect(screen.getByText('兼容 1.8-1.8.9')).toBeInTheDocument();
     });
   });
 

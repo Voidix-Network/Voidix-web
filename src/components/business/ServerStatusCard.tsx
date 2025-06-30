@@ -1,5 +1,5 @@
-import { cn } from '@/utils';
 import { ServerStatus } from '@/types';
+import { cn } from '@/utils';
 
 /**
  * 服务器状态卡片接口
@@ -36,7 +36,16 @@ export const ServerStatusCard: React.FC<ServerStatusCardProps> = ({
     }
   };
 
-  const compatibilityText = '兼容 1.7.2-最新版';
+  const getCompatibilityText = (type: 'MINIGAME' | 'SURVIVAL') => {
+    switch (type) {
+      case 'MINIGAME':
+        return '兼容 1.8-1.8.9';
+      case 'SURVIVAL':
+        return '兼容 1.7.2-latest';
+      default:
+        return '兼容版本未知';
+    }
+  };
 
   return (
     <div
@@ -53,7 +62,7 @@ export const ServerStatusCard: React.FC<ServerStatusCardProps> = ({
 
       <div className="font-mono text-lg font-bold mb-2">{address}</div>
 
-      <div className="mt-2 text-xs text-gray-300">{compatibilityText}</div>
+      <div className="mt-2 text-xs text-gray-300">{getCompatibilityText(type)}</div>
     </div>
   );
 };
