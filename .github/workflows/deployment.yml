@@ -46,15 +46,6 @@ jobs:
             LAST_DEPLOY_SHA=$(cat ".deployment_record" 2>/dev/null | head -1 || echo "")
             if [[ -n "$LAST_DEPLOY_SHA" ]]; then
               echo "📁 从缓存记录获取到上次部署: $LAST_DEPLOY_SHA"
-
-              # 检查该commit是否还存在（处理amend边缘情况）
-              if ! git cat-file -e "$LAST_DEPLOY_SHA" 2>/dev/null; then
-                echo "⚠️ 上次记录的commit不存在，可能被amend了，清除记录"
-                LAST_DEPLOY_SHA=""
-                rm -f ".deployment_record"
-              else
-                echo "✅ 上次部署commit验证通过"
-              fi
             fi
           else
             echo "📝 部署记录文件不存在"
@@ -90,6 +81,38 @@ jobs:
           if [[ -z "$LAST_DEPLOY_SHA" || "$LAST_DEPLOY_SHA" == "null" ]]; then
             echo "🔙 使用备用方案：检查最近5次提交"
             LAST_DEPLOY_SHA="HEAD~5"
+          fi
+
+          # 🛡️ 统一的amend边缘情况检测（对所有获取到的SHA进行验证）
+          if [[ -n "$LAST_DEPLOY_SHA" && "$LAST_DEPLOY_SHA" != "HEAD~5" ]]; then
+            echo "🔍 验证基准commit是否存在..."
+            if ! git cat-file -e "$LAST_DEPLOY_SHA" 2>/dev/null; then
+              echo "⚠️ 基准commit不存在，可能被amend/rebase/force-push了"
+              echo "🔄 fallback到时间策略"
+
+              # fallback到时间策略
+              SINCE_TIME=$(date -d '24 hours ago' --iso-8601 2>/dev/null || date -v-24H +%Y-%m-%dT%H:%M:%S 2>/dev/null || echo "")
+              if [[ -n "$SINCE_TIME" ]]; then
+                LAST_DEPLOY_SHA=$(git log --since="$SINCE_TIME" --format="%H" | tail -1)
+                if [[ -n "$LAST_DEPLOY_SHA" ]]; then
+                  echo "✅ fallback成功，新基准: $LAST_DEPLOY_SHA"
+                else
+                  echo "🔙 时间策略也失败，使用最终备用方案"
+                  LAST_DEPLOY_SHA="HEAD~5"
+                fi
+              else
+                echo "🔙 时间策略失败，使用最终备用方案"
+                LAST_DEPLOY_SHA="HEAD~5"
+              fi
+
+              # 清除可能已损坏的cache记录
+              if [[ -f ".deployment_record" ]]; then
+                echo "🗑️ 清除损坏的部署记录"
+                rm -f ".deployment_record"
+              fi
+            else
+              echo "✅ 基准commit验证通过"
+            fi
           fi
 
           echo "📍 上次部署基准点: $LAST_DEPLOY_SHA"
