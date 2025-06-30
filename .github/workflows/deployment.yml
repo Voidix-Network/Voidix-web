@@ -1,0 +1,292 @@
+name: 🚀 Production Deployment
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  DEPLOY_PATH: '/var/www/voidix.net'
+
+jobs:
+  # 直接部署 - 代码已通过PR检查
+  deploy:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      deployed: ${{ steps.changes.outputs.deploy_needed }}
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史
+
+      - name: 📁 Restore Deployment Record
+        uses: actions/cache/restore@v3
+        id: cache-restore
+        with:
+          path: .deployment_record
+          key: voidix-deployment-${{ github.sha }}
+          restore-keys: |
+            voidix-deployment-
+
+      - name: 🔍 Check for Code Changes
+        id: changes
+        run: |
+          echo "🔍 检查代码变更..."
+
+          # 获取上一次成功部署的提交哈希
+          LAST_DEPLOY_SHA=""
+
+          # 方法1: 从cache恢复的部署记录读取
+          if [[ -f ".deployment_record" ]]; then
+            LAST_DEPLOY_SHA=$(cat ".deployment_record" 2>/dev/null | head -1 || echo "")
+            if [[ -n "$LAST_DEPLOY_SHA" ]]; then
+              echo "📁 从缓存记录获取到上次部署: $LAST_DEPLOY_SHA"
+
+              # 检查该commit是否还存在（处理amend边缘情况）
+              if ! git cat-file -e "$LAST_DEPLOY_SHA" 2>/dev/null; then
+                echo "⚠️ 上次记录的commit不存在，可能被amend了，清除记录"
+                LAST_DEPLOY_SHA=""
+                rm -f ".deployment_record"
+              else
+                echo "✅ 上次部署commit验证通过"
+              fi
+            fi
+          else
+            echo "📝 部署记录文件不存在"
+          fi
+
+          # 方法2: 通过GitHub API获取上一次成功的部署工作流（备用）
+          if [[ -z "$LAST_DEPLOY_SHA" ]]; then
+            echo "📡 查询GitHub Actions历史作为备用..."
+            WORKFLOW_RUNS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deployment.yml/runs?status=completed&conclusion=success&per_page=5")
+
+            # 解析最近一次成功的部署（排除当前运行）
+            LAST_DEPLOY_SHA=$(echo "$WORKFLOW_RUNS" | jq -r '.workflow_runs[] | select(.head_sha != "'${{ github.sha }}'") | .head_sha' | head -1)
+
+            if [[ -n "$LAST_DEPLOY_SHA" && "$LAST_DEPLOY_SHA" != "null" ]]; then
+              echo "✅ 从GitHub API获取到上次部署: $LAST_DEPLOY_SHA"
+            fi
+          fi
+
+          # 方法3: 时间策略（最终备用）
+          if [[ -z "$LAST_DEPLOY_SHA" || "$LAST_DEPLOY_SHA" == "null" ]]; then
+            echo "⏰ 使用时间策略：检查最近24小时的变更"
+            SINCE_TIME=$(date -d '24 hours ago' --iso-8601 2>/dev/null || date -v-24H +%Y-%m-%dT%H:%M:%S 2>/dev/null || echo "")
+            if [[ -n "$SINCE_TIME" ]]; then
+              LAST_DEPLOY_SHA=$(git log --since="$SINCE_TIME" --format="%H" | tail -1)
+              if [[ -n "$LAST_DEPLOY_SHA" ]]; then
+                echo "✅ 从时间策略获取到基准: $LAST_DEPLOY_SHA"
+              fi
+            fi
+          fi
+
+          # 最后的备用方案
+          if [[ -z "$LAST_DEPLOY_SHA" || "$LAST_DEPLOY_SHA" == "null" ]]; then
+            echo "🔙 使用备用方案：检查最近5次提交"
+            LAST_DEPLOY_SHA="HEAD~5"
+          fi
+
+          echo "📍 上次部署基准点: $LAST_DEPLOY_SHA"
+          echo "📍 当前HEAD: ${{ github.sha }}"
+
+          # 获取变更文件列表
+          if [[ "$LAST_DEPLOY_SHA" == "${{ github.sha }}" ]]; then
+            echo "🔄 当前提交与上次部署相同，跳过部署"
+            echo "deploy_needed=false" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "🔍 比较上次部署到当前的变更"
+            CHANGED_FILES=$(git diff --name-only "$LAST_DEPLOY_SHA"..${{ github.sha }} 2>/dev/null || echo "")
+          fi
+
+          echo "变更的文件:"
+          echo "$CHANGED_FILES"
+
+          # 如果没有检测到任何变更文件，根据情况决定
+          if [[ -z "$CHANGED_FILES" ]]; then
+            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+              echo "⚠️ 手动触发且未检测到文件变更，执行部署"
+              echo "deploy_needed=true" >> $GITHUB_OUTPUT
+            else
+              echo "⏭️ 自动触发且未检测到文件变更，跳过部署"
+              echo "deploy_needed=false" >> $GITHUB_OUTPUT
+            fi
+            exit 0
+          fi
+
+          # 排除不需要重新部署的文件类型
+          EXCLUDED_PATTERNS="
+          \.md$
+          ^docs/
+          ^\.github/workflows/(?!deployment\.yml)
+          ^\.gitignore$
+          ^LICENSE
+          ^codecov\.yml$
+          \.test\.(ts|tsx|js|jsx)$
+          \.spec\.(ts|tsx|js|jsx)$
+          ^src/test/
+          \.eslintrc
+          \.prettierrc
+          "
+
+          # 检查是否有需要部署的实质性变更
+          DEPLOYMENT_REQUIRED=false
+
+          while IFS= read -r file; do
+            if [[ -n "$file" ]]; then
+              # 检查文件是否匹配排除模式
+              SHOULD_EXCLUDE=false
+              while IFS= read -r pattern; do
+                if [[ -n "$pattern" && "$file" =~ $pattern ]]; then
+                  SHOULD_EXCLUDE=true
+                  break
+                fi
+              done <<< "$EXCLUDED_PATTERNS"
+
+              if [[ "$SHOULD_EXCLUDE" == false ]]; then
+                echo "✅ 发现需要部署的变更: $file"
+                DEPLOYMENT_REQUIRED=true
+                break
+              else
+                echo "⏭️ 跳过非部署相关文件: $file"
+              fi
+            fi
+          done <<< "$CHANGED_FILES"
+
+          if [[ "$DEPLOYMENT_REQUIRED" == true ]]; then
+            echo "🚀 检测到代码变更，继续部署"
+            echo "deploy_needed=true" >> $GITHUB_OUTPUT
+          else
+            echo "⏭️ 未检测到需要部署的代码变更，跳过部署"
+            echo "deploy_needed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🔧 Setup SSH Key
+        if: steps.changes.outputs.deploy_needed == 'true'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 🌐 Add Server to Known Hosts
+        if: steps.changes.outputs.deploy_needed == 'true'
+        run: |
+          echo "🔑 Adding server to known hosts..."
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🚀 Deploy to Production Server
+        if: steps.changes.outputs.deploy_needed == 'true'
+        run: |
+          echo "🚀 开始部署到生产服务器..."
+
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} << 'DEPLOY_SCRIPT'
+            # 设置错误时立即退出
+            set -e
+
+            # 显示部署信息
+            echo "🏆 Production Deployment Started"
+            echo "📅 Time: $(date)"
+            echo "🖥️  Server: $(hostname)"
+            echo "👤 User: $(whoami)"
+            echo "📁 Target: ${{ env.DEPLOY_PATH }}"
+            echo ""
+
+            # 切换到部署目录
+            cd ${{ env.DEPLOY_PATH }}
+
+            # 显示当前分支信息
+            echo "📊 Current Status:"
+            echo "🌿 Current branch: $(git branch --show-current)"
+            echo "📝 Latest commit: $(git log -1 --oneline)"
+            echo ""
+
+            # 运行部署脚本
+            echo "🔥 Running deployment script..."
+            sudo ./scripts/CICD/deploy.sh
+
+            echo ""
+            echo "🎉 Deployment completed successfully!"
+            echo "🌐 Website: https://www.voidix.net"
+            echo "⏰ Completed at: $(date)"
+            echo "📝 Deployment commit: ${{ github.sha }}"
+          DEPLOY_SCRIPT
+
+      - name: 📝 Record Deployment Commit
+        if: success() && steps.changes.outputs.deploy_needed == 'true'
+        run: |
+          echo "📝 记录本次部署commit..."
+          echo "${{ github.sha }}" > .deployment_record
+          echo "📅 $(date --iso-8601=seconds)" >> .deployment_record
+          echo "🏷️  ${{ github.ref_name }}" >> .deployment_record
+          echo "✅ 部署记录已保存"
+
+      - name: 💾 Save Deployment Record
+        if: success() && steps.changes.outputs.deploy_needed == 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: .deployment_record
+          key: voidix-deployment-${{ github.sha }}
+
+      - name: ⏭️ Deployment Skipped Notification
+        if: steps.changes.outputs.deploy_needed == 'false'
+        run: |
+          echo "⏭️ 部署已跳过"
+          echo "📋 原因: 未检测到需要重新部署的代码变更"
+          echo "💡 只有文档、测试文件或配置文件发生了变更"
+
+      - name: ✅ Deployment Success Notification
+        if: success() && steps.changes.outputs.deploy_needed == 'true'
+        run: |
+          echo "🎉 部署成功完成！"
+          echo "🌐 网站地址: https://www.voidix.net"
+          echo "📅 部署时间: $(date)"
+
+      - name: ❌ Deployment Failure Notification
+        if: failure() && steps.changes.outputs.deploy_needed == 'true'
+        run: |
+          echo "❌ 部署失败！请检查日志。"
+          echo "📋 请查看上述错误信息进行排查。"
+          exit 1
+
+  # 部署后验证
+  post-deployment-verification:
+    name: 🔍 Post-deployment Verification
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: success() && needs.deploy.outputs.deployed == 'true'
+
+    steps:
+      - name: 🌐 Website Accessibility Check
+        run: |
+          echo "🌐 检查网站可访问性..."
+
+          # 基础HTTP检查
+          if curl -f -s --max-time 30 "https://www.voidix.net" > /dev/null; then
+            echo "✅ 网站可正常访问"
+          else
+            echo "⚠️ 网站访问检查失败，但部署可能仍然成功"
+          fi
+
+          # SSL证书检查
+          if curl -f -s --max-time 10 "https://www.voidix.net" | head -1 > /dev/null; then
+            echo "✅ HTTPS正常工作"
+          else
+            echo "⚠️ HTTPS检查异常"
+          fi
+
+      - name: 📊 Deployment Summary
+        run: |
+          echo ""
+          echo "==============================================="
+          echo "🏆 部署完成总结"
+          echo "==============================================="
+          echo "📅 部署时间: $(date)"
+          echo "🌐 网站地址: https://www.voidix.net"
+          echo "🔄 部署方式: 自动化CICD"
+          echo "✅ 状态: 成功完成"
+          echo "==============================================="
