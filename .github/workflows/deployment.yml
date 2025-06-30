@@ -46,15 +46,6 @@ jobs:
             LAST_DEPLOY_SHA=$(cat ".deployment_record" 2>/dev/null | head -1 || echo "")
             if [[ -n "$LAST_DEPLOY_SHA" ]]; then
               echo "📁 从缓存记录获取到上次部署: $LAST_DEPLOY_SHA"
-
-              # 检查该commit是否还存在（处理amend边缘情况）
-              if ! git cat-file -e "$LAST_DEPLOY_SHA" 2>/dev/null; then
-                echo "⚠️ 上次记录的commit不存在，可能被amend了，清除记录"
-                LAST_DEPLOY_SHA=""
-                rm -f ".deployment_record"
-              else
-                echo "✅ 上次部署commit验证通过"
-              fi
             fi
           else
             echo "📝 部署记录文件不存在"
@@ -92,6 +83,38 @@ jobs:
             LAST_DEPLOY_SHA="HEAD~5"
           fi
 
+          # 🛡️ 统一的amend边缘情况检测（对所有获取到的SHA进行验证）
+          if [[ -n "$LAST_DEPLOY_SHA" && "$LAST_DEPLOY_SHA" != "HEAD~5" ]]; then
+            echo "🔍 验证基准commit是否存在..."
+            if ! git cat-file -e "$LAST_DEPLOY_SHA" 2>/dev/null; then
+              echo "⚠️ 基准commit不存在，可能被amend/rebase/force-push了"
+              echo "🔄 fallback到时间策略"
+
+              # fallback到时间策略
+              SINCE_TIME=$(date -d '24 hours ago' --iso-8601 2>/dev/null || date -v-24H +%Y-%m-%dT%H:%M:%S 2>/dev/null || echo "")
+              if [[ -n "$SINCE_TIME" ]]; then
+                LAST_DEPLOY_SHA=$(git log --since="$SINCE_TIME" --format="%H" | tail -1)
+                if [[ -n "$LAST_DEPLOY_SHA" ]]; then
+                  echo "✅ fallback成功，新基准: $LAST_DEPLOY_SHA"
+                else
+                  echo "🔙 时间策略也失败，使用最终备用方案"
+                  LAST_DEPLOY_SHA="HEAD~5"
+                fi
+              else
+                echo "🔙 时间策略失败，使用最终备用方案"
+                LAST_DEPLOY_SHA="HEAD~5"
+              fi
+
+              # 清除可能已损坏的cache记录
+              if [[ -f ".deployment_record" ]]; then
+                echo "🗑️ 清除损坏的部署记录"
+                rm -f ".deployment_record"
+              fi
+            else
+              echo "✅ 基准commit验证通过"
+            fi
+          fi
+
           echo "📍 上次部署基准点: $LAST_DEPLOY_SHA"
           echo "📍 当前HEAD: ${{ github.sha }}"
 
@@ -124,7 +147,9 @@ jobs:
           EXCLUDED_PATTERNS="
           \.md$
           ^docs/
-          ^\.github/workflows/(?!deployment\.yml)
+          ^\.github/workflows/
+          ^\.github/ISSUE_TEMPLATE/
+          ^\.github/pull_request_template\.md$
           ^\.gitignore$
           ^LICENSE
           ^codecov\.yml$
@@ -133,6 +158,9 @@ jobs:
           ^src/test/
           \.eslintrc
           \.prettierrc
+          ^README\.
+          ^CHANGELOG\.
+          ^CONTRIBUTING\.
           "
 
           # 检查是否有需要部署的实质性变更
@@ -140,12 +168,20 @@ jobs:
 
           while IFS= read -r file; do
             if [[ -n "$file" ]]; then
+              echo "🔍 检查文件: $file"
+
               # 检查文件是否匹配排除模式
               SHOULD_EXCLUDE=false
               while IFS= read -r pattern; do
-                if [[ -n "$pattern" && "$file" =~ $pattern ]]; then
-                  SHOULD_EXCLUDE=true
-                  break
+                if [[ -n "$pattern" ]]; then
+                  echo "  测试模式: '$pattern'"
+                  if [[ "$file" =~ $pattern ]]; then
+                    echo "  ✅ 匹配成功: $file =~ $pattern"
+                    SHOULD_EXCLUDE=true
+                    break
+                  else
+                    echo "  ❌ 匹配失败: $file !~ $pattern"
+                  fi
                 fi
               done <<< "$EXCLUDED_PATTERNS"
 
@@ -199,15 +235,47 @@ jobs:
             # 切换到部署目录
             cd ${{ env.DEPLOY_PATH }}
 
+            # 验证这是一个git仓库
+            if [[ ! -d ".git" ]]; then
+              echo "❌ 错误：${{ env.DEPLOY_PATH }} 不是一个git仓库"
+              exit 1
+            fi
+
+            # 确保在正确的工作目录
+            CURRENT_DIR=$(pwd)
+            if [[ "$CURRENT_DIR" != "${{ env.DEPLOY_PATH }}" ]]; then
+              echo "❌ 错误：当前目录 $CURRENT_DIR 不是预期的 ${{ env.DEPLOY_PATH }}"
+              exit 1
+            fi
+
+            echo "✅ 目录验证通过：$CURRENT_DIR"
+
             # 显示当前分支信息
             echo "📊 Current Status:"
             echo "🌿 Current branch: $(git branch --show-current)"
             echo "📝 Latest commit: $(git log -1 --oneline)"
             echo ""
 
-            # 运行部署脚本
-            echo "🔥 Running deployment script..."
-            sudo ./scripts/CICD/deploy.sh
+            # 检查部署脚本是否存在
+            DEPLOY_SCRIPT_PATH="./scripts/CICD/deploy.sh"
+            if [[ ! -f "$DEPLOY_SCRIPT_PATH" ]]; then
+              echo "❌ 部署脚本不存在: $DEPLOY_SCRIPT_PATH"
+              echo "📁 当前目录内容:"
+              ls -la
+              echo "📁 scripts目录内容:"
+              ls -la scripts/ 2>/dev/null || echo "scripts目录不存在"
+              echo "📁 scripts/CICD目录内容:"
+              ls -la scripts/CICD/ 2>/dev/null || echo "scripts/CICD目录不存在"
+              exit 1
+            fi
+
+            # 确保脚本有执行权限
+            echo "🔧 设置脚本执行权限..."
+            chmod +x "$DEPLOY_SCRIPT_PATH"
+
+            # 运行部署脚本（确保在正确目录下执行）
+            echo "🔥 Running deployment script from $(pwd)..."
+            sudo "$DEPLOY_SCRIPT_PATH"
 
             echo ""
             echo "🎉 Deployment completed successfully!"
