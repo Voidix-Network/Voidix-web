@@ -41,11 +41,6 @@ const NotFoundPage = React.lazy(() =>
     default: module.NotFoundPage,
   }))
 );
-const CrawlerAnalyticsPage = React.lazy(() =>
-  import(/* webpackPreload: false */ '@/pages/CrawlerAnalyticsPage').then(module => ({
-    default: module.CrawlerAnalyticsPage,
-  }))
-);
 
 /**
  * 路由感知的加载组件
@@ -64,7 +59,6 @@ const RouteAwareFallback: React.FC = () => {
     '/monitor',
     '/privacy',
     '/not-found',
-    '/admin/crawler-analytics',
   ].includes(currentPath);
 
   if (is404Route) {
@@ -138,7 +132,6 @@ const RouteStateManager: React.FC<{ children: React.ReactNode }> = ({ children }
       '/monitor',
       '/privacy',
       '/not-found',
-      '/admin/crawler-analytics',
     ].includes(currentPath);
 
     if (is404Route) {
@@ -186,8 +179,6 @@ const RouteContent: React.FC = () => {
             <Route path="/bug-report" element={<BugReportPage />} />
             <Route path="/monitor" element={<MonitorPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            {/* 管理员页面 */}
-            <Route path="/admin/crawler-analytics" element={<CrawlerAnalyticsPage />} />
             {/* 静态文件404重定向路径 */}
             <Route path="/not-found" element={<NotFoundPage />} />
             {/* 404页面 - 必须放在最后 */}
