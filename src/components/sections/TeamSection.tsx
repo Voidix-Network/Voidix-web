@@ -759,7 +759,7 @@ export const TeamSection: React.FC = () => {
           {...getTitleMobileMotionProps()}
         >
           <h2 className="text-3xl font-bold mb-4">
-            我们的<GradientText variant="primary">团队</GradientText>
+            我们的 <GradientText variant="primary">团队</GradientText>
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
             这些热爱Minecraft的开发者/管理员——与热爱游戏的你们，撑起了整个Voidix

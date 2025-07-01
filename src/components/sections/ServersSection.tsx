@@ -73,7 +73,7 @@ export const ServersSection: React.FC = () => {
                       fillRule="evenodd"
                     ></path>
                   </svg>
-                  <span>支持 1.8-最新 所有版本</span>
+                  <span>支持 1.8-1.8.9</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <svg
