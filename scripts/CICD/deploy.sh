@@ -77,6 +77,7 @@ show_help() {
     echo "  --git-build        Git更新 + 构建"
     echo "  --git-build-reload Git更新 + 构建 + 重载"
     echo "  --nginx-reload     Nginx配置更新 + 重载"
+    echo "  --git-nginx-reload Git更新 + Nginx配置更新 + 重载"
     echo "  --build-reload     构建 + 重载"
     echo ""
     echo "示例："
@@ -346,107 +347,94 @@ show_completion() {
 
 # 主函数 - 解析参数并执行相应操作
 main() {
-    # 默认执行所有步骤
-    DO_GIT=false
-    DO_NGINX=false
-    DO_BUILD=false
-    DO_COMPRESS=false
-    DO_RELOAD=false
-    DO_PERMISSIONS=false
-    DO_FULL_DEPLOY=true
-
-    # 解析参数
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            -h|--help)
-                show_help
-                exit 0
-                ;;
-            -g|--git)
-                DO_GIT=true
-                DO_FULL_DEPLOY=false
-                ;;
-            -n|--nginx)
-                DO_NGINX=true
-                DO_FULL_DEPLOY=false
-                ;;
-            -b|--build)
-                DO_BUILD=true
-                DO_COMPRESS=true
-                DO_PERMISSIONS=true
-                DO_FULL_DEPLOY=false
-                ;;
-            -c|--compress)
-                DO_COMPRESS=true
-                DO_FULL_DEPLOY=false
-                ;;
-            -r|--reload)
-                DO_RELOAD=true
-                DO_FULL_DEPLOY=false
-                ;;
-            --git-build)
-                DO_GIT=true
-                DO_BUILD=true
-                DO_COMPRESS=true
-                DO_PERMISSIONS=true
-                DO_FULL_DEPLOY=false
-                ;;
-            --git-build-reload)
-                DO_GIT=true
-                DO_BUILD=true
-                DO_COMPRESS=true
-                DO_PERMISSIONS=true
-                DO_RELOAD=true
-                DO_FULL_DEPLOY=false
-                ;;
-            --nginx-reload)
-                DO_NGINX=true
-                DO_RELOAD=true
-                DO_FULL_DEPLOY=false
-                ;;
-            --build-reload)
-                DO_BUILD=true
-                DO_COMPRESS=true
-                DO_PERMISSIONS=true
-                DO_RELOAD=true
-                DO_FULL_DEPLOY=false
-                ;;
-            *)
-                log_error "未知参数: $1"
-                show_help
-                exit 1
-                ;;
-        esac
-        shift
-    done
-
-    # 检查权限
     check_permissions
 
-    echo "📦 开始部署..."
-
-    # 根据参数执行相应操作
-    if [ "$DO_FULL_DEPLOY" = true ]; then
-        # 完整部署
+    # 如果没有参数，执行完整部署
+    if [ $# -eq 0 ]; then
+        log_step "开始完整部署流程..."
         update_git
         update_nginx
         build_project
         compress_files
         set_permissions
         reload_nginx
-        show_completion
-    else
-        # 模块化执行
-        [ "$DO_GIT" = true ] && update_git
-        [ "$DO_NGINX" = true ] && update_nginx
-        [ "$DO_BUILD" = true ] && build_project
-        [ "$DO_COMPRESS" = true ] && compress_files
-        [ "$DO_PERMISSIONS" = true ] && set_permissions
-        [ "$DO_RELOAD" = true ] && reload_nginx
-
-        log_success "✅ 指定操作完成"
+        log_success "完整部署成功完成！"
+        exit 0
     fi
+
+    # 解析参数
+    while [[ "$1" != "" ]]; do
+        case $1 in
+            -g | --git)
+                update_git
+                shift
+                ;;
+            -n | --nginx)
+                update_nginx
+                shift
+                ;;
+            -b | --build)
+                build_project
+                compress_files
+                set_permissions
+                shift
+                ;;
+            -c | --compress)
+                compress_files
+                set_permissions
+                shift
+                ;;
+            -r | --reload)
+                reload_nginx
+                shift
+                ;;
+            --git-build)
+                update_git
+                build_project
+                compress_files
+                set_permissions
+                shift
+                ;;
+            --git-build-reload)
+                update_git
+                build_project
+                compress_files
+                set_permissions
+                reload_nginx
+                shift
+                ;;
+            --nginx-reload)
+                update_nginx
+                reload_nginx
+                shift
+                ;;
+            --git-nginx-reload)
+                update_git
+                update_nginx
+                reload_nginx
+                shift
+                ;;
+            --build-reload)
+                build_project
+                compress_files
+                set_permissions
+                reload_nginx
+                shift
+                ;;
+            -h | --help)
+                show_help
+                exit 0
+                ;;
+            *)
+                log_error "未知选项: $1"
+                show_help
+                exit 1
+                ;;
+        esac
+    done
+
+    log_success "所有请求的操作已完成"
 }
 
-# 执行主函数
+# 运行主函数
 main "$@"
