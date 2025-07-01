@@ -23,7 +23,7 @@ export interface SEOProps {
 
 // 默认配置
 const DEFAULT_SEO_CONFIG = {
-  title: 'Voidix - 公益·公平·包容的Minecraft服务器',
+  title: 'Voidix Minecraft公益服务器 - 最佳我的世界生存与小游戏服务器',
   description:
     '公益、公平、包容的Minecraft小游戏服务器，致力于为玩家提供开放、透明、无门槛的游戏体验。',
   image: '/logo.png',
