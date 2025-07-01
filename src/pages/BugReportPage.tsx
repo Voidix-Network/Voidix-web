@@ -62,6 +62,7 @@ export const BugReportPage: React.FC = () => {
       <SEO
         pageKey="bugReport"
         type="website"
+        url="https://www.voidix.net/bug-report"
         canonicalUrl="https://www.voidix.net/bug-report"
         enableAnalytics={true}
       />

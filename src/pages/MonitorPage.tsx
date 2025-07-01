@@ -112,6 +112,7 @@ export const MonitorPage: React.FC = () => {
       <SEO
         pageKey="monitor"
         type="website"
+        url="https://www.voidix.net/monitor"
         canonicalUrl="https://www.voidix.net/monitor"
         enableAnalytics={true}
       />

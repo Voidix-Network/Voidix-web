@@ -18,6 +18,7 @@ export const HomePage: React.FC = () => {
       <SEO
         pageKey="home"
         type="website"
+        url="https://www.voidix.net/"
         canonicalUrl="https://www.voidix.net/"
         enableAnalytics={true}
       />

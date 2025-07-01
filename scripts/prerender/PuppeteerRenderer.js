@@ -188,6 +188,9 @@ export class PuppeteerRenderer {
       // 获取初始的、包含骨架屏的HTML
       let html = await page.content();
 
+      // 🔧 统一替换localhost URL为正确的域名
+      html = this.replaceLocalhostUrls(html, serverPort);
+
       // 压缩HTML
       try {
         const minifiedHtml = await minify(html, this.minifyOptions);
@@ -232,6 +235,29 @@ export class PuppeteerRenderer {
     }
 
     return results;
+  }
+
+  /**
+   * 替换HTML中的localhost URL为正确的域名
+   */
+  replaceLocalhostUrls(html, serverPort) {
+    try {
+      const localhostPattern = new RegExp(`http://localhost:${serverPort}`, 'g');
+      const localhostWithoutPortPattern = /http:\/\/localhost/g;
+
+      // 替换包含端口的localhost URL
+      html = html.replace(localhostPattern, 'https://www.voidix.net');
+
+      // 替换不包含端口的localhost URL
+      html = html.replace(localhostWithoutPortPattern, 'https://www.voidix.net');
+
+      logger.info(`  URL替换: localhost → www.voidix.net`);
+
+      return html;
+    } catch (error) {
+      logger.warn(`URL替换失败: ${error.message}`);
+      return html;
+    }
   }
 
   /**
