@@ -98,7 +98,7 @@ const initializeClarity = (enableClarity: boolean, enableDebug: boolean = false)
 
   const initClarity = () => {
     // 检查Clarity是否已加载
-    if (window.clarity) {
+    if ((window as any).clarity) {
       if (enableDebug) console.log('[SEO] Clarity already loaded');
       return;
     }
@@ -147,27 +147,27 @@ const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
   // Voidix统一分析API
   window.voidixUnifiedAnalytics = {
     trackBugReport: (reportType: string, severity: string) => {
-      if (window.clarity) {
-        window.clarity('event', 'bug_report', { reportType, severity });
+      if ((window as any).clarity) {
+        (window as any).clarity('event', 'bug_report', { reportType, severity });
       }
       if (enableDebug) console.log('[统一分析] Bug报告跟踪:', { reportType, severity });
     },
     trackFAQView: (questionId: string, category: string) => {
-      if (window.clarity) {
-        window.clarity('event', 'faq_view', { questionId, category });
+      if ((window as any).clarity) {
+        (window as any).clarity('event', 'faq_view', { questionId, category });
       }
       if (enableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
     },
     trackCustomEvent: (category: string, action: string, label?: string, value?: number) => {
-      if (window.clarity) {
-        window.clarity('event', action, { category, label, value });
+      if ((window as any).clarity) {
+        (window as any).clarity('event', action, { category, label, value });
       }
       if (enableDebug)
         console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });
     },
     trackPagePerformance: () => {
-      if (window.clarity) {
-        window.clarity('event', 'page_performance');
+      if ((window as any).clarity) {
+        (window as any).clarity('event', 'page_performance');
       }
       if (enableDebug) console.log('[统一分析] 页面性能跟踪已执行');
     },
@@ -176,31 +176,190 @@ const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
   if (enableDebug) console.log('[SEO] 统一分析API已初始化');
 };
 
-// 生成基础结构化数据
-const generateBasicStructuredData = () => {
+// 生成Sitelinks导航结构化数据
+const generateSitelinksData = () => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SiteNavigationElement',
+    name: 'Voidix主导航',
+    url: DEFAULT_SEO_CONFIG.websiteUrl,
+    hasPart: [
+      {
+        '@type': 'SiteNavigationElement',
+        name: '服务器状态',
+        description: '查看Voidix服务器实时运行状态和在线玩家数',
+        url: 'https://www.voidix.net/status',
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: '监控面板',
+        description: '服务器性能监控和运行数据统计',
+        url: 'https://www.voidix.net/monitor',
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: '常见问题',
+        description: '新手玩家入门指南和常见问题解答',
+        url: 'https://www.voidix.net/faq',
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: 'Bug反馈',
+        description: '提交游戏问题反馈和建议',
+        url: 'https://www.voidix.net/bug-report',
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: '隐私政策',
+        description: '了解我们的隐私保护政策',
+        url: 'https://www.voidix.net/privacy',
+      },
+    ],
+  };
+};
+
+// 生成全面的结构化数据
+const generateBasicStructuredData = (pageKey?: string) => {
   const organization = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: DEFAULT_SEO_CONFIG.organizationName,
+    name: 'Voidix Minecraft Server',
+    alternateName: 'Voidix',
     url: DEFAULT_SEO_CONFIG.websiteUrl,
     logo: `${DEFAULT_SEO_CONFIG.websiteUrl}${DEFAULT_SEO_CONFIG.image}`,
     description: DEFAULT_SEO_CONFIG.description,
     email: DEFAULT_SEO_CONFIG.contactEmail,
-    areaServed: { '@type': 'Country', name: 'China' },
-    serviceType: 'Minecraft公益游戏服务器',
+    founder: [
+      {
+        '@type': 'Person',
+        name: 'NekoSora',
+        jobTitle: '核心开发者',
+      },
+      {
+        '@type': 'Person',
+        name: 'CYsonHab',
+        jobTitle: '核心开发者',
+      },
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      availableLanguage: 'Chinese',
+    },
+    foundingDate: '2025',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'CN',
+    },
+    keywords: 'Minecraft服务器,小游戏服务器,生存服务器,公益服务器,起床战争,空岛战争',
+    areaServed: {
+      '@type': 'Country',
+      name: 'China',
+    },
   };
 
   const website = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: DEFAULT_SEO_CONFIG.siteName,
+    name: 'Voidix Minecraft公益服务器',
     url: DEFAULT_SEO_CONFIG.websiteUrl,
     description: DEFAULT_SEO_CONFIG.description,
     inLanguage: 'zh-CN',
-    publisher: { '@type': 'Organization', name: DEFAULT_SEO_CONFIG.organizationName },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Voidix Team',
+    },
+    potentialAction: [
+      {
+        '@type': 'SearchAction',
+        target: 'https://www.voidix.net/search?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+      {
+        '@type': 'ReadAction',
+        target: 'https://www.voidix.net/status',
+        name: '查看服务器状态',
+      },
+      {
+        '@type': 'ReadAction',
+        target: 'https://www.voidix.net/faq',
+        name: '常见问题解答',
+      },
+    ],
+    // 添加主要导航页面信息
+    mainEntity: [
+      {
+        '@type': 'WebPage',
+        '@id': 'https://www.voidix.net/status',
+        name: '服务器状态',
+        description: '实时服务器状态监控',
+      },
+      {
+        '@type': 'WebPage',
+        '@id': 'https://www.voidix.net/faq',
+        name: '常见问题',
+        description: '新手玩家指南和FAQ',
+      },
+      {
+        '@type': 'WebPage',
+        '@id': 'https://www.voidix.net/monitor',
+        name: '监控面板',
+        description: '服务器性能监控',
+      },
+    ],
   };
 
-  return [organization, website];
+  // 为首页添加游戏相关的结构化数据
+  const gameSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoGame',
+    name: 'Voidix Minecraft服务器',
+    description: DEFAULT_SEO_CONFIG.description,
+    gameLocation: {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'CN',
+      },
+    },
+    numberOfPlayers: '1-200',
+    playMode: 'https://schema.org/MultiPlayer',
+    gamePlatform: ['PC', 'Java Edition'],
+    genre: ['沙盒游戏', '小游戏', '生存游戏'],
+    gameItem: [
+      {
+        '@type': 'Thing',
+        name: '小游戏服务器',
+        description: 'minigame.voidix.net - 起床战争、空岛战争等小游戏',
+      },
+      {
+        '@type': 'Thing',
+        name: '生存服务器',
+        description: 'survival.voidix.net - 纯净生存体验',
+      },
+    ],
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'CNY',
+      availability: 'https://schema.org/InStock',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Voidix Team',
+    },
+  };
+
+  // 根据页面类型返回不同的结构化数据
+  const baseSchemas = [organization, website, gameSchema];
+
+  // 首页添加Sitelinks导航数据
+  if (pageKey === 'home') {
+    const sitelinksData = generateSitelinksData();
+    return [...baseSchemas, sitelinksData];
+  }
+
+  return baseSchemas;
 };
 
 /**
@@ -251,7 +410,7 @@ export const SEO: React.FC<SEOProps> = ({
   }, [enableAnalytics, enableClarity, enableDebug]);
 
   // 生成结构化数据
-  const structuredData = generateBasicStructuredData();
+  const structuredData = generateBasicStructuredData(pageKey);
 
   return (
     <Helmet>
@@ -290,11 +449,9 @@ export const SEO: React.FC<SEOProps> = ({
 
       {/* 结构化数据 */}
       {structuredData.map((schema, index) => (
-        <script
-          key={index}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
+        <script key={index} type="application/ld+json">
+          {JSON.stringify(schema, null, 0)}
+        </script>
       ))}
 
       {/* 额外的meta标签 */}
