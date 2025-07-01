@@ -274,7 +274,7 @@ jobs:
 
           if [[ "$NGINX_CHANGES" == true && "$FRONTEND_CHANGES" == false && "$CONFIG_CHANGES" == false ]]; then
             # 只有Nginx配置变更
-            DEPLOY_STRATEGY="--nginx-reload"
+            DEPLOY_STRATEGY="--git-nginx-reload"
             STRATEGY_DESCRIPTION="🌐 Nginx配置优化部署"
 
           elif [[ "$NGINX_CHANGES" == false && "$FRONTEND_CHANGES" == true && "$DEPENDENCY_CHANGES" == false ]]; then
@@ -410,6 +410,10 @@ jobs:
             elif [[ "$DEPLOY_STRATEGY" == "--build-reload" ]]; then
               echo "🖼️ 执行静态资源优化部署..."
               sudo "$DEPLOY_SCRIPT_PATH" --build-reload
+
+            elif [[ "$DEPLOY_STRATEGY" == "--git-nginx-reload" ]]; then
+              echo "🌐⚛️ 执行Nginx+代码联合部署..."
+              sudo "$DEPLOY_SCRIPT_PATH" --git-nginx-reload
 
             else
               echo "⚠️ 未知部署策略，执行完整部署..."
