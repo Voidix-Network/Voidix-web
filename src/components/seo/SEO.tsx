@@ -176,8 +176,50 @@ const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
   if (enableDebug) console.log('[SEO] 统一分析API已初始化');
 };
 
+// 生成Sitelinks导航结构化数据
+const generateSitelinksData = () => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SiteNavigationElement',
+    name: 'Voidix主导航',
+    url: DEFAULT_SEO_CONFIG.websiteUrl,
+    hasPart: [
+      {
+        '@type': 'SiteNavigationElement',
+        name: '服务器状态',
+        description: '查看Voidix服务器实时运行状态和在线玩家数',
+        url: 'https://www.voidix.net/status',
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: '监控面板',
+        description: '服务器性能监控和运行数据统计',
+        url: 'https://www.voidix.net/monitor',
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: '常见问题',
+        description: '新手玩家入门指南和常见问题解答',
+        url: 'https://www.voidix.net/faq',
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: 'Bug反馈',
+        description: '提交游戏问题反馈和建议',
+        url: 'https://www.voidix.net/bug-report',
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: '隐私政策',
+        description: '了解我们的隐私保护政策',
+        url: 'https://www.voidix.net/privacy',
+      },
+    ],
+  };
+};
+
 // 生成全面的结构化数据
-const generateBasicStructuredData = () => {
+const generateBasicStructuredData = (pageKey?: string) => {
   const organization = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -227,11 +269,44 @@ const generateBasicStructuredData = () => {
       '@type': 'Organization',
       name: 'Voidix Team',
     },
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: 'https://www.voidix.net/search?q={search_term_string}',
-      'query-input': 'required name=search_term_string',
-    },
+    potentialAction: [
+      {
+        '@type': 'SearchAction',
+        target: 'https://www.voidix.net/search?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+      {
+        '@type': 'ReadAction',
+        target: 'https://www.voidix.net/status',
+        name: '查看服务器状态',
+      },
+      {
+        '@type': 'ReadAction',
+        target: 'https://www.voidix.net/faq',
+        name: '常见问题解答',
+      },
+    ],
+    // 添加主要导航页面信息
+    mainEntity: [
+      {
+        '@type': 'WebPage',
+        '@id': 'https://www.voidix.net/status',
+        name: '服务器状态',
+        description: '实时服务器状态监控',
+      },
+      {
+        '@type': 'WebPage',
+        '@id': 'https://www.voidix.net/faq',
+        name: '常见问题',
+        description: '新手玩家指南和FAQ',
+      },
+      {
+        '@type': 'WebPage',
+        '@id': 'https://www.voidix.net/monitor',
+        name: '监控面板',
+        description: '服务器性能监控',
+      },
+    ],
   };
 
   // 为首页添加游戏相关的结构化数据
@@ -275,8 +350,16 @@ const generateBasicStructuredData = () => {
     },
   };
 
-  // 所有页面都包含完整的结构化数据
-  return [organization, website, gameSchema];
+  // 根据页面类型返回不同的结构化数据
+  const baseSchemas = [organization, website, gameSchema];
+
+  // 首页添加Sitelinks导航数据
+  if (pageKey === 'home') {
+    const sitelinksData = generateSitelinksData();
+    return [...baseSchemas, sitelinksData];
+  }
+
+  return baseSchemas;
 };
 
 /**
@@ -327,7 +410,7 @@ export const SEO: React.FC<SEOProps> = ({
   }, [enableAnalytics, enableClarity, enableDebug]);
 
   // 生成结构化数据
-  const structuredData = generateBasicStructuredData();
+  const structuredData = generateBasicStructuredData(pageKey);
 
   return (
     <Helmet>
@@ -366,10 +449,7 @@ export const SEO: React.FC<SEOProps> = ({
 
       {/* 结构化数据 */}
       {structuredData.map((schema, index) => (
-        <script
-          key={index}
-          type="application/ld+json"
-        >
+        <script key={index} type="application/ld+json">
           {JSON.stringify(schema, null, 0)}
         </script>
       ))}
