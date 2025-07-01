@@ -16,6 +16,9 @@ export { VoidixLogo } from './ui/VoidixLogo';
 // Animation Components
 export { AnimatedSection, animationVariants } from './animations/AnimatedSection';
 
+// Admin Components
+export { AdminAuth } from './admin/AdminAuth';
+
 // Business Components
 export { MonitorCard } from './business/MonitorCard';
 export { MonitorOverview } from './business/MonitorOverview';

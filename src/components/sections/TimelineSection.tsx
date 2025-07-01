@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
 import { GradientText } from '@/components';
+import { motion } from 'framer-motion';
 
 /**
  * 发展历程组件 - 基于原HTML的完整时间轴
@@ -44,6 +44,13 @@ export const TimelineSection: React.FC = () => {
       description: 'Voidix官网开始搭建，采用现代化设计语言，展示服务器理念和技术特点。',
       position: 'right',
       color: 'purple',
+    },
+    {
+      date: '2025年7月1日',
+      title: 'Voidix正式启航',
+      description: 'Voidix正式启航，开启全新的Minecraft服务器篇章。',
+      position: 'left',
+      color: 'indigo',
     },
   ];
 
