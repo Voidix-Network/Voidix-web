@@ -13,46 +13,35 @@ export * from './feedbackRequirements';
 export { default as FAQSchema } from './FAQSchema';
 export { default as PerformanceOptimizer } from './PerformanceOptimizer';
 
-// 专业版SEO组件（高级功能）
-export { default as AdvancedStructuredData } from './AdvancedStructuredData';
+// 搜索引擎相关组件
 export { default as SearchEngineScript } from './SearchEngineScript';
-export { default as WebVitalsMonitor } from './WebVitalsMonitor';
-
-// 分析组件（可选）
-export { DelayedPrefetch } from './DelayedPrefetch';
-export { default as MicrosoftClarity } from './MicrosoftClarity';
 export { default as VoidixSearchConsole } from './VoidixSearchConsole';
-
-// 企业级SEO组件（大型项目）
-export {
-  InternationalSEO,
-  generateMultilingualSitemap,
-  useLanguageSwitcher,
-} from './InternationalSEO';
-export { MinecraftServerReview, ReviewSchema } from './ReviewSchema';
 
 // 使用指南：
 //
 // 🚀 快速开始（推荐）：
 // import { SEO, CookieConsent, SEOProvider } from '@/components/seo';
 //
-// 🔧 高级功能：
-// import { AdvancedStructuredData, WebVitalsMonitor, MicrosoftClarity } from '@/components/seo';
+// 🔧 搜索引擎优化：
+// import { SearchEngineScript, VoidixSearchConsole } from '@/components/seo';
 //
-// 📊 企业级：
-// import { InternationalSEO, ReviewSchema } from '@/components/seo';
+// 📄 页面结构化数据：
+// import { FAQSchema } from '@/components/seo';
 
 /**
- * 迁移指南：
+ * 简化后的SEO模块指南：
  *
- * ✅ 推荐做法（新架构）：
- * <SEO pageKey="home" enableAnalytics={true} enableClarity={true} />
- * <WebVitalsMonitor enableMicrosoftClarity={true} />
- * <MicrosoftClarity projectId="xxx" enableDebug={false} />
+ * ✅ 核心使用方式：
+ * <SEO pageKey="home" enableAnalytics={true} />
+ * <CookieConsent enableCustomization={true} />
+ * <SearchEngineScript />
+ * <VoidixSearchConsole />
  *
- * ❌ 已删除的组件（功能已整合或简化）：
- * <UnifiedAnalytics /> // 已整合到SEO组件
- * <UltraCookielessGoogleAnalytics /> // 已整合到SEO组件
- * <PageSEO /> // 已被SEO组件替代
- * <MonitorStructuredData /> // 过于复杂，已删除
+ * ❌ 已删除的高级组件（减少维护负担）：
+ * AdvancedStructuredData - 功能过于复杂，已删除
+ * WebVitalsMonitor - 功能已整合到SEO组件
+ * DelayedPrefetch - 性能收益不明显，已删除
+ * MicrosoftClarity - 分析功能已整合到SEO组件
+ * InternationalSEO - 当前项目不需要多语言支持
+ * ReviewSchema - 暂不需要评价功能
  */

@@ -98,7 +98,7 @@ const initializeClarity = (enableClarity: boolean, enableDebug: boolean = false)
 
   const initClarity = () => {
     // 检查Clarity是否已加载
-    if (window.clarity) {
+    if ((window as any).clarity) {
       if (enableDebug) console.log('[SEO] Clarity already loaded');
       return;
     }
@@ -147,27 +147,27 @@ const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
   // Voidix统一分析API
   window.voidixUnifiedAnalytics = {
     trackBugReport: (reportType: string, severity: string) => {
-      if (window.clarity) {
-        window.clarity('event', 'bug_report', { reportType, severity });
+      if ((window as any).clarity) {
+        (window as any).clarity('event', 'bug_report', { reportType, severity });
       }
       if (enableDebug) console.log('[统一分析] Bug报告跟踪:', { reportType, severity });
     },
     trackFAQView: (questionId: string, category: string) => {
-      if (window.clarity) {
-        window.clarity('event', 'faq_view', { questionId, category });
+      if ((window as any).clarity) {
+        (window as any).clarity('event', 'faq_view', { questionId, category });
       }
       if (enableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
     },
     trackCustomEvent: (category: string, action: string, label?: string, value?: number) => {
-      if (window.clarity) {
-        window.clarity('event', action, { category, label, value });
+      if ((window as any).clarity) {
+        (window as any).clarity('event', action, { category, label, value });
       }
       if (enableDebug)
         console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });
     },
     trackPagePerformance: () => {
-      if (window.clarity) {
-        window.clarity('event', 'page_performance');
+      if ((window as any).clarity) {
+        (window as any).clarity('event', 'page_performance');
       }
       if (enableDebug) console.log('[统一分析] 页面性能跟踪已执行');
     },
@@ -176,31 +176,107 @@ const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
   if (enableDebug) console.log('[SEO] 统一分析API已初始化');
 };
 
-// 生成基础结构化数据
+// 生成全面的结构化数据
 const generateBasicStructuredData = () => {
   const organization = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: DEFAULT_SEO_CONFIG.organizationName,
+    name: 'Voidix Minecraft Server',
+    alternateName: 'Voidix',
     url: DEFAULT_SEO_CONFIG.websiteUrl,
     logo: `${DEFAULT_SEO_CONFIG.websiteUrl}${DEFAULT_SEO_CONFIG.image}`,
     description: DEFAULT_SEO_CONFIG.description,
     email: DEFAULT_SEO_CONFIG.contactEmail,
-    areaServed: { '@type': 'Country', name: 'China' },
-    serviceType: 'Minecraft公益游戏服务器',
+    founder: [
+      {
+        '@type': 'Person',
+        name: 'NekoSora',
+        jobTitle: '核心开发者',
+      },
+      {
+        '@type': 'Person',
+        name: 'CYsonHab',
+        jobTitle: '核心开发者',
+      },
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      availableLanguage: 'Chinese',
+    },
+    foundingDate: '2025',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'CN',
+    },
+    keywords: 'Minecraft服务器,小游戏服务器,生存服务器,公益服务器,起床战争,空岛战争',
+    areaServed: {
+      '@type': 'Country',
+      name: 'China',
+    },
   };
 
   const website = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: DEFAULT_SEO_CONFIG.siteName,
+    name: 'Voidix Minecraft公益服务器',
     url: DEFAULT_SEO_CONFIG.websiteUrl,
     description: DEFAULT_SEO_CONFIG.description,
     inLanguage: 'zh-CN',
-    publisher: { '@type': 'Organization', name: DEFAULT_SEO_CONFIG.organizationName },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Voidix Team',
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://www.voidix.net/search?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
   };
 
-  return [organization, website];
+  // 为首页添加游戏相关的结构化数据
+  const gameSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoGame',
+    name: 'Voidix Minecraft服务器',
+    description: DEFAULT_SEO_CONFIG.description,
+    gameLocation: {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'CN',
+      },
+    },
+    numberOfPlayers: '1-200',
+    playMode: 'https://schema.org/MultiPlayer',
+    gamePlatform: ['PC', 'Java Edition'],
+    genre: ['沙盒游戏', '小游戏', '生存游戏'],
+    gameItem: [
+      {
+        '@type': 'Thing',
+        name: '小游戏服务器',
+        description: 'minigame.voidix.net - 起床战争、空岛战争等小游戏',
+      },
+      {
+        '@type': 'Thing',
+        name: '生存服务器',
+        description: 'survival.voidix.net - 纯净生存体验',
+      },
+    ],
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'CNY',
+      availability: 'https://schema.org/InStock',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Voidix Team',
+    },
+  };
+
+  // 所有页面都包含完整的结构化数据
+  return [organization, website, gameSchema];
 };
 
 /**
@@ -293,8 +369,9 @@ export const SEO: React.FC<SEOProps> = ({
         <script
           key={index}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
+        >
+          {JSON.stringify(schema, null, 0)}
+        </script>
       ))}
 
       {/* 额外的meta标签 */}
