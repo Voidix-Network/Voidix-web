@@ -1,3 +1,4 @@
+import { globalSchemaManager } from '@/utils/schemaManager';
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { generateKeywordsString, getPageSEOConfig } from './chineseKeywords';
@@ -409,8 +410,26 @@ export const SEO: React.FC<SEOProps> = ({
     initializeUnifiedAnalytics(enableDebug);
   }, [enableAnalytics, enableClarity, enableDebug]);
 
-  // 生成结构化数据
-  const structuredData = generateBasicStructuredData(pageKey);
+  // 使用SchemaManager管理结构化数据
+  useEffect(() => {
+    const structuredData = generateBasicStructuredData();
+
+    // 为每个schema设置唯一数据
+    structuredData.forEach(schema => {
+      const schemaType = schema['@type'];
+      globalSchemaManager.setSchema(schemaType, schema, 'seo-component');
+    });
+
+    if (enableDebug) {
+      console.log(`[SEO] 通过SchemaManager设置了 ${structuredData.length} 个基础结构化数据`);
+      globalSchemaManager.debug();
+    }
+
+    // 清理函数 - 移除本组件生成的schema
+    return () => {
+      globalSchemaManager.removeSchemaBySource('seo-component');
+    };
+  }, [pageKey, enableDebug]);
 
   return (
     <Helmet>
@@ -447,12 +466,7 @@ export const SEO: React.FC<SEOProps> = ({
       {/* Canonical URL */}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
-      {/* 结构化数据 */}
-      {structuredData.map((schema, index) => (
-        <script key={index} type="application/ld+json">
-          {JSON.stringify(schema, null, 0)}
-        </script>
-      ))}
+      {/* 结构化数据现在通过SchemaManager管理，确保全局唯一 */}
 
       {/* 额外的meta标签 */}
       {additionalMeta.map((meta, index) => (

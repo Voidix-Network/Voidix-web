@@ -1,3 +1,4 @@
+import { globalSchemaManager } from '@/utils/schemaManager';
 import React from 'react';
 
 interface FAQItem {
@@ -65,24 +66,14 @@ export const FAQSchema: React.FC<FAQSchemaProps> = ({ faqItems }) => {
   };
 
   React.useEffect(() => {
-    // 创建或更新FAQ结构化数据
-    const existingScript = document.querySelector('script[data-schema="faq"]');
-    if (existingScript) {
-      existingScript.remove();
-    }
+    // 使用SchemaManager设置FAQ结构化数据
+    globalSchemaManager.setSchema('FAQPage', faqSchema, 'faq-component');
 
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.setAttribute('data-schema', 'faq');
-    script.textContent = JSON.stringify(faqSchema);
-    document.head.appendChild(script);
+    console.log('[FAQSchema] 已通过SchemaManager设置FAQ结构化数据');
 
     // 清理函数
     return () => {
-      const scriptToRemove = document.querySelector('script[data-schema="faq"]');
-      if (scriptToRemove) {
-        scriptToRemove.remove();
-      }
+      globalSchemaManager.removeSchemaBySource('faq-component');
     };
   }, [faqItems]);
 
