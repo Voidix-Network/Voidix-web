@@ -352,12 +352,13 @@ const generateBasicStructuredData = (pageKey?: string) => {
   };
 
   // 根据页面类型返回不同的结构化数据
-  const baseSchemas = [organization, website, gameSchema];
+  const baseSchemas: any[] = [organization, website];
 
-  // 首页添加Sitelinks导航数据
+  // 只在首页添加VideoGame和导航数据
   if (pageKey === 'home') {
+    baseSchemas.push(gameSchema);
     const sitelinksData = generateSitelinksData();
-    return [...baseSchemas, sitelinksData];
+    baseSchemas.push(sitelinksData);
   }
 
   return baseSchemas;
@@ -412,9 +413,9 @@ export const SEO: React.FC<SEOProps> = ({
 
   // 使用SchemaManager管理结构化数据
   useEffect(() => {
-    const structuredData = generateBasicStructuredData();
+    const structuredData = generateBasicStructuredData(pageKey);
 
-    // 为每个schema设置唯一数据
+    // 为每个schema设置唯一数据（一次性设置，避免重复）
     structuredData.forEach(schema => {
       const schemaType = schema['@type'];
       globalSchemaManager.setSchema(schemaType, schema, 'seo-component');
