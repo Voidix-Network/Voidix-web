@@ -177,190 +177,31 @@ const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
   if (enableDebug) console.log('[SEO] 统一分析API已初始化');
 };
 
-// 生成Sitelinks导航结构化数据
-const generateSitelinksData = () => {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'SiteNavigationElement',
-    name: 'Voidix主导航',
-    url: DEFAULT_SEO_CONFIG.websiteUrl,
-    hasPart: [
-      {
-        '@type': 'SiteNavigationElement',
-        name: '服务器状态',
-        description: '查看Voidix服务器实时运行状态和在线玩家数',
-        url: 'https://www.voidix.net/status',
-      },
-      {
-        '@type': 'SiteNavigationElement',
-        name: '监控面板',
-        description: '服务器性能监控和运行数据统计',
-        url: 'https://www.voidix.net/monitor',
-      },
-      {
-        '@type': 'SiteNavigationElement',
-        name: '常见问题',
-        description: '新手玩家入门指南和常见问题解答',
-        url: 'https://www.voidix.net/faq',
-      },
-      {
-        '@type': 'SiteNavigationElement',
-        name: 'Bug反馈',
-        description: '提交游戏问题反馈和建议',
-        url: 'https://www.voidix.net/bug-report',
-      },
-      {
-        '@type': 'SiteNavigationElement',
-        name: '隐私政策',
-        description: '了解我们的隐私保护政策',
-        url: 'https://www.voidix.net/privacy',
-      },
-    ],
-  };
-};
-
-// 生成全面的结构化数据
-const generateBasicStructuredData = (pageKey?: string) => {
+// 生成基础结构化数据
+const generateBasicStructuredData = () => {
   const organization = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Voidix Minecraft Server',
-    alternateName: 'Voidix',
+    name: DEFAULT_SEO_CONFIG.organizationName,
     url: DEFAULT_SEO_CONFIG.websiteUrl,
     logo: `${DEFAULT_SEO_CONFIG.websiteUrl}${DEFAULT_SEO_CONFIG.image}`,
     description: DEFAULT_SEO_CONFIG.description,
     email: DEFAULT_SEO_CONFIG.contactEmail,
-    founder: [
-      {
-        '@type': 'Person',
-        name: 'NekoSora',
-        jobTitle: '核心开发者',
-      },
-      {
-        '@type': 'Person',
-        name: 'CYsonHab',
-        jobTitle: '核心开发者',
-      },
-    ],
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'customer service',
-      availableLanguage: 'Chinese',
-    },
-    foundingDate: '2025',
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'CN',
-    },
-    keywords: 'Minecraft服务器,小游戏服务器,生存服务器,公益服务器,起床战争,空岛战争',
-    areaServed: {
-      '@type': 'Country',
-      name: 'China',
-    },
+    areaServed: { '@type': 'Country', name: 'China' },
+    serviceType: 'Minecraft公益游戏服务器',
   };
 
   const website = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Voidix Minecraft公益服务器',
+    name: DEFAULT_SEO_CONFIG.siteName,
     url: DEFAULT_SEO_CONFIG.websiteUrl,
     description: DEFAULT_SEO_CONFIG.description,
     inLanguage: 'zh-CN',
-    publisher: {
-      '@type': 'Organization',
-      name: 'Voidix Team',
-    },
-    potentialAction: [
-      {
-        '@type': 'SearchAction',
-        target: 'https://www.voidix.net/search?q={search_term_string}',
-        'query-input': 'required name=search_term_string',
-      },
-      {
-        '@type': 'ReadAction',
-        target: 'https://www.voidix.net/status',
-        name: '查看服务器状态',
-      },
-      {
-        '@type': 'ReadAction',
-        target: 'https://www.voidix.net/faq',
-        name: '常见问题解答',
-      },
-    ],
-    // 添加主要导航页面信息
-    mainEntity: [
-      {
-        '@type': 'WebPage',
-        '@id': 'https://www.voidix.net/status',
-        name: '服务器状态',
-        description: '实时服务器状态监控',
-      },
-      {
-        '@type': 'WebPage',
-        '@id': 'https://www.voidix.net/faq',
-        name: '常见问题',
-        description: '新手玩家指南和FAQ',
-      },
-      {
-        '@type': 'WebPage',
-        '@id': 'https://www.voidix.net/monitor',
-        name: '监控面板',
-        description: '服务器性能监控',
-      },
-    ],
+    publisher: { '@type': 'Organization', name: DEFAULT_SEO_CONFIG.organizationName },
   };
 
-  // 为首页添加游戏相关的结构化数据
-  const gameSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'VideoGame',
-    name: 'Voidix Minecraft服务器',
-    description: DEFAULT_SEO_CONFIG.description,
-    gameLocation: {
-      '@type': 'Place',
-      address: {
-        '@type': 'PostalAddress',
-        addressCountry: 'CN',
-      },
-    },
-    numberOfPlayers: '1-200',
-    playMode: 'https://schema.org/MultiPlayer',
-    gamePlatform: ['PC', 'Java Edition'],
-    genre: ['沙盒游戏', '小游戏', '生存游戏'],
-    gameItem: [
-      {
-        '@type': 'Thing',
-        name: '小游戏服务器',
-        description: 'minigame.voidix.net - 起床战争、空岛战争等小游戏',
-      },
-      {
-        '@type': 'Thing',
-        name: '生存服务器',
-        description: 'survival.voidix.net - 纯净生存体验',
-      },
-    ],
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'CNY',
-      availability: 'https://schema.org/InStock',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'Voidix Team',
-    },
-  };
-
-  // 根据页面类型返回不同的结构化数据
-  const baseSchemas = [organization, website, gameSchema];
-
-  // 首页添加Sitelinks导航数据
-  if (pageKey === 'home') {
-    const sitelinksData = generateSitelinksData();
-    return [...baseSchemas, sitelinksData];
-  }
-
-  return baseSchemas;
+  return [organization, website];
 };
 
 /**
