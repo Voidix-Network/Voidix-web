@@ -206,13 +206,43 @@ build_project() {
     CHANGED_FILES="/tmp/voidix_changed_files.txt"
     CHANGED_URLS="/tmp/voidix_changed_urls.txt"
 
+    log_info "🔍 HTML变化检测配置："
+    log_info "  ✅ 包含: 所有HTML页面"
+    log_info "  ❌ 排除: 404/not-found页面（不需要搜索引擎索引）"
+    log_info "  🔧 清理: 动态值（CSS transform、时间戳、随机数、版本参数）"
+    log_info "  📋 规范化: scale(), translate*(), rotate*(), matrix*(), data-timestamp, _v等"
+    log_info "  🎯 目标: 只检测真正的内容变化，忽略动画状态和缓存差异"
+    log_info "  ⚠️  重要: 清理仅用于哈希计算，不会修改实际构建文件"
+
     # 记录构建前的HTML文件哈希
     log_info "记录构建前HTML文件状态..."
     > "$HASH_BEFORE"
     if [[ -d "dist" ]]; then
-        find dist -name "*.html" -type f -exec sh -c 'echo "$(md5sum "$1" | cut -d" " -f1) $1"' _ {} \; > "$HASH_BEFORE" 2>/dev/null || true
+        # 计算总文件数和排除的文件数
+        total_html_before=$(find dist -name "*.html" -type f | wc -l)
+        find dist -name "*.html" -type f -exec sh -c '
+            # 清理动态CSS值后计算哈希（注意：只影响哈希计算，不修改原文件）
+            cleaned_content=$(cat "$1" | \
+                sed "s/scale([0-9.]*)/scale(NORMALIZED)/g" | \
+                sed "s/translateY([0-9.-]*px)/translateY(NORMALIZEDpx)/g" | \
+                sed "s/translateX([0-9.-]*px)/translateX(NORMALIZEDpx)/g" | \
+                sed "s/translate([0-9.-]*px, [0-9.-]*px)/translate(NORMALIZEDpx, NORMALIZEDpx)/g" | \
+                sed "s/translate3d([0-9.-]*px, [0-9.-]*px, [0-9.-]*px)/translate3d(NORMALIZEDpx, NORMALIZEDpx, NORMALIZEDpx)/g" | \
+                sed "s/rotate([0-9.-]*deg)/rotate(NORMALIZEDdeg)/g" | \
+                sed "s/rotateX([0-9.-]*deg)/rotateX(NORMALIZEDdeg)/g" | \
+                sed "s/rotateY([0-9.-]*deg)/rotateY(NORMALIZEDdeg)/g" | \
+                sed "s/rotateZ([0-9.-]*deg)/rotateZ(NORMALIZEDdeg)/g" | \
+                sed "s/skew([0-9.-]*deg, [0-9.-]*deg)/skew(NORMALIZEDdeg, NORMALIZEDdeg)/g" | \
+                sed "s/matrix([0-9.,-]*)/matrix(NORMALIZED)/g" | \
+                sed "s/matrix3d([0-9.,-]*)/matrix3d(NORMALIZED)/g" | \
+                sed "s/data-timestamp=\"[0-9]*\"/data-timestamp=\"NORMALIZED\"/g" | \
+                sed "s/data-random=\"[0-9]*\"/data-random=\"NORMALIZED\"/g" | \
+                sed "s/_v=[0-9]*/_v=NORMALIZED/g")
+            echo "$(echo "$cleaned_content" | md5sum | cut -d" " -f1) $1"
+        ' _ {} \; | grep -v -E "(404|not-found|notfound)" > "$HASH_BEFORE" 2>/dev/null || true
         html_before_count=$(wc -l < "$HASH_BEFORE" 2>/dev/null || echo 0)
-        log_info "构建前发现 $html_before_count 个HTML文件"
+        excluded_before=$((total_html_before - html_before_count))
+        log_info "构建前发现 $html_before_count 个HTML文件（已排除 $excluded_before 个404/not-found页面）"
 
         # 如果是第一次构建（没有dist目录或文件很少），设置标记
         if [[ "$html_before_count" -eq 0 ]]; then
@@ -223,6 +253,8 @@ build_project() {
         log_info "构建前未发现dist目录，标记为首次构建"
         echo "FIRST_BUILD=true" > "/tmp/voidix_build_mode.txt"
         html_before_count=0
+        total_html_before=0
+        excluded_before=0
     fi
 
     # 安装依赖
@@ -242,23 +274,46 @@ build_project() {
     # 记录构建后的HTML文件哈希
     log_info "记录构建后HTML文件状态..."
     > "$HASH_AFTER"
-    find dist -name "*.html" -type f -exec sh -c 'echo "$(md5sum "$1" | cut -d" " -f1) $1"' _ {} \; > "$HASH_AFTER" 2>/dev/null || true
+    # 计算总文件数和排除的文件数
+    total_html_after=$(find dist -name "*.html" -type f | wc -l)
+    find dist -name "*.html" -type f -exec sh -c '
+        # 清理动态CSS值后计算哈希（注意：只影响哈希计算，不修改原文件）
+        cleaned_content=$(cat "$1" | \
+            sed "s/scale([0-9.]*)/scale(NORMALIZED)/g" | \
+            sed "s/translateY([0-9.-]*px)/translateY(NORMALIZEDpx)/g" | \
+            sed "s/translateX([0-9.-]*px)/translateX(NORMALIZEDpx)/g" | \
+            sed "s/translate([0-9.-]*px, [0-9.-]*px)/translate(NORMALIZEDpx, NORMALIZEDpx)/g" | \
+            sed "s/translate3d([0-9.-]*px, [0-9.-]*px, [0-9.-]*px)/translate3d(NORMALIZEDpx, NORMALIZEDpx, NORMALIZEDpx)/g" | \
+            sed "s/rotate([0-9.-]*deg)/rotate(NORMALIZEDdeg)/g" | \
+            sed "s/rotateX([0-9.-]*deg)/rotateX(NORMALIZEDdeg)/g" | \
+            sed "s/rotateY([0-9.-]*deg)/rotateY(NORMALIZEDdeg)/g" | \
+            sed "s/rotateZ([0-9.-]*deg)/rotateZ(NORMALIZEDdeg)/g" | \
+            sed "s/skew([0-9.-]*deg, [0-9.-]*deg)/skew(NORMALIZEDdeg, NORMALIZEDdeg)/g" | \
+            sed "s/matrix([0-9.,-]*)/matrix(NORMALIZED)/g" | \
+            sed "s/matrix3d([0-9.,-]*)/matrix3d(NORMALIZED)/g" | \
+            sed "s/data-timestamp=\"[0-9]*\"/data-timestamp=\"NORMALIZED\"/g" | \
+            sed "s/data-random=\"[0-9]*\"/data-random=\"NORMALIZED\"/g" | \
+            sed "s/_v=[0-9]*/_v=NORMALIZED/g")
+        echo "$(echo "$cleaned_content" | md5sum | cut -d" " -f1) $1"
+    ' _ {} \; | grep -v -E "(404|not-found|notfound)" > "$HASH_AFTER" 2>/dev/null || true
     html_after_count=$(wc -l < "$HASH_AFTER" 2>/dev/null || echo 0)
-    log_info "构建后发现 $html_after_count 个HTML文件"
+    excluded_after=$((total_html_after - html_after_count))
+    log_info "构建后发现 $html_after_count 个HTML文件（已排除 $excluded_after 个404/not-found页面）"
 
     # 显示构建前后对比
     echo ""
     log_info "📊 构建前后对比："
-    log_info "  构建前HTML文件: $html_before_count"
-    log_info "  构建后HTML文件: $html_after_count"
+    log_info "  构建前HTML文件: $html_before_count (总计: $total_html_before)"
+    log_info "  构建后HTML文件: $html_after_count (总计: $total_html_after)"
+    log_info "  排除404页面: 构建前 $excluded_before 个，构建后 $excluded_after 个"
     if [[ "$html_after_count" -gt "$html_before_count" ]]; then
         new_files=$((html_after_count - html_before_count))
-        log_info "  ✅ 新增文件: $new_files"
+        log_info "  ✅ 新增有效文件: $new_files"
     elif [[ "$html_after_count" -lt "$html_before_count" ]]; then
         removed_files=$((html_before_count - html_after_count))
-        log_info "  ❌ 删除文件: $removed_files"
+        log_info "  ❌ 删除有效文件: $removed_files"
     else
-        log_info "  🔄 文件数量无变化"
+        log_info "  🔄 有效文件数量无变化"
     fi
     echo ""
 
@@ -362,6 +417,8 @@ build_project() {
                 log_info "📊 变化统计:"
                 log_info "  📁 变化文件数: $changed_count"
                 log_info "  🔗 生成URL数: $url_count"
+                log_info "  ❌ 排除404页面: 自动过滤，不会提交"
+                log_info "  🔧 动态值清理: 已规范化transform/时间戳/随机数等"
                 log_info "  💰 节省API调用: 与全量提交相比节省 $(echo "scale=1; (1 - $url_count/20) * 100" | bc 2>/dev/null || echo "大量") %"
             fi
         fi
