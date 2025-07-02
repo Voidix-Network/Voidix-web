@@ -98,61 +98,35 @@ class SchemaManager {
   }
 
   /**
-   * 移除特定类型的所有结构化数据（增强版去重）
+   * 移除特定类型的所有结构化数据（激进清理版）
    */
   removeSchemaByType(type: string): void {
     let removedCount = 0;
 
-    // 移除DOM中的scripts（标记的）
-    document.querySelectorAll(`script[data-schema-type="${type}"]`).forEach(script => {
-      script.remove();
-      removedCount++;
-    });
+    // 激进方式：直接扫描所有JSON-LD scripts，移除匹配类型的所有实例
+    const allScripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
 
-    // 移除没有标记但类型匹配的scripts（兜底清理）
-    document
-      .querySelectorAll('script[type="application/ld+json"]:not([data-schema-manager])')
-      .forEach(script => {
-        try {
-          const data = JSON.parse(script.textContent || '');
-          if (data['@type'] === type) {
-            script.remove();
-            removedCount++;
-          }
-        } catch {
-          // 忽略无效JSON
-        }
-      });
-
-    // 彻底清理：扫描所有 JSON-LD scripts 找重复
-    const seenTypes = new Set<string>();
-    document.querySelectorAll('script[type="application/ld+json"]').forEach(script => {
+    allScripts.forEach(script => {
       try {
         const data = JSON.parse(script.textContent || '');
-        const schemaType = data['@type'];
-        if (schemaType === type) {
-          if (seenTypes.has(schemaType)) {
-            // 发现重复，移除
-            script.remove();
-            removedCount++;
-          } else {
-            seenTypes.add(schemaType);
-          }
+        if (data['@type'] === type) {
+          script.remove();
+          removedCount++;
         }
       } catch {
         // 忽略无效JSON
       }
     });
 
-    // 更新记录
+    // 清理记录
     for (const [key] of this.activeSchemas) {
       if (key.startsWith(type + '-')) {
         this.activeSchemas.delete(key);
       }
     }
 
-    if (this.options.enableDebug) {
-      console.log(`[SchemaManager] 移除了 ${removedCount} 个 ${type} schema`);
+    if (this.options.enableDebug && removedCount > 0) {
+      console.log(`[SchemaManager] 激进清理 ${type}：移除了 ${removedCount} 个实例`);
     }
   }
 
@@ -308,21 +282,79 @@ if (typeof window !== 'undefined') {
     // 立即执行一次清理
     setTimeout(() => {
       globalSchemaManager.globalDeduplicate();
+    }, 500);
 
-      // 每5秒检查一次重复（防止动态插入的重复）
-      const intervalId = setInterval(() => {
-        const validation = globalSchemaManager.validateUniqueness();
-        if (!validation.isValid) {
-          console.warn('[SchemaManager] 检测到重复结构化数据，自动清理中...');
-          globalSchemaManager.globalDeduplicate();
-        }
-      }, 5000);
+    // 页面加载初期频繁检查（JavaScript注入后立即清理）
+    let checkCount = 0;
+    const quickCheckInterval = setInterval(() => {
+      const validation = globalSchemaManager.validateUniqueness();
+      if (!validation.isValid) {
+        console.warn('[SchemaManager] 检测到重复结构化数据，自动清理中...');
+        globalSchemaManager.globalDeduplicate();
+      }
 
-      // 页面卸载时清理定时器
-      window.addEventListener('beforeunload', () => {
-        clearInterval(intervalId);
-      });
+      checkCount++;
+      // 前30次检查（每1秒一次，总共30秒）
+      if (checkCount >= 30) {
+        clearInterval(quickCheckInterval);
+
+        // 之后改为每5秒检查一次（长期监控）
+        const slowCheckInterval = setInterval(() => {
+          const validation = globalSchemaManager.validateUniqueness();
+          if (!validation.isValid) {
+            console.warn('[SchemaManager] 检测到重复结构化数据，自动清理中...');
+            globalSchemaManager.globalDeduplicate();
+          }
+        }, 5000);
+
+        // 页面卸载时清理定时器
+        window.addEventListener('beforeunload', () => {
+          clearInterval(slowCheckInterval);
+        });
+      }
     }, 1000);
+
+    // 页面卸载时清理快速检查定时器
+    window.addEventListener('beforeunload', () => {
+      clearInterval(quickCheckInterval);
+    });
+
+    // DOM变化监听：实时检测JSON-LD script的插入
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const element = node as Element;
+            // 检查是否是JSON-LD script或包含JSON-LD script的容器
+            if (
+              (element.tagName === 'SCRIPT' &&
+                element.getAttribute('type') === 'application/ld+json') ||
+              element.querySelectorAll('script[type="application/ld+json"]').length > 0
+            ) {
+              // 延迟一点点让DOM稳定，然后检查重复
+              setTimeout(() => {
+                const validation = globalSchemaManager.validateUniqueness();
+                if (!validation.isValid) {
+                  console.warn('[SchemaManager] DOM变化检测到重复结构化数据，立即清理中...');
+                  globalSchemaManager.globalDeduplicate();
+                }
+              }, 100);
+            }
+          }
+        });
+      });
+    });
+
+    // 监听整个document的变化
+    observer.observe(document, {
+      childList: true,
+      subtree: true,
+    });
+
+    // 页面卸载时停止监听
+    window.addEventListener('beforeunload', () => {
+      observer.disconnect();
+    });
   };
 
   // 页面加载完成后启动监控
