@@ -27,7 +27,9 @@ class SchemaManager {
 
     // 防止React严格模式重复渲染：检查相同内容是否已存在
     const newContent = JSON.stringify(data, null, 0);
-    const existingScript = Array.from(document.querySelectorAll('script[type="application/ld+json"]')).find(script => {
+    const existingScript = Array.from(
+      document.querySelectorAll('script[type="application/ld+json"]')
+    ).find(script => {
       try {
         const existingData = JSON.parse(script.textContent || '');
         return existingData['@type'] === type && script.textContent === newContent;
@@ -72,7 +74,9 @@ class SchemaManager {
    * 去重指定类型的结构化数据（保留第一个）
    */
   private deduplicate(type: string): void {
-    const scripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]')).filter(script => {
+    const scripts = Array.from(
+      document.querySelectorAll('script[type="application/ld+json"]')
+    ).filter(script => {
       try {
         const data = JSON.parse(script.textContent || '');
         return data['@type'] === type;
@@ -106,17 +110,19 @@ class SchemaManager {
     });
 
     // 移除没有标记但类型匹配的scripts（兜底清理）
-    document.querySelectorAll('script[type="application/ld+json"]:not([data-schema-manager])').forEach(script => {
-      try {
-        const data = JSON.parse(script.textContent || '');
-        if (data['@type'] === type) {
-          script.remove();
-          removedCount++;
+    document
+      .querySelectorAll('script[type="application/ld+json"]:not([data-schema-manager])')
+      .forEach(script => {
+        try {
+          const data = JSON.parse(script.textContent || '');
+          if (data['@type'] === type) {
+            script.remove();
+            removedCount++;
+          }
+        } catch {
+          // 忽略无效JSON
         }
-      } catch {
-        // 忽略无效JSON
-      }
-    });
+      });
 
     // 彻底清理：扫描所有 JSON-LD scripts 找重复
     const seenTypes = new Set<string>();
@@ -289,18 +295,41 @@ export const globalSchemaManager = new SchemaManager({
   enableDebug: import.meta.env.DEV,
 });
 
-// 在窗口对象上暴露调试功能（开发环境）
-if (typeof window !== 'undefined' && import.meta.env.DEV) {
-  (window as any).schemaManager = globalSchemaManager;
-  (window as any).fixSchemasDuplicates = () => globalSchemaManager.globalDeduplicate();
+// 全局重复监控和自动清理（生产环境也启用）
+if (typeof window !== 'undefined') {
+  // 开发环境的调试功能
+  if (import.meta.env.DEV) {
+    (window as any).schemaManager = globalSchemaManager;
+    (window as any).fixSchemasDuplicates = () => globalSchemaManager.globalDeduplicate();
+  }
 
-  // 页面加载完成后自动检查重复
+  // 定期检查并清理重复（生产环境也运行）
+  const startDuplicateMonitoring = () => {
+    // 立即执行一次清理
+    setTimeout(() => {
+      globalSchemaManager.globalDeduplicate();
+
+      // 每5秒检查一次重复（防止动态插入的重复）
+      const intervalId = setInterval(() => {
+        const validation = globalSchemaManager.validateUniqueness();
+        if (!validation.isValid) {
+          console.warn('[SchemaManager] 检测到重复结构化数据，自动清理中...');
+          globalSchemaManager.globalDeduplicate();
+        }
+      }, 5000);
+
+      // 页面卸载时清理定时器
+      window.addEventListener('beforeunload', () => {
+        clearInterval(intervalId);
+      });
+    }, 1000);
+  };
+
+  // 页面加载完成后启动监控
   if (document.readyState === 'complete') {
-    setTimeout(() => globalSchemaManager.debug(), 1000);
+    startDuplicateMonitoring();
   } else {
-    window.addEventListener('load', () => {
-      setTimeout(() => globalSchemaManager.debug(), 1000);
-    });
+    window.addEventListener('load', startDuplicateMonitoring);
   }
 }
 
