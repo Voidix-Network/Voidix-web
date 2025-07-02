@@ -223,23 +223,12 @@ build_project() {
         find dist -name "*.html" -type f -exec sh -c '
             # 清理动态CSS值后计算哈希（注意：只影响哈希计算，不修改原文件）
             cleaned_content=$(cat "$1" | \
-                sed "s/scale([[:space:]]*[0-9.-]*[[:space:]]*)/scale(NORMALIZED)/g" | \
-                sed "s/translateY([[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*)/translateY(NORMALIZED)/g" | \
-                sed "s/translateX([[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*)/translateX(NORMALIZED)/g" | \
-                sed "s/translate([[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*,[[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*)/translate(NORMALIZED)/g" | \
-                sed "s/translate3d([[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*,[[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*,[[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*)/translate3d(NORMALIZED)/g" | \
-                sed "s/rotate([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/rotate(NORMALIZED)/g" | \
-                sed "s/rotateX([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/rotateX(NORMALIZED)/g" | \
-                sed "s/rotateY([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/rotateY(NORMALIZED)/g" | \
-                sed "s/rotateZ([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/rotateZ(NORMALIZED)/g" | \
-                sed "s/skew([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*,[[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/skew(NORMALIZED)/g" | \
-                sed "s/matrix([[:space:]]*[0-9.,-]*[[:space:]]*)/matrix(NORMALIZED)/g" | \
-                sed "s/matrix3d([[:space:]]*[0-9.,-]*[[:space:]]*)/matrix3d(NORMALIZED)/g" | \
-                sed "s/data-timestamp=[\"'"'"'][0-9]*[\"'"'"']/data-timestamp=\"NORMALIZED\"/g" | \
-                sed "s/data-random=[\"'"'"'][0-9]*[\"'"'"']/data-random=\"NORMALIZED\"/g" | \
+                sed "s/translateY([0-9.-]*px)/translateY(NORMALIZED)/g" | \
+                sed "s/translateX([0-9.-]*px)/translateX(NORMALIZED)/g" | \
+                sed "s/scale([0-9.-]*)/scale(NORMALIZED)/g" | \
+                sed "s/rotate([0-9.-]*deg)/rotate(NORMALIZED)/g" | \
                 sed "s/_v=[0-9]*/_v=NORMALIZED/g" | \
-                sed "s/&t=[0-9]*/\&t=NORMALIZED/g" | \
-                sed "s/[?]v=[0-9]*/\?v=NORMALIZED/g")
+                sed "s/?v=[0-9]*/?v=NORMALIZED/g")
             echo "$(echo "$cleaned_content" | md5sum | cut -d" " -f1) $1"
         ' _ {} \; | grep -v -E "(404|not-found|notfound)" > "$HASH_BEFORE" 2>/dev/null || true
         html_before_count=$(wc -l < "$HASH_BEFORE" 2>/dev/null || echo 0)
@@ -281,23 +270,12 @@ build_project() {
     find dist -name "*.html" -type f -exec sh -c '
         # 清理动态CSS值后计算哈希（注意：只影响哈希计算，不修改原文件）
         cleaned_content=$(cat "$1" | \
-            sed "s/scale([[:space:]]*[0-9.-]*[[:space:]]*)/scale(NORMALIZED)/g" | \
-            sed "s/translateY([[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*)/translateY(NORMALIZED)/g" | \
-            sed "s/translateX([[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*)/translateX(NORMALIZED)/g" | \
-            sed "s/translate([[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*,[[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*)/translate(NORMALIZED)/g" | \
-            sed "s/translate3d([[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*,[[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*,[[:space:]]*[0-9.-]*[[:space:]]*[a-z%]*[[:space:]]*)/translate3d(NORMALIZED)/g" | \
-            sed "s/rotate([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/rotate(NORMALIZED)/g" | \
-            sed "s/rotateX([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/rotateX(NORMALIZED)/g" | \
-            sed "s/rotateY([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/rotateY(NORMALIZED)/g" | \
-            sed "s/rotateZ([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/rotateZ(NORMALIZED)/g" | \
-            sed "s/skew([[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*,[[:space:]]*[0-9.-]*[[:space:]]*[a-z]*[[:space:]]*)/skew(NORMALIZED)/g" | \
-            sed "s/matrix([[:space:]]*[0-9.,-]*[[:space:]]*)/matrix(NORMALIZED)/g" | \
-            sed "s/matrix3d([[:space:]]*[0-9.,-]*[[:space:]]*)/matrix3d(NORMALIZED)/g" | \
-            sed "s/data-timestamp=[\"'"'"'][0-9]*[\"'"'"']/data-timestamp=\"NORMALIZED\"/g" | \
-            sed "s/data-random=[\"'"'"'][0-9]*[\"'"'"']/data-random=\"NORMALIZED\"/g" | \
+            sed "s/translateY([0-9.-]*px)/translateY(NORMALIZED)/g" | \
+            sed "s/translateX([0-9.-]*px)/translateX(NORMALIZED)/g" | \
+            sed "s/scale([0-9.-]*)/scale(NORMALIZED)/g" | \
+            sed "s/rotate([0-9.-]*deg)/rotate(NORMALIZED)/g" | \
             sed "s/_v=[0-9]*/_v=NORMALIZED/g" | \
-            sed "s/&t=[0-9]*/\&t=NORMALIZED/g" | \
-            sed "s/[?]v=[0-9]*/\?v=NORMALIZED/g")
+            sed "s/?v=[0-9]*/?v=NORMALIZED/g")
         echo "$(echo "$cleaned_content" | md5sum | cut -d" " -f1) $1"
     ' _ {} \; | grep -v -E "(404|not-found|notfound)" > "$HASH_AFTER" 2>/dev/null || true
     html_after_count=$(wc -l < "$HASH_AFTER" 2>/dev/null || echo 0)
