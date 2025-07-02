@@ -1,3 +1,4 @@
+import { globalSchemaManager } from '@/utils/schemaManager';
 import { ChevronRight, Home } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -94,54 +95,14 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
       }),
     };
 
-    // 强化去重：移除所有可能的面包屑结构化数据
-    const removeExistingBreadcrumbs = () => {
-      // 通过data-schema属性移除
-      const schemaScripts = document.querySelectorAll('script[data-schema="breadcrumb"]');
-      schemaScripts.forEach(script => script.remove());
+    // 使用SchemaManager设置面包屑结构化数据
+    globalSchemaManager.setSchema('BreadcrumbList', breadcrumbSchema, 'breadcrumb-component');
 
-      // 通过内容特征移除BreadcrumbList
-      const allScripts = document.querySelectorAll('script[type="application/ld+json"]');
-      allScripts.forEach(script => {
-        try {
-          const data = JSON.parse(script.textContent || '');
-          if (data['@type'] === 'BreadcrumbList') {
-            script.remove();
-          }
-        } catch {
-          // 忽略无效JSON
-        }
-      });
-    };
-
-    removeExistingBreadcrumbs();
-
-    // 短暂延迟确保DOM操作完成
-    const timeoutId = setTimeout(() => {
-      // 再次检查并移除重复
-      removeExistingBreadcrumbs();
-
-      // 创建新的面包屑结构化数据
-      const script = document.createElement('script');
-      script.type = 'application/ld+json';
-      script.setAttribute('data-schema', 'breadcrumb');
-      script.setAttribute('data-component', 'BreadcrumbNavigation');
-      script.textContent = JSON.stringify(breadcrumbSchema, null, 0);
-
-      // 插入到head的特定位置
-      const head = document.head;
-      const existingMeta = head.querySelector('meta[name="viewport"]');
-      if (existingMeta && existingMeta.nextSibling) {
-        head.insertBefore(script, existingMeta.nextSibling);
-      } else {
-        head.appendChild(script);
-      }
-    }, 10);
+    console.log('[BreadcrumbNavigation] 已通过SchemaManager设置面包屑结构化数据');
 
     // 清理函数
     return () => {
-      clearTimeout(timeoutId);
-      removeExistingBreadcrumbs();
+      globalSchemaManager.removeSchemaBySource('breadcrumb-component');
     };
   }, [breadcrumbs]);
 
