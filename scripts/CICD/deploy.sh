@@ -22,20 +22,21 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# 配置变量
-SERVER_PATH="/var/www/voidix.net"
-NGINX_CONFIG_PATH="/etc/nginx/sites-available/voidix.net"
-NGINX_SYMLINK_PATH="/etc/nginx/sites-enabled/voidix.net"
-WEB_USER="www-data"
-WEB_GROUP="www-data"
-
 # 获取脚本所在目录（scripts/CICD/）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 项目根目录（向上两级：CICD -> scripts -> project root）
 PROJECT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
+# 配置变量
+SERVER_PATH="$PROJECT_DIR"  # 使用项目根目录作为服务器路径
+NGINX_CONFIG_PATH="/etc/nginx/sites-available/voidix.net"
+NGINX_SYMLINK_PATH="/etc/nginx/sites-enabled/voidix.net"
+WEB_USER="www-data"
+WEB_GROUP="www-data"
+
 echo "Debug: SCRIPT_DIR=$SCRIPT_DIR"
 echo "Debug: PROJECT_DIR=$PROJECT_DIR"
+echo "Debug: SERVER_PATH=$SERVER_PATH"
 
 # 日志函数
 log_info() {
@@ -68,24 +69,27 @@ show_help() {
     echo "选项："
     echo "  -g, --git      仅更新Git代码仓库"
     echo "  -n, --nginx    仅更新Nginx配置"
-    echo "  -b, --build    仅构建项目（包含压缩）"
+    echo "  -b, --build    仅构建项目（包含压缩和变化检测）"
     echo "  -c, --compress 仅压缩静态文件"
     echo "  -r, --reload   仅重载Nginx服务"
+    echo "  -s, --submit   仅提交变化的URL到搜索引擎"
     echo "  -h, --help     显示此帮助信息"
     echo ""
     echo "组合选项："
-    echo "  --git-build        Git更新 + 构建"
-    echo "  --git-build-reload Git更新 + 构建 + 重载"
-    echo "  --nginx-reload     Nginx配置更新 + 重载"
-    echo "  --git-nginx-reload Git更新 + Nginx配置更新 + 重载"
-    echo "  --build-reload     构建 + 重载"
+    echo "  --git-build         Git更新 + 构建 + URL提交"
+    echo "  --git-build-reload  Git更新 + 构建 + URL提交 + 重载"
+    echo "  --nginx-reload      Nginx配置更新 + 重载"
+    echo "  --git-nginx-reload  Git更新 + Nginx配置更新 + 重载"
+    echo "  --build-reload      构建 + URL提交 + 重载"
+    echo "  --build-submit      构建 + URL提交"
     echo ""
     echo "示例："
     echo "  $0                     # 完整部署（默认）"
     echo "  $0 --nginx             # 只更新Nginx配置"
-    echo "  $0 --build             # 只构建项目"
-    echo "  $0 --git-build         # 更新代码并构建"
-    echo "  $0 --git-build-reload  # 更新代码、构建并重载"
+    echo "  $0 --build             # 只构建项目（含变化检测）"
+    echo "  $0 --git-build         # 更新代码、构建并提交变化URL"
+    echo "  $0 --git-build-reload  # 更新代码、构建、提交URL并重载"
+    echo "  $0 --submit            # 只提交变化的URL"
     echo ""
     echo "注意：所有操作都需要root权限"
 }
@@ -189,10 +193,25 @@ update_nginx() {
     log_success "Nginx配置更新完成"
 }
 
-# 3. 构建项目模块
+# 3. 构建项目模块（含HTML变化检测）
 build_project() {
     log_module "构建项目"
     cd "$SERVER_PATH"
+
+    # 临时文件路径
+    HASH_BEFORE="/tmp/voidix_html_hashes_before.txt"
+    HASH_AFTER="/tmp/voidix_html_hashes_after.txt"
+    CHANGED_FILES="/tmp/voidix_changed_files.txt"
+    CHANGED_URLS="/tmp/voidix_changed_urls.txt"
+
+    # 记录构建前的HTML文件哈希
+    log_info "记录构建前HTML文件状态..."
+    > "$HASH_BEFORE"
+    if [[ -d "dist" ]]; then
+        find dist -name "*.html" -type f -exec sh -c 'echo "$(md5sum "$1" | cut -d" " -f1) $1"' _ {} \; > "$HASH_BEFORE" 2>/dev/null || true
+    fi
+    html_before_count=$(wc -l < "$HASH_BEFORE" 2>/dev/null || echo 0)
+    log_info "构建前发现 $html_before_count 个HTML文件"
 
     # 安装依赖
     log_info "安装/更新依赖..."
@@ -206,6 +225,75 @@ build_project() {
     if [[ ! -d "dist" ]] || [[ -z "$(ls -A dist 2>/dev/null)" ]]; then
         log_error "构建失败，dist目录不存在或为空"
         exit 1
+    fi
+
+    # 记录构建后的HTML文件哈希
+    log_info "记录构建后HTML文件状态..."
+    > "$HASH_AFTER"
+    find dist -name "*.html" -type f -exec sh -c 'echo "$(md5sum "$1" | cut -d" " -f1) $1"' _ {} \; > "$HASH_AFTER" 2>/dev/null || true
+    html_after_count=$(wc -l < "$HASH_AFTER" 2>/dev/null || echo 0)
+    log_info "构建后发现 $html_after_count 个HTML文件"
+
+    # 检测变化的文件
+    log_info "检测HTML文件变化..."
+    > "$CHANGED_FILES"
+
+    # 找出新增和修改的文件
+    while IFS= read -r line; do
+        if [[ -n "$line" ]]; then
+            hash_after=$(echo "$line" | cut -d' ' -f1)
+            file_path=$(echo "$line" | cut -d' ' -f2-)
+
+            # 检查文件在构建前是否存在且哈希是否相同
+            hash_before=$(grep " $file_path$" "$HASH_BEFORE" 2>/dev/null | cut -d' ' -f1 || echo "")
+
+            if [[ -z "$hash_before" ]]; then
+                # 新增文件
+                echo "$file_path" >> "$CHANGED_FILES"
+                log_info "新增文件: $file_path"
+            elif [[ "$hash_before" != "$hash_after" ]]; then
+                # 修改文件
+                echo "$file_path" >> "$CHANGED_FILES"
+                log_info "修改文件: $file_path"
+            fi
+        fi
+    done < "$HASH_AFTER"
+
+    # 生成对应的URL列表
+    > "$CHANGED_URLS"
+    if [[ -s "$CHANGED_FILES" ]]; then
+        while IFS= read -r file_path; do
+            if [[ -n "$file_path" ]]; then
+                # 将文件路径转换为URL
+                # 移除 dist/ 前缀，处理 index.html
+                url_path=$(echo "$file_path" | sed 's|^dist/||' | sed 's|/index\.html$|/|' | sed 's|\.html$||')
+
+                # 确保以 / 开头
+                if [[ ! "$url_path" =~ ^/ ]]; then
+                    url_path="/$url_path"
+                fi
+
+                # 生成完整URL
+                full_url="https://www.voidix.net$url_path"
+                echo "$full_url" >> "$CHANGED_URLS"
+            fi
+        done < "$CHANGED_FILES"
+
+        changed_count=$(wc -l < "$CHANGED_FILES" 2>/dev/null || echo 0)
+        url_count=$(wc -l < "$CHANGED_URLS" 2>/dev/null || echo 0)
+
+        log_success "检测到 $changed_count 个HTML文件发生变化，生成 $url_count 个URL"
+
+        if [[ "$url_count" -gt 0 ]]; then
+            log_info "变化的URL列表:"
+            while IFS= read -r url; do
+                if [[ -n "$url" ]]; then
+                    log_info "  → $url"
+                fi
+            done < "$CHANGED_URLS"
+        fi
+    else
+        log_info "没有检测到HTML文件变化"
     fi
 
     log_success "项目构建完成"
@@ -331,17 +419,71 @@ set_permissions() {
     fi
 }
 
+# 7. 提交变化的URL到搜索引擎
+submit_changed_urls() {
+    log_module "提交变化的URL到搜索引擎"
+
+    # 检查是否有变化的URL文件
+    CHANGED_URLS="/tmp/voidix_changed_urls.txt"
+
+    if [[ ! -f "$CHANGED_URLS" ]]; then
+        log_info "未找到变化的URL文件，跳过URL提交"
+        return 0
+    fi
+
+    if [[ ! -s "$CHANGED_URLS" ]]; then
+        log_info "没有检测到HTML文件变化，跳过URL提交"
+        return 0
+    fi
+
+    # 计算要提交的URL数量
+    url_count=$(wc -l < "$CHANGED_URLS" 2>/dev/null || echo 0)
+
+    if [[ "$url_count" -eq 0 ]]; then
+        log_info "没有要提交的URL，跳过URL提交"
+        return 0
+    fi
+
+    log_info "准备提交 $url_count 个变化的URL到搜索引擎..."
+
+    # 调用submitUrls.sh脚本提交变化的URL
+    SUBMIT_SCRIPT="$SCRIPT_DIR/submitUrls.sh"
+
+    if [[ ! -f "$SUBMIT_SCRIPT" ]]; then
+        log_error "未找到URL提交脚本: $SUBMIT_SCRIPT"
+        return 1
+    fi
+
+    # 使用-f参数传递URL文件
+    if bash "$SUBMIT_SCRIPT" -f "$CHANGED_URLS"; then
+        log_success "变化的URL提交成功！节省了API限额"
+    else
+        log_error "URL提交失败，请检查网络连接和API配置"
+        return 1
+    fi
+
+    # 清理临时文件
+    rm -f "/tmp/voidix_html_hashes_before.txt" \
+          "/tmp/voidix_html_hashes_after.txt" \
+          "/tmp/voidix_changed_files.txt" \
+          "/tmp/voidix_changed_urls.txt"
+
+    log_info "已清理临时文件"
+}
+
 # 显示部署完成信息
 show_completion() {
     echo ""
     echo "==============================================="
     echo "✅ 部署完成"
     echo "🌐 网站地址: https://www.voidix.net"
-    echo "📁 部署路径: $SERVER_PATH"
+    echo "📁 项目路径: $SERVER_PATH"
     echo "⚙️  配置文件: $NGINX_CONFIG_PATH"
     echo "🔄 Git更新: 自动暂存本地更改 + 拉取最新代码"
     echo "📦 压缩配置: Brotli + Gzip 预压缩文件"
-    echo "💡 压缩收益: 预计节省约80%带宽"
+    echo "🔍 变化检测: 智能检测HTML文件变化"
+    echo "🚀 URL提交: 精准提交变化的URL，节省API限额"
+    echo "💡 优化效果: 预计节省约80%带宽 + 智能SEO更新"
     echo "==============================================="
 }
 
@@ -357,8 +499,9 @@ main() {
         build_project
         compress_files
         set_permissions
+        submit_changed_urls
         reload_nginx
-        log_success "完整部署成功完成！"
+        show_completion
         exit 0
     fi
 
@@ -388,11 +531,16 @@ main() {
                 reload_nginx
                 shift
                 ;;
+            -s | --submit)
+                submit_changed_urls
+                shift
+                ;;
             --git-build)
                 update_git
                 build_project
                 compress_files
                 set_permissions
+                submit_changed_urls
                 shift
                 ;;
             --git-build-reload)
@@ -400,6 +548,7 @@ main() {
                 build_project
                 compress_files
                 set_permissions
+                submit_changed_urls
                 reload_nginx
                 shift
                 ;;
@@ -418,7 +567,15 @@ main() {
                 build_project
                 compress_files
                 set_permissions
+                submit_changed_urls
                 reload_nginx
+                shift
+                ;;
+            --build-submit)
+                build_project
+                compress_files
+                set_permissions
+                submit_changed_urls
                 shift
                 ;;
             -h | --help)
