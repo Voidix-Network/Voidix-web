@@ -374,6 +374,25 @@ jobs:
             echo "📝 Latest commit: $(git log -1 --oneline)"
             echo ""
 
+            # 如果检测到脚本变化，确保使用最新版本
+            DEPLOY_STRATEGY="${{ steps.changes.outputs.deploy_strategy }}"
+            if [[ "${{ steps.changes.outputs.deploy_strategy }}" == "full" ]] && echo "${{ steps.changes.outputs.strategy_description }}" | grep -q "脚本更新"; then
+              echo "🔄 检测到部署脚本更新，确保使用最新版本..."
+
+              # 暂存任何本地更改
+              echo "📦 暂存本地更改..."
+              git stash push -m "Auto-stash before script update $(date '+%Y-%m-%d %H:%M:%S')" || echo "📝 没有需要暂存的更改"
+
+              # 获取最新代码
+              echo "⬇️ 拉取最新脚本..."
+              if git pull origin "$(git branch --show-current)"; then
+                echo "✅ 脚本更新成功"
+              else
+                echo "⚠️ git pull失败，尝试恢复暂存的更改..."
+                git stash pop || echo "⚠️ 恢复暂存失败，但继续执行"
+              fi
+            fi
+
             # 检查部署脚本是否存在
             DEPLOY_SCRIPT_PATH="./scripts/CICD/deploy.sh"
             if [[ ! -f "$DEPLOY_SCRIPT_PATH" ]]; then

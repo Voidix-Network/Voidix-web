@@ -13,18 +13,24 @@ show_help() {
     echo ""
     echo "选项："
     echo "  -f, --file FILE       从文件读取URL列表（每行一个URL）"
+    echo "  -d, --debug          启用调试模式，显示详细错误信息"
     echo "  -h, --help           显示此帮助信息"
 }
 
 # 解析命令行参数
 CUSTOM_URLS=""
 URL_FILE=""
+DEBUG=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         -f|--file)
             URL_FILE="$2"
             shift 2
+            ;;
+        -d|--debug)
+            DEBUG="1"
+            shift
             ;;
         -h|--help)
             show_help
@@ -107,12 +113,22 @@ if [ -z "${URL_LIST}" ]; then
   exit 0
 fi
 
+# 显示即将提交的URL列表
+echo ""
+echo "📋 即将提交的URL列表："
+echo "${URL_LIST}" | while IFS= read -r url; do
+  if [[ -n "$url" ]]; then
+    echo "  🔗 $url"
+  fi
+done
+echo ""
+
 # 将 URL 列表转换为 JSON 数组格式，用于 Bing
 BING_URL_ARRAY=$(echo "${URL_LIST}" | jq -R . | jq -s .)
 
 # 提交到 Bing
 echo "正在提交 URL 到 Bing Webmaster..."
-BING_RESPONSE=$(curl -s -v -X POST \
+BING_RESPONSE=$(curl -s -X POST \
   "https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey=${BING_API_KEY}" \
   -H "Content-Type: application/json; charset=utf-8" \
   -d "{\"siteUrl\":\"${BING_SITE_URL}\",\"urlList\":${BING_URL_ARRAY}}")
@@ -120,12 +136,16 @@ BING_RESPONSE=$(curl -s -v -X POST \
 if echo "${BING_RESPONSE}" | grep -q '"d":null'; then
   echo "[Bing Webmaster] URL批量提交成功！"
 else
-  echo "[Bing Webmaster] URL提交失败，返回：${BING_RESPONSE}"
+  echo "[Bing Webmaster] URL提交失败"
+  # 只在调试模式下显示详细错误
+  if [[ "${DEBUG:-0}" == "1" ]]; then
+    echo "详细错误：${BING_RESPONSE}"
+  fi
 fi
 
 # 提交到 Baidu
 echo "正在提交 URL 到 Baidu Push..."
-BAIDU_RESPONSE=$(curl -s -v -X POST \
+BAIDU_RESPONSE=$(curl -s -X POST \
   "http://data.zz.baidu.com/urls?site=${BAIDU_SITE_URL}&token=${BAIDU_API_KEY}" \
   -H "Content-Type: text/plain" \
   -H "User-Agent: curl/7.12.1" \
@@ -134,7 +154,42 @@ BAIDU_RESPONSE=$(curl -s -v -X POST \
 if echo "${BAIDU_RESPONSE}" | grep -q 'success'; then
   echo "[Baidu Push] URL批量推送成功！"
 else
-  echo "[Baidu Push] URL推送失败，返回：${BAIDU_RESPONSE}"
+  echo "[Baidu Push] URL推送失败"
+  # 检查常见错误并给出友好提示
+  if echo "${BAIDU_RESPONSE}" | grep -q 'over quota'; then
+    echo "原因：API调用次数超出限额"
+  elif echo "${BAIDU_RESPONSE}" | grep -q 'token'; then
+    echo "原因：API密钥可能无效"
+  elif [[ "${DEBUG:-0}" == "1" ]]; then
+    echo "详细错误：${BAIDU_RESPONSE}"
+  fi
 fi
 
-echo "URL 提交完成。"
+# 提交结果汇总
+echo ""
+echo "================================================="
+echo "📊 URL提交结果汇总"
+echo "================================================="
+total_urls=$(echo "${URL_LIST}" | wc -l)
+echo "📋 总URL数量: $total_urls"
+
+# 检查Bing提交结果
+if echo "${BING_RESPONSE}" | grep -q '"d":null'; then
+  echo "✅ Bing提交: 成功 ($total_urls 个URL)"
+else
+  echo "❌ Bing提交: 失败"
+fi
+
+# 检查Baidu提交结果
+if echo "${BAIDU_RESPONSE}" | grep -q 'success'; then
+  echo "✅ Baidu提交: 成功 ($total_urls 个URL)"
+elif echo "${BAIDU_RESPONSE}" | grep -q 'over quota'; then
+  echo "⚠️ Baidu提交: API限额已用完"
+else
+  echo "❌ Baidu提交: 失败"
+fi
+
+echo "🔗 提交站点: https://www.voidix.net"
+echo "⏰ 完成时间: $(date '+%Y-%m-%d %H:%M:%S')"
+echo "================================================="
+echo "✅ URL 提交任务完成"

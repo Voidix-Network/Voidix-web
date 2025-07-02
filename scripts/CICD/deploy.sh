@@ -73,6 +73,7 @@ show_help() {
     echo "  -c, --compress 仅压缩静态文件"
     echo "  -r, --reload   仅重载Nginx服务"
     echo "  -s, --submit   仅提交变化的URL到搜索引擎"
+    echo "  --force-submit 强制提交所有URL（忽略首次构建检测）"
     echo "  -h, --help     显示此帮助信息"
     echo ""
     echo "组合选项："
@@ -90,6 +91,7 @@ show_help() {
     echo "  $0 --git-build         # 更新代码、构建并提交变化URL"
     echo "  $0 --git-build-reload  # 更新代码、构建、提交URL并重载"
     echo "  $0 --submit            # 只提交变化的URL"
+    echo "  $0 --force-submit      # 强制提交所有URL（忽略首次构建检测）"
     echo ""
     echo "注意：所有操作都需要root权限"
 }
@@ -209,9 +211,19 @@ build_project() {
     > "$HASH_BEFORE"
     if [[ -d "dist" ]]; then
         find dist -name "*.html" -type f -exec sh -c 'echo "$(md5sum "$1" | cut -d" " -f1) $1"' _ {} \; > "$HASH_BEFORE" 2>/dev/null || true
+        html_before_count=$(wc -l < "$HASH_BEFORE" 2>/dev/null || echo 0)
+        log_info "构建前发现 $html_before_count 个HTML文件"
+
+        # 如果是第一次构建（没有dist目录或文件很少），设置标记
+        if [[ "$html_before_count" -eq 0 ]]; then
+            log_info "首次构建检测：将跳过URL提交以避免全量提交"
+            echo "FIRST_BUILD=true" > "/tmp/voidix_build_mode.txt"
+        fi
+    else
+        log_info "构建前未发现dist目录，标记为首次构建"
+        echo "FIRST_BUILD=true" > "/tmp/voidix_build_mode.txt"
+        html_before_count=0
     fi
-    html_before_count=$(wc -l < "$HASH_BEFORE" 2>/dev/null || echo 0)
-    log_info "构建前发现 $html_before_count 个HTML文件"
 
     # 安装依赖
     log_info "安装/更新依赖..."
@@ -234,11 +246,27 @@ build_project() {
     html_after_count=$(wc -l < "$HASH_AFTER" 2>/dev/null || echo 0)
     log_info "构建后发现 $html_after_count 个HTML文件"
 
+    # 显示构建前后对比
+    echo ""
+    log_info "📊 构建前后对比："
+    log_info "  构建前HTML文件: $html_before_count"
+    log_info "  构建后HTML文件: $html_after_count"
+    if [[ "$html_after_count" -gt "$html_before_count" ]]; then
+        new_files=$((html_after_count - html_before_count))
+        log_info "  ✅ 新增文件: $new_files"
+    elif [[ "$html_after_count" -lt "$html_before_count" ]]; then
+        removed_files=$((html_before_count - html_after_count))
+        log_info "  ❌ 删除文件: $removed_files"
+    else
+        log_info "  🔄 文件数量无变化"
+    fi
+    echo ""
+
     # 检测变化的文件
     log_info "检测HTML文件变化..."
     > "$CHANGED_FILES"
 
-    # 找出新增和修改的文件
+        # 找出新增和修改的文件
     while IFS= read -r line; do
         if [[ -n "$line" ]]; then
             hash_after=$(echo "$line" | cut -d' ' -f1)
@@ -251,46 +279,91 @@ build_project() {
                 # 新增文件
                 echo "$file_path" >> "$CHANGED_FILES"
                 log_info "新增文件: $file_path"
+                if [[ -f "$file_path" ]]; then
+                    file_size=$(stat -c%s "$file_path" 2>/dev/null || stat -f%z "$file_path" 2>/dev/null || echo "未知")
+                    log_info "  📏 文件大小: $file_size 字节"
+                    # 显示HTML标题（如果存在）
+                    title=$(grep -o '<title[^>]*>[^<]*</title>' "$file_path" 2>/dev/null | sed 's/<[^>]*>//g' | head -1 || echo "")
+                    if [[ -n "$title" ]]; then
+                        log_info "  📝 页面标题: $title"
+                    fi
+                fi
             elif [[ "$hash_before" != "$hash_after" ]]; then
                 # 修改文件
                 echo "$file_path" >> "$CHANGED_FILES"
                 log_info "修改文件: $file_path"
+                log_info "  🔄 哈希变化: $hash_before → $hash_after"
+                if [[ -f "$file_path" ]]; then
+                    file_size=$(stat -c%s "$file_path" 2>/dev/null || stat -f%z "$file_path" 2>/dev/null || echo "未知")
+                    log_info "  📏 当前大小: $file_size 字节"
+                    # 显示HTML标题（如果存在）
+                    title=$(grep -o '<title[^>]*>[^<]*</title>' "$file_path" 2>/dev/null | sed 's/<[^>]*>//g' | head -1 || echo "")
+                    if [[ -n "$title" ]]; then
+                        log_info "  📝 页面标题: $title"
+                    fi
+                    # 显示最后修改时间
+                    mod_time=$(stat -c%y "$file_path" 2>/dev/null | cut -d. -f1 || stat -f%Sm "$file_path" 2>/dev/null || echo "未知")
+                    log_info "  ⏰ 修改时间: $mod_time"
+                fi
             fi
         fi
     done < "$HASH_AFTER"
 
+        # 检查是否为首次构建
+    BUILD_MODE="normal"
+    if [[ -f "/tmp/voidix_build_mode.txt" ]]; then
+        BUILD_MODE=$(cat "/tmp/voidix_build_mode.txt" | grep "FIRST_BUILD=true" && echo "first" || echo "normal")
+    fi
+
     # 生成对应的URL列表
     > "$CHANGED_URLS"
     if [[ -s "$CHANGED_FILES" ]]; then
-        while IFS= read -r file_path; do
-            if [[ -n "$file_path" ]]; then
-                # 将文件路径转换为URL
-                # 移除 dist/ 前缀，处理 index.html
-                url_path=$(echo "$file_path" | sed 's|^dist/||' | sed 's|/index\.html$|/|' | sed 's|\.html$||')
-
-                # 确保以 / 开头
-                if [[ ! "$url_path" =~ ^/ ]]; then
-                    url_path="/$url_path"
-                fi
-
-                # 生成完整URL
-                full_url="https://www.voidix.net$url_path"
-                echo "$full_url" >> "$CHANGED_URLS"
-            fi
-        done < "$CHANGED_FILES"
-
         changed_count=$(wc -l < "$CHANGED_FILES" 2>/dev/null || echo 0)
-        url_count=$(wc -l < "$CHANGED_URLS" 2>/dev/null || echo 0)
 
-        log_success "检测到 $changed_count 个HTML文件发生变化，生成 $url_count 个URL"
+        if [[ "$BUILD_MODE" == "first" ]]; then
+            log_info "首次构建模式：检测到 $changed_count 个HTML文件，但将跳过URL提交"
+            log_info "这是为了避免向搜索引擎API提交所有页面，节省API限额"
+            # 清空URL文件
+            > "$CHANGED_URLS"
+        else
+            # 正常模式：生成URL列表
+            while IFS= read -r file_path; do
+                if [[ -n "$file_path" ]]; then
+                    # 将文件路径转换为URL
+                    # 移除 dist/ 前缀，处理 index.html
+                    url_path=$(echo "$file_path" | sed 's|^dist/||' | sed 's|/index\.html$|/|' | sed 's|\.html$||')
 
-        if [[ "$url_count" -gt 0 ]]; then
-            log_info "变化的URL列表:"
-            while IFS= read -r url; do
-                if [[ -n "$url" ]]; then
-                    log_info "  → $url"
+                    # 确保以 / 开头
+                    if [[ ! "$url_path" =~ ^/ ]]; then
+                        url_path="/$url_path"
+                    fi
+
+                    # 生成完整URL
+                    full_url="https://www.voidix.net$url_path"
+                    echo "$full_url" >> "$CHANGED_URLS"
                 fi
-            done < "$CHANGED_URLS"
+            done < "$CHANGED_FILES"
+
+                        url_count=$(wc -l < "$CHANGED_URLS" 2>/dev/null || echo 0)
+            log_success "检测到 $changed_count 个HTML文件发生变化，生成 $url_count 个URL"
+
+            if [[ "$url_count" -gt 0 ]]; then
+                log_info "文件→URL映射关系:"
+                # 同时读取文件和URL，显示对应关系
+                paste "$CHANGED_FILES" "$CHANGED_URLS" | while IFS=$'\t' read -r file_path url; do
+                    if [[ -n "$file_path" && -n "$url" ]]; then
+                        log_info "  📄 $file_path"
+                        log_info "  🔗 $url"
+                        echo ""
+                    fi
+                done
+
+                echo ""
+                log_info "📊 变化统计:"
+                log_info "  📁 变化文件数: $changed_count"
+                log_info "  🔗 生成URL数: $url_count"
+                log_info "  💰 节省API调用: 与全量提交相比节省 $(echo "scale=1; (1 - $url_count/20) * 100" | bc 2>/dev/null || echo "大量") %"
+            fi
         fi
     else
         log_info "没有检测到HTML文件变化"
@@ -432,7 +505,12 @@ submit_changed_urls() {
     fi
 
     if [[ ! -s "$CHANGED_URLS" ]]; then
-        log_info "没有检测到HTML文件变化，跳过URL提交"
+        # 检查是否为首次构建
+        if [[ -f "/tmp/voidix_build_mode.txt" && $(cat "/tmp/voidix_build_mode.txt" | grep "FIRST_BUILD=true") ]]; then
+            log_info "首次构建模式：已自动跳过URL提交，节省API限额"
+        else
+            log_info "没有检测到HTML文件变化，跳过URL提交"
+        fi
         return 0
     fi
 
@@ -462,11 +540,12 @@ submit_changed_urls() {
         return 1
     fi
 
-    # 清理临时文件
+        # 清理临时文件
     rm -f "/tmp/voidix_html_hashes_before.txt" \
           "/tmp/voidix_html_hashes_after.txt" \
           "/tmp/voidix_changed_files.txt" \
-          "/tmp/voidix_changed_urls.txt"
+          "/tmp/voidix_changed_urls.txt" \
+          "/tmp/voidix_build_mode.txt"
 
     log_info "已清理临时文件"
 }
@@ -533,6 +612,18 @@ main() {
                 ;;
             -s | --submit)
                 submit_changed_urls
+                shift
+                ;;
+            --force-submit)
+                # 强制提交模式：从sitemap读取所有URL并提交
+                log_module "强制提交所有URL到搜索引擎"
+                SUBMIT_SCRIPT="$SCRIPT_DIR/submitUrls.sh"
+                if [[ -f "$SUBMIT_SCRIPT" ]]; then
+                    bash "$SUBMIT_SCRIPT"
+                    log_success "强制URL提交完成"
+                else
+                    log_error "未找到URL提交脚本: $SUBMIT_SCRIPT"
+                fi
                 shift
                 ;;
             --git-build)
