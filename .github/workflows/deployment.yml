@@ -274,38 +274,38 @@ jobs:
 
           if [[ "$NGINX_CHANGES" == true && "$FRONTEND_CHANGES" == false && "$CONFIG_CHANGES" == false ]]; then
             # 只有Nginx配置变更
-            DEPLOY_STRATEGY="--nginx-reload"
+            DEPLOY_STRATEGY="--git-nginx-reload"
             STRATEGY_DESCRIPTION="🌐 Nginx配置优化部署"
 
           elif [[ "$NGINX_CHANGES" == false && "$FRONTEND_CHANGES" == true && "$DEPENDENCY_CHANGES" == false ]]; then
             # 只有前端代码变更，无依赖变更
             DEPLOY_STRATEGY="--git-build-reload"
-            STRATEGY_DESCRIPTION="⚛️ 前端代码快速部署"
+            STRATEGY_DESCRIPTION="⚛️ 前端代码快速部署 + 精准URL提交"
 
           elif [[ "$NGINX_CHANGES" == false && "$ASSETS_CHANGES" == true && "$FRONTEND_CHANGES" == false ]]; then
             # 只有静态资源变更
             DEPLOY_STRATEGY="--build-reload"
-            STRATEGY_DESCRIPTION="🖼️ 静态资源优化部署"
+            STRATEGY_DESCRIPTION="🖼️ 静态资源优化部署 + 智能URL更新"
 
           elif [[ "$NGINX_CHANGES" == true && "$FRONTEND_CHANGES" == true && "$DEPENDENCY_CHANGES" == false ]]; then
             # Nginx + 前端变更，无依赖变更
             DEPLOY_STRATEGY="--git-build-reload"
-            STRATEGY_DESCRIPTION="🌐⚛️ 配置+代码联合部署"
+            STRATEGY_DESCRIPTION="🌐⚛️ 配置+代码联合部署 + 精准URL提交"
 
           elif [[ "$DEPENDENCY_CHANGES" == true ]]; then
             # 有依赖变更，需要完整部署
             DEPLOY_STRATEGY="full"
-            STRATEGY_DESCRIPTION="📦 依赖更新完整部署"
+            STRATEGY_DESCRIPTION="📦 依赖更新完整部署 + 智能SEO优化"
 
           elif [[ "$SCRIPT_CHANGES" == true ]]; then
             # 部署脚本变更，完整部署
             DEPLOY_STRATEGY="full"
-            STRATEGY_DESCRIPTION="🚀 部署脚本更新完整部署"
+            STRATEGY_DESCRIPTION="🚀 部署脚本更新完整部署 + URL提交功能升级"
 
           else
             # 混合变更或其他情况，完整部署
             DEPLOY_STRATEGY="full"
-            STRATEGY_DESCRIPTION="🔄 混合变更完整部署"
+            STRATEGY_DESCRIPTION="🔄 混合变更完整部署 + 智能SEO优化"
           fi
 
           echo ""
@@ -374,6 +374,25 @@ jobs:
             echo "📝 Latest commit: $(git log -1 --oneline)"
             echo ""
 
+            # 如果检测到脚本变化，确保使用最新版本
+            DEPLOY_STRATEGY="${{ steps.changes.outputs.deploy_strategy }}"
+            if [[ "${{ steps.changes.outputs.deploy_strategy }}" == "full" ]] && echo "${{ steps.changes.outputs.strategy_description }}" | grep -q "脚本更新"; then
+              echo "🔄 检测到部署脚本更新，确保使用最新版本..."
+
+              # 暂存任何本地更改
+              echo "📦 暂存本地更改..."
+              git stash push -m "Auto-stash before script update $(date '+%Y-%m-%d %H:%M:%S')" || echo "📝 没有需要暂存的更改"
+
+              # 获取最新代码
+              echo "⬇️ 拉取最新脚本..."
+              if git pull origin "$(git branch --show-current)"; then
+                echo "✅ 脚本更新成功"
+              else
+                echo "⚠️ git pull失败，尝试恢复暂存的更改..."
+                git stash pop || echo "⚠️ 恢复暂存失败，但继续执行"
+              fi
+            fi
+
             # 检查部署脚本是否存在
             DEPLOY_SCRIPT_PATH="./scripts/CICD/deploy.sh"
             if [[ ! -f "$DEPLOY_SCRIPT_PATH" ]]; then
@@ -410,6 +429,14 @@ jobs:
             elif [[ "$DEPLOY_STRATEGY" == "--build-reload" ]]; then
               echo "🖼️ 执行静态资源优化部署..."
               sudo "$DEPLOY_SCRIPT_PATH" --build-reload
+
+            elif [[ "$DEPLOY_STRATEGY" == "--git-nginx-reload" ]]; then
+              echo "🌐⚛️ 执行Nginx+代码联合部署..."
+              sudo "$DEPLOY_SCRIPT_PATH" --git-nginx-reload
+
+            elif [[ "$DEPLOY_STRATEGY" == "--build-submit" ]]; then
+              echo "🔍 执行构建+精准URL提交..."
+              sudo "$DEPLOY_SCRIPT_PATH" --build-submit
 
             else
               echo "⚠️ 未知部署策略，执行完整部署..."
@@ -457,6 +484,8 @@ jobs:
           echo "🎯 使用策略: ${{ steps.changes.outputs.deploy_strategy }}"
           echo "📝 策略描述: ${{ steps.changes.outputs.strategy_description }}"
           echo "⚡ 自动化部署提升效率和稳定性"
+          echo "🔍 智能功能: HTML变化检测 + 精准URL提交"
+          echo "💡 SEO优化: 自动节省搜索引擎API限额"
 
       - name: ❌ 部署失败通知
         if: failure() && steps.changes.outputs.deploy_needed == 'true'
@@ -507,4 +536,7 @@ jobs:
           echo "📝 策略描述: ${{ needs.deploy.outputs.strategy_description || '标准部署流程' }}"
           echo "✅ 状态: 成功完成"
           echo "⚡ 效率优化: 根据变更类型自动选择部署方式"
+          echo "🔍 智能检测: HTML文件变化自动识别"
+          echo "🚀 SEO优化: 精准提交变化的URL，节省API限额"
+          echo "💡 技术栈: 智能部署 + 精准URL提交 + 自动化优化"
           echo "================================================="

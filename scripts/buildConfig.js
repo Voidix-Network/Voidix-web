@@ -39,6 +39,7 @@ export const PRERENDER_CONFIG = {
     { path: '/faq', outputDir: 'faq' },
     { path: '/bug-report', outputDir: 'bug-report' },
     { path: '/privacy', outputDir: 'privacy' },
+    { path: '/not-found', outputDir: 'not-found' },
   ],
 
   // HTML压缩配置 - SEO友好版本（移除注释但保持结构）
