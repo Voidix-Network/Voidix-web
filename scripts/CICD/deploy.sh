@@ -242,6 +242,15 @@ build_project() {
     fi
     log_success "项目构建完成"
 
+    # 新增：格式化构建产物中的HTML文件
+    log_step "格式化HTML文件 (npm run format:html)..."
+    if ! npm run format:html; then
+        log_error "HTML文件格式化失败"
+        # 此处也可以考虑恢复dist目录
+        exit 1
+    fi
+    log_success "HTML格式化完成"
+
     # 3. 对比文件并检测变化
     log_step "对比构建前后的HTML文件..."
     if [ ! -d "$dist_after_dir" ]; then
