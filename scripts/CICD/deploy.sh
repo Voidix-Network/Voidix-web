@@ -267,34 +267,36 @@ build_project() {
             is_new=true
             has_changed=true
         else
-            # 规范化文件内容以进行比较
+            # 确保prettier已安装
+            if ! command -v npx &> /dev/null; then
+                log_error "npx (Node.js) 未安装，无法运行prettier进行格式化。请安装Node.js。"
+                exit 1
+            fi
+
+            # 规范化 + 格式化文件内容以进行比较
+            format_and_clean() {
+                local file_path="$1"
+                # 先用sed进行初步清理，再用prettier进行最终格式化
+                sed -E \
+                    -e 's/translate[XY]\([0-9.-]+(px|em|rem|%|vw|vh)\)/translate(NORMALIZED)/g' \
+                    -e 's/scale\([0-9.-]+\)/scale(NORMALIZED)/g' \
+                    -e 's/rotate\([0-9.-]+deg\)/rotate(NORMALIZED)/g' \
+                    -e 's/opacity: [0-9.]+/opacity: NORMALIZED/g' \
+                    -e 's/transition-delay: [0-9.]+s/transition-delay: NORMALIZED/g' \
+                    -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
+                    -e 's/最后更新: [0-9]{2}:[0-9]{2}:[0-9]{2}/最后更新: NORMALIZED/g' \
+                    -e '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/d' \
+                    -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
+                    "$file_path" | npx prettier --parser html --print-width 120
+            }
+
             local cleaned_new_file_content
-            cleaned_new_file_content=$(sed -E \
-                -e 's/translate[XY]\([0-9.-]+(px|em|rem|%|vw|vh)\)/translate(NORMALIZED)/g' \
-                -e 's/scale\([0-9.-]+\)/scale(NORMALIZED)/g' \
-                -e 's/rotate\([0-9.-]+deg\)/rotate(NORMALIZED)/g' \
-                -e 's/opacity: [0-9.]+/opacity: NORMALIZED/g' \
-                -e 's/transition-delay: [0-9.]+s/transition-delay: NORMALIZED/g' \
-                -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
-                -e 's/最后更新: [0-9]{2}:[0-9]{2}:[0-9]{2}/最后更新: NORMALIZED/g' \
-                -e '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/d' \
-                -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
-                "$new_file")
+            cleaned_new_file_content=$(format_and_clean "$new_file")
 
             local cleaned_old_file_content
-            cleaned_old_file_content=$(sed -E \
-                -e 's/translate[XY]\([0-9.-]+(px|em|rem|%|vw|vh)\)/translate(NORMALIZED)/g' \
-                -e 's/scale\([0-9.-]+\)/scale(NORMALIZED)/g' \
-                -e 's/rotate\([0-9.-]+deg\)/rotate(NORMALIZED)/g' \
-                -e 's/opacity: [0-9.]+/opacity: NORMALIZED/g' \
-                -e 's/transition-delay: [0-9.]+s/transition-delay: NORMALIZED/g' \
-                -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
-                -e 's/最后更新: [0-9]{2}:[0-9]{2}:[0-9]{2}/最后更新: NORMALIZED/g' \
-                -e '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/d' \
-                -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
-                "$old_file")
+            cleaned_old_file_content=$(format_and_clean "$old_file")
 
-            # 比较规范化后的内容
+            # 比较规范化和格式化后的内容
             if [ "$cleaned_new_file_content" != "$cleaned_old_file_content" ]; then
                 has_changed=true
                 # 将清理后的内容存入临时文件以供diff
