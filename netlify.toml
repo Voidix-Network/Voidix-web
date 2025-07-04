@@ -4,7 +4,7 @@
 
 # 全局构建设置，适用于所有部署（包括生产、预览等）
 [build]
-  # 构建命令
+  # 完整的构建命令，用于生产环境
   command = "npm run build"
 
   # 构建产物的输出目录
@@ -14,6 +14,13 @@
   [build.environment]
     # 指定一个稳定的Node.js版本，确保构建一致性
     NODE_VERSION = "18"
+
+# 部署预览 (Deploy Previews) 的特定配置
+# 这里我们覆盖默认的构建命令
+[context.deploy-preview]
+  # 对于预览环境，我们跳过耗时且非必要的Prerender步骤，
+  # 这样既可以修复错误，也能加快预览构建速度。
+  command = "npx tsc && vite build --mode production && npm run generate:sitemap"
 
 # =============================================================================
 # 重定向规则
