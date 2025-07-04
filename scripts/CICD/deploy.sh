@@ -223,10 +223,18 @@ build_project() {
         find dist -name "*.html" -type f -exec sh -c '
             # 清理动态值后计算哈希（只影响哈希计算，不修改原文件）
             cleaned_content=$(cat "$1" | \
-                sed "s/translateY([0-9.-]*[px|em|rem|%]*)/translateY(NORMALIZED)/g" | \
-                sed "s/translateX([0-9.-]*[px|em|rem|%]*)/translateX(NORMALIZED)/g" | \
-                sed "s/scale([0-9.-]*)/scale(NORMALIZED)/g" | \
-                sed "s/rotate([0-9.-]*deg)/rotate(NORMALIZED)/g" | \
+                sed "s/translateY(-\?[0-9]*\.\?[0-9]*px)/translateY(NORMALIZED)/g" | \
+                sed "s/translateY(-\?[0-9]*\.\?[0-9]*em)/translateY(NORMALIZED)/g" | \
+                sed "s/translateY(-\?[0-9]*\.\?[0-9]*rem)/translateY(NORMALIZED)/g" | \
+                sed "s/translateY(-\?[0-9]*\.\?[0-9]*%)/translateY(NORMALIZED)/g" | \
+                sed "s/translateX(-\?[0-9]*\.\?[0-9]*px)/translateX(NORMALIZED)/g" | \
+                sed "s/translateX(-\?[0-9]*\.\?[0-9]*em)/translateX(NORMALIZED)/g" | \
+                sed "s/translateX(-\?[0-9]*\.\?[0-9]*rem)/translateX(NORMALIZED)/g" | \
+                sed "s/translateX(-\?[0-9]*\.\?[0-9]*%)/translateX(NORMALIZED)/g" | \
+                sed "s/scale(-\?[0-9]*\.\?[0-9]*)/scale(NORMALIZED)/g" | \
+                sed "s/rotate(-\?[0-9]*\.\?[0-9]*deg)/rotate(NORMALIZED)/g" | \
+                sed "s/opacity: [0-9]*\.\?[0-9]*/opacity: NORMALIZED/g" | \
+                sed "s/transition-delay: [0-9]*\.\?[0-9]*s/transition-delay: NORMALIZED/g" | \
                 sed "s/_v=[0-9]*/_v=NORMALIZED/g" | \
                 sed "s/?v=[0-9]*/?v=NORMALIZED/g" | \
                 sed "s/最后更新: [0-9][0-9]:[0-9][0-9]:[0-9][0-9]/最后更新: NORMALIZED/g" | \
@@ -273,10 +281,18 @@ build_project() {
     find dist -name "*.html" -type f -exec sh -c '
         # 清理动态值后计算哈希（只影响哈希计算，不修改原文件）
         cleaned_content=$(cat "$1" | \
-            sed "s/translateY([0-9.-]*[px|em|rem|%]*)/translateY(NORMALIZED)/g" | \
-            sed "s/translateX([0-9.-]*[px|em|rem|%]*)/translateX(NORMALIZED)/g" | \
-            sed "s/scale([0-9.-]*)/scale(NORMALIZED)/g" | \
-            sed "s/rotate([0-9.-]*deg)/rotate(NORMALIZED)/g" | \
+            sed "s/translateY(-\?[0-9]*\.\?[0-9]*px)/translateY(NORMALIZED)/g" | \
+            sed "s/translateY(-\?[0-9]*\.\?[0-9]*em)/translateY(NORMALIZED)/g" | \
+            sed "s/translateY(-\?[0-9]*\.\?[0-9]*rem)/translateY(NORMALIZED)/g" | \
+            sed "s/translateY(-\?[0-9]*\.\?[0-9]*%)/translateY(NORMALIZED)/g" | \
+            sed "s/translateX(-\?[0-9]*\.\?[0-9]*px)/translateX(NORMALIZED)/g" | \
+            sed "s/translateX(-\?[0-9]*\.\?[0-9]*em)/translateX(NORMALIZED)/g" | \
+            sed "s/translateX(-\?[0-9]*\.\?[0-9]*rem)/translateX(NORMALIZED)/g" | \
+            sed "s/translateX(-\?[0-9]*\.\?[0-9]*%)/translateX(NORMALIZED)/g" | \
+            sed "s/scale(-\?[0-9]*\.\?[0-9]*)/scale(NORMALIZED)/g" | \
+            sed "s/rotate(-\?[0-9]*\.\?[0-9]*deg)/rotate(NORMALIZED)/g" | \
+            sed "s/opacity: [0-9]*\.\?[0-9]*/opacity: NORMALIZED/g" | \
+            sed "s/transition-delay: [0-9]*\.\?[0-9]*s/transition-delay: NORMALIZED/g" | \
             sed "s/_v=[0-9]*/_v=NORMALIZED/g" | \
             sed "s/?v=[0-9]*/?v=NORMALIZED/g" | \
             sed "s/最后更新: [0-9][0-9]:[0-9][0-9]:[0-9][0-9]/最后更新: NORMALIZED/g" | \

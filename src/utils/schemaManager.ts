@@ -10,6 +10,8 @@ interface SchemaManagerOptions {
 class SchemaManager {
   private activeSchemas = new Map<string, string>(); // 跟踪活跃的schema
   private options: SchemaManagerOptions;
+  private timeouts: Set<NodeJS.Timeout> = new Set(); // 跟踪定时器用于清理
+  private intervals: Set<NodeJS.Timeout> = new Set(); // 跟踪间隔定时器用于清理
 
   constructor(options: SchemaManagerOptions = {}) {
     this.options = options;
@@ -61,9 +63,11 @@ class SchemaManager {
     this.activeSchemas.set(schemaKey, newContent);
 
     // 最终去重检查：确保只有一个该类型的schema
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       this.deduplicate(type);
+      this.timeouts.delete(timeoutId); // 完成后从集合中移除
     }, 0);
+    this.timeouts.add(timeoutId); // 跟踪定时器
 
     if (this.options.enableDebug) {
       console.log(`[SchemaManager] 设置 ${type} schema (来源: ${source})`);
@@ -153,14 +157,22 @@ class SchemaManager {
    * 清理所有结构化数据
    */
   clearAll(): void {
-    document.querySelectorAll('script[data-schema-manager="true"]').forEach(script => {
-      script.remove();
-    });
+    if (typeof document !== 'undefined' && document.querySelectorAll) {
+      document.querySelectorAll('script[data-schema-manager="true"]').forEach(script => {
+        script.remove();
+      });
+    }
 
     this.activeSchemas.clear();
 
+    // 清理所有跟踪的定时器
+    this.timeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    this.timeouts.clear();
+    this.intervals.forEach(intervalId => clearInterval(intervalId));
+    this.intervals.clear();
+
     if (this.options.enableDebug) {
-      console.log('[SchemaManager] 清理所有schema');
+      console.log('[SchemaManager] 清理所有schema和定时器');
     }
   }
 
@@ -169,6 +181,11 @@ class SchemaManager {
    */
   getStats(): { [key: string]: number } {
     const stats: { [key: string]: number } = {};
+
+    // 检查document是否可用（测试环境安全检查）
+    if (typeof document === 'undefined' || !document.querySelectorAll) {
+      return stats;
+    }
 
     document.querySelectorAll('script[type="application/ld+json"]').forEach(script => {
       try {
@@ -189,6 +206,11 @@ class SchemaManager {
    * 验证schema唯一性
    */
   validateUniqueness(): { isValid: boolean; duplicates: string[] } {
+    // 检查document是否可用（测试环境安全检查）
+    if (typeof document === 'undefined' || !document.querySelectorAll) {
+      return { isValid: true, duplicates: [] };
+    }
+
     const stats = this.getStats();
     const duplicates = Object.entries(stats)
       .filter(([_, count]) => count > 1)
@@ -280,9 +302,11 @@ if (typeof window !== 'undefined') {
   // 定期检查并清理重复（生产环境也运行）
   const startDuplicateMonitoring = () => {
     // 立即执行一次清理
-    setTimeout(() => {
+    const initialTimeout = setTimeout(() => {
       globalSchemaManager.globalDeduplicate();
+      (globalSchemaManager as any).timeouts.delete(initialTimeout);
     }, 500);
+    (globalSchemaManager as any).timeouts.add(initialTimeout);
 
     // 页面加载初期频繁检查（JavaScript注入后立即清理）
     let checkCount = 0;
@@ -297,6 +321,7 @@ if (typeof window !== 'undefined') {
       // 前30次检查（每1秒一次，总共30秒）
       if (checkCount >= 30) {
         clearInterval(quickCheckInterval);
+        (globalSchemaManager as any).intervals.delete(quickCheckInterval);
 
         // 之后改为每5秒检查一次（长期监控）
         const slowCheckInterval = setInterval(() => {
@@ -306,17 +331,21 @@ if (typeof window !== 'undefined') {
             globalSchemaManager.globalDeduplicate();
           }
         }, 5000);
+        (globalSchemaManager as any).intervals.add(slowCheckInterval);
 
         // 页面卸载时清理定时器
         window.addEventListener('beforeunload', () => {
           clearInterval(slowCheckInterval);
+          (globalSchemaManager as any).intervals.delete(slowCheckInterval);
         });
       }
     }, 1000);
+    (globalSchemaManager as any).intervals.add(quickCheckInterval);
 
     // 页面卸载时清理快速检查定时器
     window.addEventListener('beforeunload', () => {
       clearInterval(quickCheckInterval);
+      (globalSchemaManager as any).intervals.delete(quickCheckInterval);
     });
 
     // DOM变化监听：实时检测JSON-LD script的插入
@@ -332,13 +361,16 @@ if (typeof window !== 'undefined') {
               element.querySelectorAll('script[type="application/ld+json"]').length > 0
             ) {
               // 延迟一点点让DOM稳定，然后检查重复
-              setTimeout(() => {
+              let timeoutId: NodeJS.Timeout;
+              timeoutId = setTimeout(() => {
                 const validation = globalSchemaManager.validateUniqueness();
                 if (!validation.isValid) {
                   console.warn('[SchemaManager] DOM变化检测到重复结构化数据，立即清理中...');
                   globalSchemaManager.globalDeduplicate();
                 }
+                (globalSchemaManager as any).timeouts.delete(timeoutId);
               }, 100);
+              (globalSchemaManager as any).timeouts.add(timeoutId);
             }
           }
         });
@@ -354,6 +386,7 @@ if (typeof window !== 'undefined') {
     // 页面卸载时停止监听
     window.addEventListener('beforeunload', () => {
       observer.disconnect();
+      globalSchemaManager.clearAll();
     });
   };
 

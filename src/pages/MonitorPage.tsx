@@ -56,8 +56,6 @@ export const MonitorPage: React.FC = () => {
     }
   };
 
-
-
   if (loading && (!monitors || monitors.length === 0)) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
