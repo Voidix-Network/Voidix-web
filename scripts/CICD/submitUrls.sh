@@ -91,7 +91,15 @@ if [ -n "${URL_FILE}" ]; then
     exit 1
   fi
   URL_LIST=$(cat "${URL_FILE}" | grep -v '^$' | grep -v '^#')
-  echo "[Multi Submit] 从文件读取了 $(echo "${URL_LIST}" | wc -l) 个URL"
+  url_count=$(echo "${URL_LIST}" | wc -l)
+
+  # 如果URL文件为空，说明没有变化
+  if [ "$url_count" -eq 0 ] || [ -z "${URL_LIST}" ]; then
+    echo "[Multi Submit] 没有检测到变化的URL，跳过提交以节省API限额"
+    exit 0
+  fi
+
+  echo "[Multi Submit] 从文件读取了 $url_count 个变化的URL"
 elif [ -n "${CUSTOM_URLS}" ]; then
   # 使用命令行传入的URL
   URL_LIST=$(echo "${CUSTOM_URLS}" | grep -v '^$')
@@ -105,12 +113,39 @@ else
 
   # 解析 sitemap.xml，提取所有 <loc> 标签内容
   URL_LIST=$(grep -oP '(?<=<loc>)[^<]+(?=</loc>)' "${SITEMAP_PATH}")
-  echo "[Multi Submit] 从sitemap.xml读取了 $(echo "${URL_LIST}" | wc -l) 个URL"
+  total_urls=$(echo "${URL_LIST}" | wc -l)
+  echo "[Multi Submit] ⚠️  从sitemap.xml读取了 $total_urls 个URL（全量提交模式）"
+  echo "[Multi Submit] 💡 建议：使用 deploy.sh 的变化检测功能以节省API限额"
 fi
 
 if [ -z "${URL_LIST}" ]; then
   echo "[Multi Submit] 没有找到要提交的URL，跳过提交。"
   exit 0
+fi
+
+# 最终检查：避免重复提交
+final_url_count=$(echo "${URL_LIST}" | grep -v '^$' | wc -l)
+if [ "$final_url_count" -eq 0 ]; then
+  echo "[Multi Submit] 过滤后没有有效的URL，跳过提交"
+  exit 0
+fi
+
+# 检查提交历史（避免短时间内重复提交相同URL）
+LAST_SUBMIT_FILE="/tmp/voidix_last_submit_urls.txt"
+if [ -f "$LAST_SUBMIT_FILE" ]; then
+  # 检查上次提交时间（1小时内不重复提交相同URL）
+  last_submit_time=$(stat -c %Y "$LAST_SUBMIT_FILE" 2>/dev/null || echo 0)
+  current_time=$(date +%s)
+  time_diff=$((current_time - last_submit_time))
+
+  if [ "$time_diff" -lt 3600 ]; then # 1小时 = 3600秒
+    # 比较URL列表是否相同
+    if cmp -s <(echo "$URL_LIST" | sort) <(cat "$LAST_SUBMIT_FILE" | sort) 2>/dev/null; then
+      echo "[Multi Submit] ⚠️  检测到1小时内已提交相同URL，跳过重复提交"
+      echo "[Multi Submit] 上次提交时间: $(date -d @$last_submit_time '+%H:%M:%S' 2>/dev/null || date -r $last_submit_time '+%H:%M:%S' 2>/dev/null || echo '未知')"
+      exit 0
+    fi
+  fi
 fi
 
 # 显示即将提交的URL列表
@@ -191,5 +226,12 @@ fi
 
 echo "🔗 提交站点: https://www.voidix.net"
 echo "⏰ 完成时间: $(date '+%Y-%m-%d %H:%M:%S')"
+
+# 记录本次提交的URL（用于避免重复提交）
+if [ -n "${URL_LIST}" ]; then
+  echo "${URL_LIST}" > "$LAST_SUBMIT_FILE"
+  echo "💾 已记录提交历史，避免重复提交"
+fi
+
 echo "================================================="
 echo "✅ URL 提交任务完成"
