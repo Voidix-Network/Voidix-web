@@ -297,6 +297,9 @@ build_project() {
             # 比较规范化后的内容
             if [ "$cleaned_new_file_content" != "$cleaned_old_file_content" ]; then
                 has_changed=true
+                # 将清理后的内容存入临时文件以供diff
+                echo "$cleaned_old_file_content" > "/tmp/voidix_diff_old.txt"
+                echo "$cleaned_new_file_content" > "/tmp/voidix_diff_new.txt"
             fi
         fi
 
@@ -306,6 +309,17 @@ build_project() {
                 log_success "✨ 新增文件: $relative_path"
             else
                 log_success "🔄 内容变化: $relative_path"
+                # 使用diff命令显示具体变化
+                log_info "    - 显示规范化后的内容差异:"
+                diff_output=$(diff -u --color=always "/tmp/voidix_diff_old.txt" "/tmp/voidix_diff_new.txt" || true)
+                if [ -n "$diff_output" ]; then
+                    # 给diff输出加上缩进，更美观
+                    echo "$diff_output" | sed 's/^/      /'
+                else
+                    log_info "    - diff未产生输出（可能是空白符等非可见字符变化）"
+                fi
+                # 清理临时文件
+                rm -f "/tmp/voidix_diff_old.txt" "/tmp/voidix_diff_new.txt"
             fi
             echo "$relative_path" >> "$changed_files_log"
             changed_count=$((changed_count + 1))
