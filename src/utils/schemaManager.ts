@@ -369,7 +369,7 @@ if (typeof window !== 'undefined') {
                   globalSchemaManager.globalDeduplicate();
                 }
                 (globalSchemaManager as any).timeouts.delete(timeoutId);
-              }, 100);
+              }, 0); // 立即执行，不要延迟
               (globalSchemaManager as any).timeouts.add(timeoutId);
             }
           }
