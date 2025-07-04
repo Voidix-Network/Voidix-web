@@ -87,7 +87,7 @@ export const PrivacyPolicyPage: React.FC = () => {
         type="article"
         url="https://www.voidix.net/privacy"
         canonicalUrl="https://www.voidix.net/privacy"
-        enableAnalytics={true}
+        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
         additionalMeta={[
           { name: 'article:modified_time', content: new Date().toISOString() },
           { name: 'article:section', content: 'Legal' },

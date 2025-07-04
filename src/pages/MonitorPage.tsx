@@ -93,7 +93,7 @@ export const MonitorPage: React.FC = () => {
         type="website"
         url="https://www.voidix.net/monitor"
         canonicalUrl="https://www.voidix.net/monitor"
-        enableAnalytics={true}
+        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <div className="min-h-screen bg-gray-900 pt-12 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

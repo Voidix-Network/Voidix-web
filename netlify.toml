@@ -22,6 +22,10 @@
   # 这样既可以修复错误，也能加快预览构建速度。
   command = "npx tsc && vite build --mode production && npm run generate:sitemap"
 
+  # 同时，在预览环境中禁用分析和追踪，避免测试数据污染生产统计
+  [context.deploy-preview.environment]
+    VITE_ENABLE_ANALYTICS = "false"
+
 # =============================================================================
 # 重定向规则
 # =============================================================================
