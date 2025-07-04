@@ -276,7 +276,7 @@ build_project() {
             # 规范化 + 格式化文件内容以进行比较
             format_and_clean() {
                 local file_path="$1"
-                # 先用sed进行初步清理，再用prettier进行最终格式化
+                # 先用sed进行初步清理，再用prettier进行最终格式化，最后移除head内容
                 sed -E \
                     -e 's/translate[XY]\([0-9.-]+(px|em|rem|%|vw|vh)\)/translate(NORMALIZED)/g' \
                     -e 's/scale\([0-9.-]+\)/scale(NORMALIZED)/g' \
@@ -287,7 +287,10 @@ build_project() {
                     -e 's/最后更新: [0-9]{2}:[0-9]{2}:[0-9]{2}/最后更新: NORMALIZED/g' \
                     -e '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/d' \
                     -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
-                    "$file_path" | npx prettier --parser html --print-width 120
+                    -e 's/(article:modified_time" content=")[^"]+/\1NORMALIZED_DATETIME/g' \
+                    "$file_path" | \
+                npx prettier --parser html --print-width 120 | \
+                sed '/<head>/,/<\/head>/d'
             }
 
             local cleaned_new_file_content
