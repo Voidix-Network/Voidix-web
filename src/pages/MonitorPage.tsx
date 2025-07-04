@@ -15,15 +15,12 @@ export const MonitorPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false); // 区分初始加载和刷新
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-
   // 获取监控数据
   const fetchMonitors = useCallback(async () => {
     try {
       setError(null);
       const monitorData = await uptimeRobotApi.getMonitors(90);
       setMonitors(monitorData);
-      setLastUpdate(new Date());
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '获取监控数据失败';
       setError(errorMessage);
@@ -59,23 +56,7 @@ export const MonitorPage: React.FC = () => {
     }
   };
 
-  // 计算总体状态
-  const getOverallStatus = () => {
-    if (!monitors || monitors.length === 0) return { text: '检查中', color: 'text-blue-400' };
 
-    const downCount = monitors.filter(m => m.status === 'down').length;
-    const upCount = monitors.filter(m => m.status === 'ok').length;
-
-    if (downCount > 0) {
-      return { text: '部分故障', color: 'text-red-400' };
-    } else if (upCount === monitors.length) {
-      return { text: '全部正常', color: 'text-green-400' };
-    } else {
-      return { text: '检查中', color: 'text-yellow-400' };
-    }
-  };
-
-  const overallStatus = getOverallStatus();
 
   if (loading && (!monitors || monitors.length === 0)) {
     return (
