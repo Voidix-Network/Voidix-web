@@ -276,17 +276,14 @@ build_project() {
             # 规范化 + 格式化文件内容以进行比较
             format_and_clean() {
                 local file_path="$1"
-                # 终极方案：移除所有内联style，并清理其他动态值，最后格式化并移除head
+                # 化繁为简：只对已知且安全的动态值进行精确清理，然后交由prettier格式化
                 sed -E \
-                    -e 's/ style="[^"]*"//g' \
-                    -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
-                    -e 's/最后更新: [0-9]{2}:[0-9]{2}:[0-9]{2}/最后更新: NORMALIZED/g' \
-                    -e '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/d' \
-                    -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
+                    -e 's/transform: [^;"]*//g' \
+                    -e 's/height: [0-9.]+px/height: auto/g' \
                     -e 's/(article:modified_time" content=")[^"]+/\1NORMALIZED_DATETIME/g' \
-                    "$file_path" | \
-                npx prettier --parser html --print-width 120 | \
-                sed '/<head>/,/<\/head>/d'
+                    -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
+                    -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
+                    "$file_path" | npx prettier --parser html --print-width 120
             }
 
             local cleaned_new_file_content
