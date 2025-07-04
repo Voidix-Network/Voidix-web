@@ -289,7 +289,7 @@ build_project() {
                     -e 's/transform: [^;"]*//g' \
                     -e 's/height: [0-9.]+px/height: auto/g' \
                     -e 's/opacity: [0-9.]+/opacity: 1/g' \
-                    -e 's/(article:modified_time" content=")[^"]+/\1NORMALIZED_DATETIME/g' \
+                    -e 's/(<meta[^>]*content=")[^"]*(")/\1NORMALIZED_META_CONTENT\2/g' \
                     -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
                     -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
                     "$file_path"
