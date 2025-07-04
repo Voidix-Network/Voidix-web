@@ -200,243 +200,168 @@ build_project() {
     log_module "构建项目"
     cd "$SERVER_PATH"
 
-    # 临时文件路径
-    HASH_BEFORE="/tmp/voidix_html_hashes_before.txt"
-    HASH_AFTER="/tmp/voidix_html_hashes_after.txt"
-    CHANGED_FILES="/tmp/voidix_changed_files.txt"
-    CHANGED_URLS="/tmp/voidix_changed_urls.txt"
+    # 临时文件和目录路径
+    local dist_before_dir="/tmp/voidix_dist_before_build"
+    local dist_after_dir="$SERVER_PATH/dist"
+    local changed_files_log="/tmp/voidix_changed_files.txt"
+    local changed_urls_log="/tmp/voidix_changed_urls.txt"
+
+    # 清理上次的日志
+    > "$changed_files_log"
+    > "$changed_urls_log"
 
     log_info "🔍 HTML变化检测配置："
-    log_info "  ✅ 包含: 所有HTML页面"
-    log_info "  ❌ 排除: 404/not-found页面（不需要搜索引擎索引）"
-    log_info "  🔧 清理: 动态值（CSS transform、时间戳、随机数、版本参数）"
-    log_info "  📋 规范化: CSS transform值（支持px/em/rem/%单位）、时间戳、缓存参数等"
-    log_info "  🎯 目标: 只检测真正的内容变化，忽略动画状态和缓存差异"
-    log_info "  ⚠️  重要: 清理仅用于哈希计算，不会修改实际构建文件"
+    log_info "  - 备份当前dist目录用于对比"
+    log_info "  - 规范化处理动态值（CSS动画、时间戳等）"
+    log_info "  - 对比规范化后的文件内容以检测真实变化"
+    log_info "  - 排除404页面"
 
-    # 记录构建前的HTML文件哈希
-    log_info "记录构建前HTML文件状态..."
-    > "$HASH_BEFORE"
-    if [[ -d "dist" ]]; then
-        # 计算总文件数和排除的文件数
-        total_html_before=$(find dist -name "*.html" -type f | wc -l)
-        find dist -name "*.html" -type f -exec sh -c '
-            # 清理动态值后计算哈希（只影响哈希计算，不修改原文件）
-            cleaned_content=$(cat "$1" | \
-                sed "s/translateY(-\?[0-9]*\.\?[0-9]*px)/translateY(NORMALIZED)/g" | \
-                sed "s/translateY(-\?[0-9]*\.\?[0-9]*em)/translateY(NORMALIZED)/g" | \
-                sed "s/translateY(-\?[0-9]*\.\?[0-9]*rem)/translateY(NORMALIZED)/g" | \
-                sed "s/translateY(-\?[0-9]*\.\?[0-9]*%)/translateY(NORMALIZED)/g" | \
-                sed "s/translateX(-\?[0-9]*\.\?[0-9]*px)/translateX(NORMALIZED)/g" | \
-                sed "s/translateX(-\?[0-9]*\.\?[0-9]*em)/translateX(NORMALIZED)/g" | \
-                sed "s/translateX(-\?[0-9]*\.\?[0-9]*rem)/translateX(NORMALIZED)/g" | \
-                sed "s/translateX(-\?[0-9]*\.\?[0-9]*%)/translateX(NORMALIZED)/g" | \
-                sed "s/scale(-\?[0-9]*\.\?[0-9]*)/scale(NORMALIZED)/g" | \
-                sed "s/rotate(-\?[0-9]*\.\?[0-9]*deg)/rotate(NORMALIZED)/g" | \
-                sed "s/opacity: [0-9]*\.\?[0-9]*/opacity: NORMALIZED/g" | \
-                sed "s/transition-delay: [0-9]*\.\?[0-9]*s/transition-delay: NORMALIZED/g" | \
-                sed "s/_v=[0-9]*/_v=NORMALIZED/g" | \
-                sed "s/?v=[0-9]*/?v=NORMALIZED/g" | \
-                sed "s/最后更新: [0-9][0-9]:[0-9][0-9]:[0-9][0-9]/最后更新: NORMALIZED/g" | \
-                sed "s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}/NORMALIZED_DATETIME/g" | \
-                sed "s/data-timestamp=\"[0-9]*\"/data-timestamp=\"NORMALIZED\"/g")
-            echo "$(echo "$cleaned_content" | md5sum | cut -d" " -f1) $1"
-        ' _ {} \; | grep -v -E "(404|not-found|notfound)" > "$HASH_BEFORE" 2>/dev/null || true
-        html_before_count=$(wc -l < "$HASH_BEFORE" 2>/dev/null || echo 0)
-        excluded_before=$((total_html_before - html_before_count))
-        log_info "构建前发现 $html_before_count 个HTML文件（已排除 $excluded_before 个404/not-found页面）"
-
-        # 如果是第一次构建（没有dist目录或文件很少），设置标记
-        if [[ "$html_before_count" -eq 0 ]]; then
-            log_info "首次构建检测：将跳过URL提交以避免全量提交"
-            echo "FIRST_BUILD=true" > "/tmp/voidix_build_mode.txt"
-        fi
+    # 1. 备份当前dist目录
+    if [ -d "$dist_after_dir" ]; then
+        log_info "备份当前 'dist' 目录到 '$dist_before_dir'..."
+        rm -rf "$dist_before_dir"
+        mv "$dist_after_dir" "$dist_before_dir"
+        log_success "'dist' 目录已备份"
     else
-        log_info "构建前未发现dist目录，标记为首次构建"
-        echo "FIRST_BUILD=true" > "/tmp/voidix_build_mode.txt"
-        html_before_count=0
-        total_html_before=0
-        excluded_before=0
+        log_info "'dist' 目录不存在，跳过备份。所有生成的文件将被视为新文件。"
+        mkdir -p "$dist_before_dir" # 确保目录存在以避免后续命令失败
     fi
 
-    # 安装依赖
-    log_info "安装/更新依赖..."
-    npm ci --production=false
+    # 2. 运行构建命令 (npm run build)
+    log_step "执行构建命令 (npm run build)..."
+    if ! npm run build; then
+        log_error "项目构建失败"
+        # 恢复备份的dist目录
+        if [ -d "$dist_before_dir/dist" ]; then # 在某些情况下，mv后目录结构会变成/tmp/voidix_dist_before_build/dist
+            mv "$dist_before_dir/dist" "$dist_after_dir"
+        else
+            mv "$dist_before_dir" "$dist_after_dir"
+        fi
+        log_info "已恢复构建前的 'dist' 目录"
+        exit 1
+    fi
+    log_success "项目构建完成"
 
-    # 构建项目
-    log_info "开始构建..."
-    npm run build
-
-    # 检查构建结果
-    if [[ ! -d "dist" ]] || [[ -z "$(ls -A dist 2>/dev/null)" ]]; then
-        log_error "构建失败，dist目录不存在或为空"
+    # 3. 对比文件并检测变化
+    log_step "对比构建前后的HTML文件..."
+    if [ ! -d "$dist_after_dir" ]; then
+        log_error "构建后 'dist' 目录未找到！"
         exit 1
     fi
 
-    # 记录构建后的HTML文件哈希
-    log_info "记录构建后HTML文件状态..."
-    > "$HASH_AFTER"
-    # 计算总文件数和排除的文件数
-    total_html_after=$(find dist -name "*.html" -type f | wc -l)
-    find dist -name "*.html" -type f -exec sh -c '
-        # 清理动态值后计算哈希（只影响哈希计算，不修改原文件）
-        cleaned_content=$(cat "$1" | \
-            sed "s/translateY(-\?[0-9]*\.\?[0-9]*px)/translateY(NORMALIZED)/g" | \
-            sed "s/translateY(-\?[0-9]*\.\?[0-9]*em)/translateY(NORMALIZED)/g" | \
-            sed "s/translateY(-\?[0-9]*\.\?[0-9]*rem)/translateY(NORMALIZED)/g" | \
-            sed "s/translateY(-\?[0-9]*\.\?[0-9]*%)/translateY(NORMALIZED)/g" | \
-            sed "s/translateX(-\?[0-9]*\.\?[0-9]*px)/translateX(NORMALIZED)/g" | \
-            sed "s/translateX(-\?[0-9]*\.\?[0-9]*em)/translateX(NORMALIZED)/g" | \
-            sed "s/translateX(-\?[0-9]*\.\?[0-9]*rem)/translateX(NORMALIZED)/g" | \
-            sed "s/translateX(-\?[0-9]*\.\?[0-9]*%)/translateX(NORMALIZED)/g" | \
-            sed "s/scale(-\?[0-9]*\.\?[0-9]*)/scale(NORMALIZED)/g" | \
-            sed "s/rotate(-\?[0-9]*\.\?[0-9]*deg)/rotate(NORMALIZED)/g" | \
-            sed "s/opacity: [0-9]*\.\?[0-9]*/opacity: NORMALIZED/g" | \
-            sed "s/transition-delay: [0-9]*\.\?[0-9]*s/transition-delay: NORMALIZED/g" | \
-            sed "s/_v=[0-9]*/_v=NORMALIZED/g" | \
-            sed "s/?v=[0-9]*/?v=NORMALIZED/g" | \
-            sed "s/最后更新: [0-9][0-9]:[0-9][0-9]:[0-9][0-9]/最后更新: NORMALIZED/g" | \
-            sed "s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}/NORMALIZED_DATETIME/g" | \
-            sed "s/data-timestamp=\"[0-9]*\"/data-timestamp=\"NORMALIZED\"/g")
-        echo "$(echo "$cleaned_content" | md5sum | cut -d" " -f1) $1"
-    ' _ {} \; | grep -v -E "(404|not-found|notfound)" > "$HASH_AFTER" 2>/dev/null || true
-    html_after_count=$(wc -l < "$HASH_AFTER" 2>/dev/null || echo 0)
-    excluded_after=$((total_html_after - html_after_count))
-    log_info "构建后发现 $html_after_count 个HTML文件（已排除 $excluded_after 个404/not-found页面）"
-
-    # 显示构建前后对比
-    echo ""
-    log_info "📊 构建前后对比："
-    log_info "  构建前HTML文件: $html_before_count (总计: $total_html_before)"
-    log_info "  构建后HTML文件: $html_after_count (总计: $total_html_after)"
-    log_info "  排除404页面: 构建前 $excluded_before 个，构建后 $excluded_after 个"
-    if [[ "$html_after_count" -gt "$html_before_count" ]]; then
-        new_files=$((html_after_count - html_before_count))
-        log_info "  ✅ 新增有效文件: $new_files"
-    elif [[ "$html_after_count" -lt "$html_before_count" ]]; then
-        removed_files=$((html_before_count - html_after_count))
-        log_info "  ❌ 删除有效文件: $removed_files"
-    else
-        log_info "  🔄 有效文件数量无变化"
-    fi
-    echo ""
-
-    # 检测变化的文件
-    log_info "检测HTML文件变化..."
-    > "$CHANGED_FILES"
-
-        # 找出新增和修改的文件
-    while IFS= read -r line; do
-        if [[ -n "$line" ]]; then
-            hash_after=$(echo "$line" | cut -d' ' -f1)
-            file_path=$(echo "$line" | cut -d' ' -f2-)
-
-            # 检查文件在构建前是否存在且哈希是否相同
-            hash_before=$(grep " $file_path$" "$HASH_BEFORE" 2>/dev/null | cut -d' ' -f1 || echo "")
-
-            if [[ -z "$hash_before" ]]; then
-                # 新增文件
-                echo "$file_path" >> "$CHANGED_FILES"
-                log_info "新增文件: $file_path"
-                if [[ -f "$file_path" ]]; then
-                    file_size=$(stat -c%s "$file_path" 2>/dev/null || stat -f%z "$file_path" 2>/dev/null || echo "未知")
-                    log_info "  📏 文件大小: $file_size 字节"
-                    # 显示HTML标题（如果存在）
-                    title=$(grep -o '<title[^>]*>[^<]*</title>' "$file_path" 2>/dev/null | sed 's/<[^>]*>//g' | head -1 || echo "")
-                    if [[ -n "$title" ]]; then
-                        log_info "  📝 页面标题: $title"
-                    fi
-                fi
-            elif [[ "$hash_before" != "$hash_after" ]]; then
-                # 修改文件
-                echo "$file_path" >> "$CHANGED_FILES"
-                log_info "修改文件: $file_path"
-                log_info "  🔄 哈希变化: $hash_before → $hash_after"
-                if [[ -f "$file_path" ]]; then
-                    file_size=$(stat -c%s "$file_path" 2>/dev/null || stat -f%z "$file_path" 2>/dev/null || echo "未知")
-                    log_info "  📏 当前大小: $file_size 字节"
-                    # 显示HTML标题（如果存在）
-                    title=$(grep -o '<title[^>]*>[^<]*</title>' "$file_path" 2>/dev/null | sed 's/<[^>]*>//g' | head -1 || echo "")
-                    if [[ -n "$title" ]]; then
-                        log_info "  📝 页面标题: $title"
-                    fi
-                    # 显示最后修改时间
-                    mod_time=$(stat -c%y "$file_path" 2>/dev/null | cut -d. -f1 || stat -f%Sm "$file_path" 2>/dev/null || echo "未知")
-                    log_info "  ⏰ 修改时间: $mod_time"
-                fi
-            fi
+    local changed_count=0
+    # 遍历构建后的所有HTML文件
+    find "$dist_after_dir" -name "*.html" -type f | while read -r new_file; do
+        # 排除404页面
+        if echo "$new_file" | grep -qE "(404|not-found|notfound)"; then
+            log_info "⏭️  排除404页面: $new_file"
+            continue
         fi
-    done < "$HASH_AFTER"
 
-        # 检查是否为首次构建
-    BUILD_MODE="normal"
-    if [[ -f "/tmp/voidix_build_mode.txt" ]]; then
-        BUILD_MODE=$(cat "/tmp/voidix_build_mode.txt" | grep "FIRST_BUILD=true" && echo "first" || echo "normal")
-    fi
+        local relative_path="${new_file#$dist_after_dir/}"
+        local old_file="$dist_before_dir/$relative_path"
+        local is_new=false
+        local has_changed=false
 
-    # 生成对应的URL列表
-    > "$CHANGED_URLS"
-    if [[ -s "$CHANGED_FILES" ]]; then
-        changed_count=$(wc -l < "$CHANGED_FILES" 2>/dev/null || echo 0)
-
-        if [[ "$BUILD_MODE" == "first" ]]; then
-            log_info "🚫 首次构建模式：检测到 $changed_count 个HTML文件，但将跳过URL提交"
-            log_info "📊 理由：避免向搜索引擎API提交所有页面，节省API限额"
-            log_info "💡 后续部署：只会提交真正变化的页面URL"
-            # 清空URL文件
-            > "$CHANGED_URLS"
+        if [ ! -f "$old_file" ]; then
+            is_new=true
+            has_changed=true
         else
-            # 正常模式：生成URL列表
-            while IFS= read -r file_path; do
-                if [[ -n "$file_path" ]]; then
-                    # 将文件路径转换为URL
-                    # 移除 dist/ 前缀
-                    url_path=$(echo "$file_path" | sed 's|^dist/||')
+            # 规范化文件内容以进行比较
+            local cleaned_new_file_content
+            cleaned_new_file_content=$(sed -E \
+                -e 's/translate[XY]\([0-9.-]+(px|em|rem|%|vw|vh)\)/translate(NORMALIZED)/g' \
+                -e 's/scale\([0-9.-]+\)/scale(NORMALIZED)/g' \
+                -e 's/rotate\([0-9.-]+deg\)/rotate(NORMALIZED)/g' \
+                -e 's/opacity: [0-9.]+/opacity: NORMALIZED/g' \
+                -e 's/transition-delay: [0-9.]+s/transition-delay: NORMALIZED/g' \
+                -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
+                -e 's/最后更新: [0-9]{2}:[0-9]{2}:[0-9]{2}/最后更新: NORMALIZED/g' \
+                -e '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/d' \
+                -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
+                "$new_file")
 
-                    # 处理不同类型的HTML文件
-                    if [[ "$url_path" == "index.html" ]]; then
-                        # 根目录的index.html对应首页
-                        url_path="/"
-                    elif [[ "$url_path" =~ /index\.html$ ]]; then
-                        # 子目录的index.html去掉/index.html，保留目录路径
-                        url_path=$(echo "$url_path" | sed 's|/index\.html$|/|')
-                    else
-                        # 其他.html文件去掉.html后缀
-                        url_path=$(echo "$url_path" | sed 's|\.html$||')
-                        # 确保以 / 开头
-                        if [[ ! "$url_path" =~ ^/ ]]; then
-                            url_path="/$url_path"
-                        fi
-                    fi
+            local cleaned_old_file_content
+            cleaned_old_file_content=$(sed -E \
+                -e 's/translate[XY]\([0-9.-]+(px|em|rem|%|vw|vh)\)/translate(NORMALIZED)/g' \
+                -e 's/scale\([0-9.-]+\)/scale(NORMALIZED)/g' \
+                -e 's/rotate\([0-9.-]+deg\)/rotate(NORMALIZED)/g' \
+                -e 's/opacity: [0-9.]+/opacity: NORMALIZED/g' \
+                -e 's/transition-delay: [0-9.]+s/transition-delay: NORMALIZED/g' \
+                -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
+                -e 's/最后更新: [0-9]{2}:[0-9]{2}:[0-9]{2}/最后更新: NORMALIZED/g' \
+                -e '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/d' \
+                -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
+                "$old_file")
 
-                    # 生成完整URL
-                    full_url="https://www.voidix.net$url_path"
-                    echo "$full_url" >> "$CHANGED_URLS"
-
-                    # 调试信息：显示文件到URL的映射
-                    log_info "  📄 $file_path → 🔗 $full_url"
-                fi
-            done < "$CHANGED_FILES"
-
-                        url_count=$(wc -l < "$CHANGED_URLS" 2>/dev/null || echo 0)
-            log_success "检测到 $changed_count 个HTML文件发生变化，生成 $url_count 个URL"
-
-            if [[ "$url_count" -gt 0 ]]; then
-                echo ""
-                log_info "📊 变化统计:"
-                log_info "  📁 变化文件数: $changed_count"
-                log_info "  🔗 生成URL数: $url_count"
-                log_info "  ❌ 排除404页面: 自动过滤，不会提交"
-                log_info "  🔧 动态值清理: 已规范化transform/时间戳/随机数等"
-                log_info "  💰 节省API调用: 与全量提交相比节省 $(echo "scale=1; (1 - $url_count/20) * 100" | bc 2>/dev/null || echo "大量") %"
-                log_info "  🛡️  重复提交保护: submitUrls.sh 会自动检查并跳过重复提交"
+            # 比较规范化后的内容
+            if [ "$cleaned_new_file_content" != "$cleaned_old_file_content" ]; then
+                has_changed=true
             fi
         fi
-    else
-        log_info "没有检测到HTML文件变化"
-    fi
 
-    log_success "项目构建完成"
+        # 如果是新文件或内容有变化，则记录
+        if [ "$has_changed" = true ]; then
+            if [ "$is_new" = true ]; then
+                log_success "✨ 新增文件: $relative_path"
+            else
+                log_success "🔄 内容变化: $relative_path"
+            fi
+            echo "$relative_path" >> "$changed_files_log"
+            changed_count=$((changed_count + 1))
+        else
+            log_info "👌 内容未变: $relative_path"
+        fi
+    done
+
+    # 4. 生成URL列表
+    log_step "生成变化的URL列表..."
+    if [ -s "$changed_files_log" ]; then
+        map_files_to_urls "$changed_files_log" > "$changed_urls_log"
+        local url_count
+        url_count=$(wc -l < "$changed_urls_log")
+        log_success "已生成 $url_count 个变化的URL"
+        echo -e "${CYAN}📋 即将提交的URL列表：${NC}"
+        while read -r url; do
+            echo -e "  🔗 ${PURPLE}$url${NC}"
+        done < "$changed_urls_log"
+    else
+        log_info "没有检测到任何内容变化，无需提交URL。"
+    fi
+}
+
+# 函数：将文件路径映射为URL
+map_files_to_urls() {
+    local file_list="$1"
+    local base_url="https://www.voidix.net"
+
+    while read -r file; do
+        local url_path
+        # 特殊处理index.html -> /
+        if [[ "$(basename "$file")" == "index.html" ]]; then
+            # 如果是根目录的index.html
+            if [[ "$(dirname "$file")" == "." || "$(dirname "$file")" == "dist" || "$(dirname "$file")" == "$SERVER_PATH/dist" ]]; then
+                 url_path="/"
+            else
+                 # 如果是子目录的index.html, e.g., about/index.html -> /about/
+                 url_path="/$(dirname "$file")/"
+            fi
+        else
+            # 移除.html后缀
+            url_path="/${file%.html}"
+        fi
+
+        # 移除路径中的'dist/'前缀
+        url_path=$(echo "$url_path" | sed 's#^/dist/##')
+        # 确保路径以/开头
+        if [[ ! "$url_path" =~ ^/ ]]; then
+            url_path="/$url_path"
+        fi
+        # 修正双斜杠
+        url_path=$(echo "$url_path" | sed 's#//#/#g')
+
+        echo "${base_url}${url_path}"
+    done < "$file_list"
 }
 
 # 4. 压缩静态文件模块
@@ -564,14 +489,14 @@ submit_changed_urls() {
     log_module "提交变化的URL到搜索引擎"
 
     # 检查是否有变化的URL文件
-    CHANGED_URLS="/tmp/voidix_changed_urls.txt"
+    CHANGED_URLS_LOG="/tmp/voidix_changed_urls.txt"
 
-    if [[ ! -f "$CHANGED_URLS" ]]; then
+    if [[ ! -f "$CHANGED_URLS_LOG" ]]; then
         log_info "未找到变化的URL文件，跳过URL提交"
         return 0
     fi
 
-    if [[ ! -s "$CHANGED_URLS" ]]; then
+    if [[ ! -s "$CHANGED_URLS_LOG" ]]; then
         # 检查是否为首次构建
         if [[ -f "/tmp/voidix_build_mode.txt" && $(cat "/tmp/voidix_build_mode.txt" | grep "FIRST_BUILD=true") ]]; then
             log_info "🚫 首次构建模式：已自动跳过URL提交，节省API限额"
@@ -584,7 +509,7 @@ submit_changed_urls() {
     fi
 
     # 计算要提交的URL数量
-    url_count=$(wc -l < "$CHANGED_URLS" 2>/dev/null || echo 0)
+    url_count=$(wc -l < "$CHANGED_URLS_LOG" 2>/dev/null || echo 0)
 
     if [[ "$url_count" -eq 0 ]]; then
         log_info "没有要提交的URL，跳过URL提交"
@@ -602,14 +527,14 @@ submit_changed_urls() {
     fi
 
     # 使用-f参数传递URL文件
-    if bash "$SUBMIT_SCRIPT" -f "$CHANGED_URLS"; then
+    if bash "$SUBMIT_SCRIPT" -f "$CHANGED_URLS_LOG"; then
         log_success "变化的URL提交成功！节省了API限额"
     else
         log_error "URL提交失败，请检查网络连接和API配置"
         return 1
     fi
 
-        # 清理临时文件
+    # 清理临时文件
     rm -f "/tmp/voidix_html_hashes_before.txt" \
           "/tmp/voidix_html_hashes_after.txt" \
           "/tmp/voidix_changed_files.txt" \
