@@ -195,194 +195,26 @@ update_nginx() {
     log_success "Nginx配置更新完成"
 }
 
-# 3. 构建项目模块（含HTML变化检测）
+# 3. 构建项目模块
 build_project() {
     log_module "构建项目"
     cd "$SERVER_PATH"
 
-    # 临时文件和目录路径
-    local dist_before_dir="/tmp/voidix_dist_before_build"
-    local dist_after_dir="$SERVER_PATH/dist"
-    local changed_files_log="/tmp/voidix_changed_files.txt"
-    local changed_urls_log="/tmp/voidix_changed_urls.txt"
-
-    # 清理上次的日志
-    > "$changed_files_log"
-    > "$changed_urls_log"
-
-    log_info "🔍 HTML变化检测配置："
-    log_info "  - 备份当前dist目录用于对比"
-    log_info "  - 规范化处理动态值（CSS动画、时间戳等）"
-    log_info "  - 对比规范化后的文件内容以检测真实变化"
-    log_info "  - 排除404页面"
-
-    # 1. 备份当前dist目录
-    if [ -d "$dist_after_dir" ]; then
-        log_info "备份当前 'dist' 目录到 '$dist_before_dir'..."
-        rm -rf "$dist_before_dir"
-        mv "$dist_after_dir" "$dist_before_dir"
-        log_success "'dist' 目录已备份"
-    else
-        log_info "'dist' 目录不存在，跳过备份。所有生成的文件将被视为新文件。"
-        mkdir -p "$dist_before_dir" # 确保目录存在以避免后续命令失败
-    fi
-
-    # 2. 运行构建命令 (npm run build)
+    # 1. 运行构建命令 (npm run build)
     log_step "执行构建命令 (npm run build)..."
     if ! npm run build; then
         log_error "项目构建失败"
-        # 恢复备份的dist目录
-        if [ -d "$dist_before_dir/dist" ]; then # 在某些情况下，mv后目录结构会变成/tmp/voidix_dist_before_build/dist
-            mv "$dist_before_dir/dist" "$dist_after_dir"
-        else
-            mv "$dist_before_dir" "$dist_after_dir"
-        fi
-        log_info "已恢复构建前的 'dist' 目录"
         exit 1
     fi
     log_success "项目构建完成"
 
-    # 新增：格式化构建产物中的HTML文件
+    # 2. 格式化HTML文件 (可选，但保留以保持输出一致性)
     log_step "格式化HTML文件 (npm run format:html)..."
     if ! npm run format:html; then
-        log_error "HTML文件格式化失败"
-        # 此处也可以考虑恢复dist目录
-        exit 1
-    fi
-    log_success "HTML格式化完成"
-
-    # 3. 对比文件并检测变化
-    log_step "对比构建前后的HTML文件..."
-    if [ ! -d "$dist_after_dir" ]; then
-        log_error "构建后 'dist' 目录未找到！"
-        exit 1
-    fi
-
-    local changed_count=0
-    # 遍历构建后的所有HTML文件
-    find "$dist_after_dir" -name "*.html" -type f | while read -r new_file; do
-        # 排除404页面
-        if echo "$new_file" | grep -qE "(404|not-found|notfound)"; then
-            log_info "⏭️  排除404页面: $new_file"
-            continue
-        fi
-
-        local relative_path="${new_file#$dist_after_dir/}"
-        local old_file="$dist_before_dir/$relative_path"
-        local is_new=false
-        local has_changed=false
-
-        if [ ! -f "$old_file" ]; then
-            is_new=true
-            has_changed=true
-        else
-            # 确保prettier已安装
-            if ! command -v npx &> /dev/null; then
-                log_error "npx (Node.js) 未安装，无法运行prettier进行格式化。请安装Node.js。"
-                exit 1
-            fi
-
-            # 最终、最稳定的方案：放弃prettier和body提取，只进行最核心、最安全的sed清理
-            format_and_clean() {
-                local file_path="$1"
-                sed -E \
-                    -e 's/transform: [^;"]*//g' \
-                    -e 's/height: [0-9.]+px/height: auto/g' \
-                    -e 's/opacity: [0-9.]+/opacity: 1/g' \
-                    -e 's/(<meta[^>]*content=")[^"]*(")/\1NORMALIZED_META_CONTENT\2/g' \
-                    -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
-                    -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
-                    "$file_path"
-            }
-
-            local cleaned_new_file_content
-            cleaned_new_file_content=$(format_and_clean "$new_file")
-
-            local cleaned_old_file_content
-            cleaned_old_file_content=$(format_and_clean "$old_file")
-
-            # 比较规范化和格式化后的内容
-            if [ "$cleaned_new_file_content" != "$cleaned_old_file_content" ]; then
-                has_changed=true
-                # 将清理后的内容存入临时文件以供diff
-                echo "$cleaned_old_file_content" > "/tmp/voidix_diff_old.txt"
-                echo "$cleaned_new_file_content" > "/tmp/voidix_diff_new.txt"
-            fi
-        fi
-
-        # 如果是新文件或内容有变化，则记录
-        if [ "$has_changed" = true ]; then
-            if [ "$is_new" = true ]; then
-                log_success "✨ 新增文件: $relative_path"
-            else
-                log_success "🔄 内容变化: $relative_path"
-                # 使用diff命令显示具体变化
-                log_info "    - 显示规范化后的内容差异:"
-                diff_output=$(diff -u --color=always "/tmp/voidix_diff_old.txt" "/tmp/voidix_diff_new.txt" || true)
-                if [ -n "$diff_output" ]; then
-                    # 给diff输出加上缩进，更美观
-                    echo "$diff_output" | sed 's/^/      /'
-                else
-                    log_info "    - diff未产生输出（可能是空白符等非可见字符变化）"
-                fi
-                # 清理临时文件
-                rm -f "/tmp/voidix_diff_old.txt" "/tmp/voidix_diff_new.txt"
-            fi
-            echo "$relative_path" >> "$changed_files_log"
-            changed_count=$((changed_count + 1))
-        else
-            log_info "👌 内容未变: $relative_path"
-        fi
-    done
-
-    # 4. 生成URL列表
-    log_step "生成变化的URL列表..."
-    if [ -s "$changed_files_log" ]; then
-        map_files_to_urls "$changed_files_log" > "$changed_urls_log"
-        local url_count
-        url_count=$(wc -l < "$changed_urls_log")
-        log_success "已生成 $url_count 个变化的URL"
-        echo -e "${CYAN}📋 即将提交的URL列表：${NC}"
-        while read -r url; do
-            echo -e "  🔗 ${PURPLE}$url${NC}"
-        done < "$changed_urls_log"
+        log_warn "HTML文件格式化失败，但这不会中断部署流程。"
     else
-        log_info "没有检测到任何内容变化，无需提交URL。"
+        log_success "HTML格式化完成"
     fi
-}
-
-# 函数：将文件路径映射为URL
-map_files_to_urls() {
-    local file_list="$1"
-    local base_url="https://www.voidix.net"
-
-    while read -r file; do
-        local url_path
-        # 特殊处理index.html -> /
-        if [[ "$(basename "$file")" == "index.html" ]]; then
-            # 如果是根目录的index.html
-            if [[ "$(dirname "$file")" == "." || "$(dirname "$file")" == "dist" || "$(dirname "$file")" == "$SERVER_PATH/dist" ]]; then
-                 url_path="/"
-            else
-                 # 如果是子目录的index.html, e.g., about/index.html -> /about/
-                 url_path="/$(dirname "$file")/"
-            fi
-        else
-            # 移除.html后缀
-            url_path="/${file%.html}"
-        fi
-
-        # 移除路径中的'dist/'前缀
-        url_path=$(echo "$url_path" | sed 's#^/dist/##')
-        # 确保路径以/开头
-        if [[ ! "$url_path" =~ ^/ ]]; then
-            url_path="/$url_path"
-        fi
-        # 修正双斜杠
-        url_path=$(echo "$url_path" | sed 's#//#/#g')
-
-        echo "${base_url}${url_path}"
-    done < "$file_list"
 }
 
 # 4. 压缩静态文件模块
@@ -537,9 +369,9 @@ submit_changed_urls() {
         return 0
     fi
 
-    log_info "准备提交 $url_count 个变化的URL到搜索引擎..."
+    log_info "准备将所有URL提交到搜索引擎..."
 
-    # 调用submitUrls.sh脚本提交变化的URL
+    # 调用submitUrls.sh脚本，不带参数，由其自行决定提交范围（例如sitemap）
     SUBMIT_SCRIPT="$SCRIPT_DIR/submitUrls.sh"
 
     if [[ ! -f "$SUBMIT_SCRIPT" ]]; then
@@ -547,22 +379,17 @@ submit_changed_urls() {
         return 1
     fi
 
-    # 使用-f参数传递URL文件
-    if bash "$SUBMIT_SCRIPT" -f "$CHANGED_URLS_LOG"; then
-        log_success "变化的URL提交成功！节省了API限额"
+    if [[ "$1" == "true" ]]; then
+        log_info "强制提交所有URL..."
+        if ! bash "$SUBMIT_SCRIPT"; then
+            log_error "URL提交失败，请检查网络连接和API配置"
+            return 1
+        fi
     else
-        log_error "URL提交失败，请检查网络连接和API配置"
-        return 1
+        log_info "根据配置，跳过URL自动提交。请在需要时手动运行提交脚本。"
     fi
 
-    # 清理临时文件
-    rm -f "/tmp/voidix_html_hashes_before.txt" \
-          "/tmp/voidix_html_hashes_after.txt" \
-          "/tmp/voidix_changed_files.txt" \
-          "/tmp/voidix_changed_urls.txt" \
-          "/tmp/voidix_build_mode.txt"
-
-    log_info "已清理临时文件"
+    log_success "URL提交操作完成"
 }
 
 # 显示部署完成信息
@@ -575,9 +402,9 @@ show_completion() {
     echo "⚙️  配置文件: $NGINX_CONFIG_PATH"
     echo "🔄 Git更新: 自动暂存本地更改 + 拉取最新代码"
     echo "📦 压缩配置: Brotli + Gzip 预压缩文件"
-    echo "🔍 变化检测: 智能检测HTML文件变化"
-    echo "🚀 URL提交: 精准提交变化的URL，节省API限额"
-    echo "💡 优化效果: 预计节省约80%带宽 + 智能SEO更新"
+    echo "🔍 变化检测: 已禁用 - URL提交需手动触发"
+    echo "🚀 URL提交: 请手动运行 'scripts/CICD/submitUrls.sh' 脚本"
+    echo "💡 优化效果: 预计节省约80%带宽"
     echo "==============================================="
 }
 
@@ -626,19 +453,11 @@ main() {
                 shift
                 ;;
             -s | --submit)
-                submit_changed_urls
+                submit_changed_urls "true" # 传递参数以强制提交
                 shift
                 ;;
             --force-submit)
-                # 强制提交模式：从sitemap读取所有URL并提交
-                log_module "强制提交所有URL到搜索引擎"
-                SUBMIT_SCRIPT="$SCRIPT_DIR/submitUrls.sh"
-                if [[ -f "$SUBMIT_SCRIPT" ]]; then
-                    bash "$SUBMIT_SCRIPT"
-                    log_success "强制URL提交完成"
-                else
-                    log_error "未找到URL提交脚本: $SUBMIT_SCRIPT"
-                fi
+                submit_changed_urls "true" # 强制提交模式
                 shift
                 ;;
             --git-build)
@@ -646,7 +465,7 @@ main() {
                 build_project
                 compress_files
                 set_permissions
-                submit_changed_urls
+                submit_changed_urls # 默认不提交
                 shift
                 ;;
             --git-build-reload)
@@ -654,7 +473,7 @@ main() {
                 build_project
                 compress_files
                 set_permissions
-                submit_changed_urls
+                submit_changed_urls # 默认不提交
                 reload_nginx
                 shift
                 ;;
@@ -673,7 +492,7 @@ main() {
                 build_project
                 compress_files
                 set_permissions
-                submit_changed_urls
+                submit_changed_urls # 默认不提交
                 reload_nginx
                 shift
                 ;;
@@ -681,7 +500,7 @@ main() {
                 build_project
                 compress_files
                 set_permissions
-                submit_changed_urls
+                submit_changed_urls "true" # 显式提交
                 shift
                 ;;
             -h | --help)
