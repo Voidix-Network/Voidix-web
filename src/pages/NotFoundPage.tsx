@@ -38,6 +38,9 @@ export const NotFoundPage: React.FC = () => {
         pageKey="notFound"
         type="website"
         url="https://www.voidix.net/404"
+        title="页面未找到 - Voidix"
+        description="抱歉，您访问的页面不存在。返回首页继续探索Voidix Minecraft服务器的精彩内容。"
+        additionalMeta={[{ name: 'robots', content: 'noindex,nofollow' }]}
         enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">

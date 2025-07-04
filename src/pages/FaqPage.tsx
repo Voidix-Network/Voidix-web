@@ -145,7 +145,7 @@ export const FaqPage: React.FC = () => {
     <>
       <SEO
         pageKey="faq"
-        type="website"
+        type="article"
         url="https://www.voidix.net/faq"
         canonicalUrl="https://www.voidix.net/faq"
         enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}

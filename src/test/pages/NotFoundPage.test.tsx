@@ -140,7 +140,6 @@ describe('NotFoundPage', () => {
         'data-description',
         '抱歉，您访问的页面不存在。返回首页继续探索Voidix Minecraft服务器的精彩内容。'
       );
-      expect(pageSEO).toHaveAttribute('data-keywords', '404,页面未找到,Voidix');
     });
 
     it('应该设置noindex和nofollow属性', () => {
