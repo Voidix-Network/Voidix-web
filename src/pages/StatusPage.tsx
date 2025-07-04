@@ -146,7 +146,7 @@ export const StatusPage: React.FC = () => {
         type="website"
         url="https://www.voidix.net/status"
         canonicalUrl="https://www.voidix.net/status"
-        enableAnalytics={true}
+        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <div className="min-h-screen bg-gray-900 py-16">
         <div className="container mx-auto px-4 max-w-6xl">

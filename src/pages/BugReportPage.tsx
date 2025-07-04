@@ -64,7 +64,7 @@ export const BugReportPage: React.FC = () => {
         type="website"
         url="https://www.voidix.net/bug-report"
         canonicalUrl="https://www.voidix.net/bug-report"
-        enableAnalytics={true}
+        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <div className="min-h-screen bg-gray-900">
         {' '}

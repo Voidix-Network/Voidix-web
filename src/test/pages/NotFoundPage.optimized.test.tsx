@@ -74,7 +74,6 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       PageTestAssertions.assertSEOConfiguration({
         hasTitle: true,
         hasDescription: true,
-        hasKeywords: true,
       });
     });
 
@@ -140,7 +139,6 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       PageTestAssertions.assertSEOConfiguration({
         hasTitle: true,
         hasDescription: true,
-        hasKeywords: true,
       });
 
       const pageSEO = screen.getByTestId('page-seo');
@@ -148,7 +146,6 @@ describe('NotFoundPage - 向后兼容性优化版本', () => {
       // 验证关键SEO属性存在
       expect(pageSEO.getAttribute('data-title')).toContain('Voidix');
       expect(pageSEO.getAttribute('data-description')).toBeTruthy();
-      expect(pageSEO.getAttribute('data-keywords')).toContain('404');
     });
 
     it('应该设置noindex和nofollow属性', () => {

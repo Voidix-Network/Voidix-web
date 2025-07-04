@@ -148,7 +148,7 @@ export const FaqPage: React.FC = () => {
         type="article"
         url="https://www.voidix.net/faq"
         canonicalUrl="https://www.voidix.net/faq"
-        enableAnalytics={true}
+        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <FAQSchema faqItems={faqSchemaData} />
       <div className="min-h-screen bg-gray-900 pt-12 pb-16">
