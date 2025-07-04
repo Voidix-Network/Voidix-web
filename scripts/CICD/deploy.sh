@@ -276,13 +276,9 @@ build_project() {
             # 规范化 + 格式化文件内容以进行比较
             format_and_clean() {
                 local file_path="$1"
-                # 先用sed进行初步清理，再用prettier进行最终格式化，最后移除head内容
+                # 终极方案：移除所有内联style，并清理其他动态值，最后格式化并移除head
                 sed -E \
-                    -e 's/translate[XY]\([0-9.-]+(px|em|rem|%|vw|vh)\)/translate(NORMALIZED)/g' \
-                    -e 's/scale\([0-9.-]+\)/scale(NORMALIZED)/g' \
-                    -e 's/rotate\([0-9.-]+deg\)/rotate(NORMALIZED)/g' \
-                    -e 's/opacity: [0-9.]+/opacity: NORMALIZED/g' \
-                    -e 's/transition-delay: [0-9.]+s/transition-delay: NORMALIZED/g' \
+                    -e 's/ style="[^"]*"//g' \
                     -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
                     -e 's/最后更新: [0-9]{2}:[0-9]{2}:[0-9]{2}/最后更新: NORMALIZED/g' \
                     -e '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/d' \
