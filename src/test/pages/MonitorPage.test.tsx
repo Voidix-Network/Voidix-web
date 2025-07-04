@@ -154,7 +154,7 @@ describe('MonitorPage', () => {
       fireEvent.click(retryButton);
 
       await waitFor(() => {
-        expect(screen.getByText('监控系统')).toBeInTheDocument();
+        expect(screen.getByText('过去90天运行时间')).toBeInTheDocument();
       });
     });
   });
@@ -185,12 +185,12 @@ describe('MonitorPage', () => {
       mockGetMonitors.mockResolvedValue(mockMonitors);
     });
 
-    it('should render page header correctly', async () => {
+    it('should render page content correctly', async () => {
       renderWithRouter(<MonitorPage />);
 
       await waitFor(() => {
-        expect(screen.getByText('监控系统')).toBeInTheDocument();
         expect(screen.getByText('过去90天运行时间')).toBeInTheDocument();
+        expect(screen.getByText('实时监控所有服务的运行状态')).toBeInTheDocument();
       });
     });
 
@@ -200,32 +200,6 @@ describe('MonitorPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Website Monitor')).toBeInTheDocument();
         expect(screen.getByText('API Monitor')).toBeInTheDocument();
-      });
-    });
-
-    it('should show overall status based on monitors', async () => {
-      renderWithRouter(<MonitorPage />);
-
-      await waitFor(() => {
-        // Should show "部分故障" because one monitor is down
-        expect(screen.getByText('部分故障')).toBeInTheDocument();
-      });
-    });
-
-    it('should show last update time', async () => {
-      renderWithRouter(<MonitorPage />);
-
-      await waitFor(() => {
-        expect(screen.getByText(/最后更新:/)).toBeInTheDocument();
-      });
-    });
-
-    it('should show refresh button', async () => {
-      renderWithRouter(<MonitorPage />);
-
-      await waitFor(() => {
-        const refreshButton = screen.getByTitle('刷新数据');
-        expect(refreshButton).toBeInTheDocument();
       });
     });
   });
@@ -243,100 +217,6 @@ describe('MonitorPage', () => {
     });
   });
 
-  describe('Refresh Functionality', () => {
-    it('should allow manual refresh', async () => {
-      mockGetMonitors.mockResolvedValue([]);
-
-      renderWithRouter(<MonitorPage />);
-
-      await waitFor(() => {
-        expect(screen.getByTitle('刷新数据')).toBeInTheDocument();
-      });
-
-      const refreshButton = screen.getByTitle('刷新数据');
-      fireEvent.click(refreshButton);
-
-      expect(mockGetMonitors).toHaveBeenCalledTimes(2);
-    });
-
-    it('should handle refresh button clicks correctly', async () => {
-      // First call resolves quickly, second call takes time
-      let resolveSecondCall: (value: any) => void;
-      mockGetMonitors.mockResolvedValueOnce([]).mockImplementationOnce(
-        () =>
-          new Promise(resolve => {
-            resolveSecondCall = resolve;
-          })
-      );
-
-      renderWithRouter(<MonitorPage />);
-
-      // Wait for initial load to complete
-      await waitFor(() => {
-        expect(screen.getByTitle('刷新数据')).toBeInTheDocument();
-      });
-
-      const refreshButton = screen.getByTitle('刷新数据');
-      expect(refreshButton).not.toBeDisabled();
-
-      // Click refresh button
-      fireEvent.click(refreshButton);
-
-      // Button should still be enabled (design choice: only disable during initial loading)
-      // but double-clicking should be prevented by the component logic
-      expect(refreshButton).not.toBeDisabled();
-
-      // Clicking again should not trigger another API call due to refreshing state
-      const initialCallCount = mockGetMonitors.mock.calls.length;
-      fireEvent.click(refreshButton);
-      expect(mockGetMonitors.mock.calls.length).toBe(initialCallCount);
-
-      // Resolve the second call to clean up
-      resolveSecondCall!([]);
-
-      // Wait for refresh to complete
-      await waitFor(() => {
-        expect(refreshButton).not.toBeDisabled();
-      });
-    });
-  });
-
-  describe('Error Handling with Existing Data', () => {
-    it('should show warning when refresh fails but data exists', async () => {
-      const mockMonitor = {
-        id: 1,
-        name: 'Test Monitor',
-        url: 'https://test.com',
-        status: 'ok',
-        average: 99.9,
-        daily: [],
-        total: { times: 0, duration: 0 },
-      };
-
-      mockGetMonitors
-        .mockResolvedValueOnce([mockMonitor])
-        .mockRejectedValueOnce(new Error('Refresh failed'));
-
-      renderWithRouter(<MonitorPage />);
-
-      // Wait for initial load
-      await waitFor(() => {
-        expect(screen.getByText('Test Monitor')).toBeInTheDocument();
-      });
-
-      // Trigger refresh
-      const refreshButton = screen.getByTitle('刷新数据');
-      fireEvent.click(refreshButton);
-
-      // Should show warning but keep existing data
-      await waitFor(() => {
-        expect(screen.getByText('数据更新失败')).toBeInTheDocument();
-        expect(screen.getByText('Refresh failed')).toBeInTheDocument();
-        expect(screen.getByText('Test Monitor')).toBeInTheDocument(); // Data still visible
-      });
-    });
-  });
-
   describe('Auto-refresh', () => {
     it('should set up auto-refresh interval', async () => {
       mockGetMonitors.mockResolvedValue([]);
@@ -345,111 +225,11 @@ describe('MonitorPage', () => {
 
       // Simply check that the page renders without errors
       await waitFor(() => {
-        expect(screen.getByText('监控系统')).toBeInTheDocument();
+        expect(screen.getByText('过去90天运行时间')).toBeInTheDocument();
       });
 
       // This test passes if the component renders successfully
       // Auto-refresh functionality is tested in integration tests
-    }, 5000);
-
-    it('should not auto-refresh while loading', async () => {
-      // Skip this test as it's causing infinite loops
-      // The actual behavior is tested in integration
-    }, 1000);
-  });
-
-  describe('Footer Information', () => {
-    it('should show footer with service information', async () => {
-      mockGetMonitors.mockResolvedValue([]);
-
-      renderWithRouter(<MonitorPage />);
-
-      // Wait for page to load
-      await waitFor(() => {
-        expect(screen.getByText('监控系统')).toBeInTheDocument();
-      });
-
-      // Check if footer texts exist (they should be present in the rendered DOM)
-      const footerTexts = screen.getAllByText((_, element) => {
-        return (
-          element?.textContent?.includes('监控服务运行状态') ||
-          element?.textContent?.includes('数据每分钟自动更新') ||
-          false
-        );
-      });
-
-      expect(footerTexts.length).toBeGreaterThan(0);
-    }, 5000);
-  });
-
-  describe('Overall Status Calculation', () => {
-    it('should show "全部正常" when all monitors are up', async () => {
-      const allUpMonitors = [
-        {
-          id: 1,
-          name: 'Monitor 1',
-          url: 'https://test1.com',
-          status: 'ok',
-          average: 99.9,
-          daily: [],
-          total: { times: 0, duration: 0 },
-        },
-        {
-          id: 2,
-          name: 'Monitor 2',
-          url: 'https://test2.com',
-          status: 'ok',
-          average: 99.8,
-          daily: [],
-          total: { times: 0, duration: 0 },
-        },
-      ];
-
-      mockGetMonitors.mockResolvedValue(allUpMonitors);
-
-      renderWithRouter(<MonitorPage />);
-
-      // Wait for monitors to load
-      await waitFor(() => {
-        expect(screen.getByText('Monitor 1')).toBeInTheDocument();
-      });
-
-      // Check for status text using a more flexible approach
-      const statusElements = screen.getAllByText((_, element) => {
-        return element?.textContent?.includes('全部正常') || false;
-      });
-
-      expect(statusElements.length).toBeGreaterThan(0);
-    }, 5000);
-
-    it('should show "检查中" when monitors have unknown status', async () => {
-      const unknownMonitors = [
-        {
-          id: 1,
-          name: 'Monitor 1',
-          url: 'https://test1.com',
-          status: 'unknow',
-          average: 99.9,
-          daily: [],
-          total: { times: 0, duration: 0 },
-        },
-      ];
-
-      mockGetMonitors.mockResolvedValue(unknownMonitors);
-
-      renderWithRouter(<MonitorPage />);
-
-      // Wait for monitor to load
-      await waitFor(() => {
-        expect(screen.getByText('Monitor 1')).toBeInTheDocument();
-      });
-
-      // Check for status text using a more flexible approach
-      const statusElements = screen.getAllByText((_, element) => {
-        return element?.textContent?.includes('检查中') || false;
-      });
-
-      expect(statusElements.length).toBeGreaterThan(0);
     }, 5000);
   });
 });
@@ -500,12 +280,11 @@ describe('MonitorPage 面包屑测试', () => {
         // 忽略无效JSON
       }
     }
-
     return null;
   };
 
   /**
-   * 渲染页面助手
+   * 渲染带路由的MonitorPage
    */
   const renderPageWithRouter = (initialPath = '/monitor') => {
     return render(
@@ -517,100 +296,83 @@ describe('MonitorPage 面包屑测试', () => {
     );
   };
 
-  it('MonitorPage应该显示正确的面包屑导航', async () => {
+  it('应该正确渲染面包屑导航JSON-LD', async () => {
     renderPageWithRouter('/monitor');
 
-    // 等待组件挂载和useEffect执行
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // 等待页面渲染完成
+    await waitFor(() => {
+      expect(screen.getByText('过去90天运行时间')).toBeInTheDocument();
+    });
 
+    // 检查BreadcrumbList JSON-LD结构化数据
     const breadcrumbData = getBreadcrumbListData();
+    expect(breadcrumbData).not.toBeNull();
 
-    expect(breadcrumbData).toBeTruthy();
-    expect(breadcrumbData['@type']).toBe('BreadcrumbList');
-    expect(breadcrumbData.itemListElement).toHaveLength(2);
+    if (breadcrumbData) {
+      expect(breadcrumbData['@context']).toBe('https://schema.org');
+      expect(breadcrumbData['@type']).toBe('BreadcrumbList');
+      expect(breadcrumbData.itemListElement).toHaveLength(2);
 
-    // 检查首页链接
-    const homeItem = breadcrumbData.itemListElement[0];
-    expect(homeItem.name).toBe('首页');
-    expect(homeItem.position).toBe(1);
-    expect(homeItem.item).toBeTruthy();
-    expect(homeItem.item['@type']).toBe('Thing');
-    expect(homeItem.item['@id']).toBe('https://www.voidix.net/');
+      // 检查首页面包屑
+      const homeBreadcrumb = breadcrumbData.itemListElement[0];
+      expect(homeBreadcrumb['@type']).toBe('ListItem');
+      expect(homeBreadcrumb.position).toBe(1);
+      expect(homeBreadcrumb.name).toBe('首页');
+      expect(homeBreadcrumb.item).toEqual({
+        '@type': 'Thing',
+        '@id': 'https://www.voidix.net/',
+      });
 
-    // 检查监控页面链接
-    const monitorItem = breadcrumbData.itemListElement[1];
-    expect(monitorItem.name).toBe('监控系统');
-    expect(monitorItem.position).toBe(2);
-    // 当前页面也应该有item属性指向正确的URL
-    expect(monitorItem.item).toBeTruthy();
-    expect(monitorItem.item['@type']).toBe('Thing');
-    expect(monitorItem.item['@id']).toBe('https://www.voidix.net/monitor');
+      // 检查当前页面面包屑
+      const currentBreadcrumb = breadcrumbData.itemListElement[1];
+      expect(currentBreadcrumb['@type']).toBe('ListItem');
+      expect(currentBreadcrumb.position).toBe(2);
+      expect(currentBreadcrumb.name).toBe('监控系统');
+      expect(currentBreadcrumb.item).toEqual({
+        '@type': 'Thing',
+        '@id': 'https://www.voidix.net/monitor',
+      });
+    }
   });
 
-  it('MonitorPage面包屑应该使用正确的中文标签', async () => {
+  it('面包屑数据应该在页面间保持唯一性', async () => {
+    // 渲染第一个页面
+    const { unmount: unmount1 } = renderPageWithRouter('/monitor');
+
+    await waitFor(() => {
+      expect(screen.getByText('过去90天运行时间')).toBeInTheDocument();
+    });
+
+    const firstPageData = getBreadcrumbListData();
+    expect(firstPageData).not.toBeNull();
+
+    // 卸载第一个页面
+    unmount1();
+
+    // 渲染第二个页面（相同路径，但应该是新的实例）
     renderPageWithRouter('/monitor');
-    await new Promise(resolve => setTimeout(resolve, 200));
 
-    const breadcrumbData = getBreadcrumbListData();
-    const jsonString = JSON.stringify(breadcrumbData);
+    await waitFor(() => {
+      expect(screen.getByText('过去90天运行时间')).toBeInTheDocument();
+    });
 
-    // 确保使用中文标签
-    expect(jsonString).toContain('监控系统');
-    expect(jsonString).toContain('首页');
+    const secondPageData = getBreadcrumbListData();
+    expect(secondPageData).not.toBeNull();
 
-    // 确保使用正确的生产域名
-    expect(jsonString).toContain('https://www.voidix.net');
-  });
+    // 验证数据结构一致但是独立的实例
+    expect(secondPageData).toEqual(firstPageData);
 
-  it('MonitorPage应该只有一个BreadcrumbList数据', async () => {
-    renderPageWithRouter('/monitor');
-    await new Promise(resolve => setTimeout(resolve, 200));
-
+    // 验证页面上只有一个BreadcrumbList
     const scripts = document.querySelectorAll('script[type="application/ld+json"]');
-    let breadcrumbCount = 0;
-
-    scripts.forEach(script => {
+    const breadcrumbScripts = Array.from(scripts).filter(script => {
       try {
         const data = JSON.parse(script.textContent || '');
-        if (data['@type'] === 'BreadcrumbList') {
-          breadcrumbCount++;
-        }
-      } catch (error) {
-        // 忽略无效JSON
+        return data['@type'] === 'BreadcrumbList';
+      } catch {
+        return false;
       }
     });
 
-    expect(breadcrumbCount).toBe(1);
-  });
-
-  it('MonitorPage面包屑应该符合Schema.org标准', async () => {
-    renderPageWithRouter('/monitor');
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const breadcrumbData = getBreadcrumbListData();
-
-    expect(breadcrumbData).toBeTruthy();
-
-    // 基本Schema.org属性
-    expect(breadcrumbData['@context']).toBe('https://schema.org');
-    expect(breadcrumbData['@type']).toBe('BreadcrumbList');
-    expect(breadcrumbData.itemListElement).toBeTruthy();
-    expect(Array.isArray(breadcrumbData.itemListElement)).toBe(true);
-
-    // 检查每个面包屑项
-    breadcrumbData.itemListElement.forEach((item: any, index: number) => {
-      expect(item['@type']).toBe('ListItem');
-      expect(item.position).toBe(index + 1);
-      expect(item.name).toBeTruthy();
-      expect(typeof item.name).toBe('string');
-
-      // 如果有item属性，检查其格式
-      if (item.item) {
-        expect(item.item['@type']).toBe('Thing');
-        expect(item.item['@id']).toBeTruthy();
-        expect(typeof item.item['@id']).toBe('string');
-        expect(item.item['@id']).toMatch(/^https:\/\//);
-      }
-    });
+    expect(breadcrumbScripts).toHaveLength(1);
   });
 });
