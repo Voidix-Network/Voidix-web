@@ -273,35 +273,27 @@ build_project() {
                 exit 1
             fi
 
-            # 规范化 + 格式化文件内容以进行比较
+            # 最终、最稳定的方案：放弃prettier和body提取，只进行最核心、最安全的sed清理
             format_and_clean() {
                 local file_path="$1"
-                # 最终方案：仅提取<body>内容，然后进行清理和格式化，彻底忽略<head>
-                sed -n '/<body/,/<\/body>/p' "$file_path" | \
                 sed -E \
                     -e 's/transform: [^;"]*//g' \
                     -e 's/height: [0-9.]+px/height: auto/g' \
-                    | npx prettier --parser html --print-width 120 --html-whitespace-sensitivity ignore
+                    -e 's/opacity: [0-9.]+/opacity: 1/g' \
+                    -e 's/(article:modified_time" content=")[^"]+/\1NORMALIZED_DATETIME/g' \
+                    -e 's/([?&])v=[0-9a-zA-Z._-]+/\1v=NORMALIZED/g' \
+                    -e 's/data-timestamp="[0-9]+"/data-timestamp="NORMALIZED"/g' \
+                    "$file_path"
             }
 
             local cleaned_new_file_content
-            # 增加错误处理，防止prettier失败导致脚本中断
-            cleaned_new_file_content=$(format_and_clean "$new_file" 2>/tmp/prettier_error.log)
-            if [ $? -ne 0 ]; then
-                log_error "Prettier格式化新文件 '$relative_path'失败。错误日志: /tmp/prettier_error.log"
-                # 在这种情况下，我们假定文件有变化，以确保不会漏掉潜在的更新
-                has_changed=true
-            fi
+            cleaned_new_file_content=$(format_and_clean "$new_file")
 
             local cleaned_old_file_content
-            cleaned_old_file_content=$(format_and_clean "$old_file" 2>/tmp/prettier_error.log)
-            if [ $? -ne 0 ]; then
-                log_error "Prettier格式化旧文件 '$relative_path'失败。错误日志: /tmp/prettier_error.log"
-                has_changed=true
-            fi
+            cleaned_old_file_content=$(format_and_clean "$old_file")
 
             # 比较规范化和格式化后的内容
-            if [ "$has_changed" = false ] && [ "$cleaned_new_file_content" != "$cleaned_old_file_content" ]; then
+            if [ "$cleaned_new_file_content" != "$cleaned_old_file_content" ]; then
                 has_changed=true
                 # 将清理后的内容存入临时文件以供diff
                 echo "$cleaned_old_file_content" > "/tmp/voidix_diff_old.txt"
