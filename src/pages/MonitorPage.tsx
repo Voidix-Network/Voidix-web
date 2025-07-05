@@ -20,7 +20,25 @@ export const MonitorPage: React.FC = () => {
     try {
       setError(null);
       const monitorData = await uptimeRobotApi.getMonitors(90);
-      setMonitors(monitorData);
+
+      // 自定义排序逻辑
+      const sortedData = [...monitorData].sort((a, b) => {
+        const aName = a.name;
+        const bName = b.name;
+
+        // 将"邮箱系统"置顶
+        if (aName === '邮箱系统' && bName !== '邮箱系统') return -1;
+        if (aName !== '邮箱系统' && bName === '邮箱系统') return 1;
+
+        // 将"官网"置底
+        if (aName === '官网' && bName !== '官网') return 1;
+        if (aName !== '官网' && bName === '官网') return -1;
+
+        // 保持原有顺序
+        return 0;
+      });
+
+      setMonitors(sortedData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '获取监控数据失败';
       setError(errorMessage);
