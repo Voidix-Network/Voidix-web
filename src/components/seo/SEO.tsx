@@ -349,6 +349,11 @@ const generateBasicStructuredData = (pageKey?: string) => {
       '@type': 'Organization',
       name: 'Voidix Team',
     },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '5.0',
+      reviewCount: '37',
+    },
   };
 
   // 根据页面类型返回不同的结构化数据

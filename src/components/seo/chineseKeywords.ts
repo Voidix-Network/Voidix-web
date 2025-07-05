@@ -27,9 +27,9 @@ export interface PageKeywords {
  */
 export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
   home: {
-    title: 'Voidix Minecraft公益服务器 - 最佳我的世界生存与小游戏服务器',
+    title: 'Voidix Minecraft公益服务器 - 免费我的世界生存与小游戏服务器',
     description:
-      'Voidix是一个永久免费的Minecraft公益服务器，我们提供稳定的起床战争、空岛战争等小游戏。低延迟，致力于为玩家打造一个公平、互助、绿色的MC玩家社区。',
+      'Voidix是一个永久免费的Minecraft公益服务器，我们提供稳定的MC小游戏与生存服务器。低延迟，致力于为玩家打造一个公平、互助、绿色的MC玩家社区。',
     keywords: {
       primary: [
         'Voidix',
@@ -40,8 +40,8 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
         '生存服务器',
       ],
       secondary: ['公益'],
-      longTail: ['我的世界公益服务器推荐', '我的世界小游戏服务器推荐'],
-      gameTerms: ['小游戏', '生存'],
+      longTail: ['生存服务器推荐', '小游戏服务器推荐', 'MC小游戏服务器'],
+      gameTerms: ['生存'],
       localTerms: ['中国'],
     },
     socialTags: {
