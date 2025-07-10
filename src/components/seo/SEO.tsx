@@ -1,3 +1,9 @@
+/**
+ * 优化的SEO组件
+ * 集成新的统一分析系统，移除重复的脚本加载逻辑
+ */
+
+import { initVoidixAnalytics } from '@/services/analytics';
 import { globalSchemaManager } from '@/utils/schemaManager';
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -13,7 +19,6 @@ export interface SEOProps {
   canonicalUrl?: string;
   pageKey?: string;
   enableAnalytics?: boolean;
-  enableClarity?: boolean;
   enableDebug?: boolean;
   additionalMeta?: Array<{
     name?: string;
@@ -24,7 +29,7 @@ export interface SEOProps {
 
 // 默认配置
 const DEFAULT_SEO_CONFIG = {
-  title: 'Voidix Minecraft公益服务器 - 最佳我的世界生存与小游戏服务器',
+  title: 'Voidix Minecraft公益服务器 - 免费我的世界生存与小游戏服务器',
   description:
     '公益、公平、包容的Minecraft小游戏服务器，致力于为玩家提供开放、透明、无门槛的游戏体验。',
   image: '/logo.png',
@@ -33,148 +38,6 @@ const DEFAULT_SEO_CONFIG = {
   organizationName: 'Voidix Minecraft Server',
   websiteUrl: 'https://www.voidix.net',
   contactEmail: 'contact@voidix.net',
-};
-
-// 延迟分析跟踪 - DOMContentLoaded后加载
-const initializeSimpleAnalytics = (enableAnalytics: boolean, enableDebug: boolean = false) => {
-  if (!enableAnalytics || typeof window === 'undefined') return;
-
-  // 检查用户同意
-  const hasConsent = localStorage.getItem('voidix-analytics-consent') === 'true';
-  const isDev = import.meta.env.DEV;
-
-  if (!hasConsent || isDev) return;
-
-  // 等待DOM完全加载后再初始化分析脚本
-  const initAnalytics = () => {
-    const measurementId = 'G-SPQQPKW4VN';
-
-    // 只加载必要的gtag功能
-    if (!window.gtag) {
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = function () {
-        window.dataLayer.push(arguments);
-      };
-
-      // 进一步延迟加载gtag.js，避免阻塞渲染
-      setTimeout(() => {
-        const script = document.createElement('script');
-        script.async = true;
-        script.defer = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-        document.head.appendChild(script);
-
-        script.onload = () => {
-          window.gtag('js', new Date());
-          window.gtag('config', measurementId, {
-            client_storage: 'none',
-            anonymize_ip: true,
-            allow_google_signals: false,
-            send_page_view: true,
-          });
-          if (enableDebug) console.log('[SEO] GA4 延迟初始化完成');
-        };
-      }, 3000); // 增加延迟到3秒
-    }
-  };
-
-  // 确保在DOMContentLoaded之后运行
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAnalytics);
-  } else {
-    // 如果DOM已经加载完成，直接执行
-    setTimeout(initAnalytics, 1000);
-  }
-};
-
-// Microsoft Clarity延迟集成
-const initializeClarity = (enableClarity: boolean, enableDebug: boolean = false) => {
-  if (!enableClarity || typeof window === 'undefined') return;
-
-  const hasConsent = localStorage.getItem('voidix-analytics-consent') === 'true';
-  const isDev = import.meta.env.DEV;
-  const clarityId = import.meta.env.VITE_CLARITY_PROJECT_ID || '';
-
-  if (!hasConsent || isDev || !clarityId) return;
-
-  const initClarity = () => {
-    // 检查Clarity是否已加载
-    if ((window as any).clarity) {
-      if (enableDebug) console.log('[SEO] Clarity already loaded');
-      return;
-    }
-
-    // 延迟加载Microsoft Clarity
-    setTimeout(() => {
-      (function (c: any, l: any, a: any, r: any, i: any, t: any, y: any) {
-        c[a] =
-          c[a] ||
-          function () {
-            (c[a].q = c[a].q || []).push(arguments);
-          };
-        t = l.createElement(r);
-        t.async = 1;
-        t.defer = 1;
-        t.src = 'https://www.clarity.ms/tag/' + i;
-        y = l.getElementsByTagName(r)[0];
-        y.parentNode.insertBefore(t, y);
-      })(window, document, 'clarity', 'script', clarityId, null, null);
-
-      if (enableDebug) console.log('[SEO] Clarity 延迟初始化完成');
-    }, 4000); // 延迟4秒加载
-  };
-
-  // 确保在页面完全加载后运行
-  if (document.readyState === 'complete') {
-    initClarity();
-  } else {
-    window.addEventListener('load', initClarity);
-  }
-};
-
-// 统一分析API
-const initializeUnifiedAnalytics = (enableDebug: boolean = false) => {
-  if (typeof window === 'undefined') return;
-
-  const hasConsent = localStorage.getItem('voidix-analytics-consent') === 'true';
-  const isDev = import.meta.env.DEV;
-
-  if (!hasConsent || isDev) {
-    // @ts-ignore
-    window.voidixUnifiedAnalytics = undefined;
-    return;
-  }
-
-  // Voidix统一分析API
-  window.voidixUnifiedAnalytics = {
-    trackBugReport: (reportType: string, severity: string) => {
-      if ((window as any).clarity) {
-        (window as any).clarity('event', 'bug_report', { reportType, severity });
-      }
-      if (enableDebug) console.log('[统一分析] Bug报告跟踪:', { reportType, severity });
-    },
-    trackFAQView: (questionId: string, category: string) => {
-      if ((window as any).clarity) {
-        (window as any).clarity('event', 'faq_view', { questionId, category });
-      }
-      if (enableDebug) console.log('[统一分析] FAQ查看跟踪:', { questionId, category });
-    },
-    trackCustomEvent: (category: string, action: string, label?: string, value?: number) => {
-      if ((window as any).clarity) {
-        (window as any).clarity('event', action, { category, label, value });
-      }
-      if (enableDebug)
-        console.log('[统一分析] 自定义事件跟踪:', { category, action, label, value });
-    },
-    trackPagePerformance: () => {
-      if ((window as any).clarity) {
-        (window as any).clarity('event', 'page_performance');
-      }
-      if (enableDebug) console.log('[统一分析] 页面性能跟踪已执行');
-    },
-  };
-
-  if (enableDebug) console.log('[SEO] 统一分析API已初始化');
 };
 
 // 生成Sitelinks导航结构化数据
@@ -209,17 +72,11 @@ const generateSitelinksData = () => {
         description: '提交游戏问题反馈和建议',
         url: 'https://www.voidix.net/bug-report',
       },
-      {
-        '@type': 'SiteNavigationElement',
-        name: '隐私政策',
-        description: '了解我们的隐私保护政策',
-        url: 'https://www.voidix.net/privacy',
-      },
     ],
   };
 };
 
-// 生成全面的结构化数据
+// 生成基础结构化数据
 const generateBasicStructuredData = (pageKey?: string) => {
   const organization = {
     '@context': 'https://schema.org',
@@ -356,7 +213,6 @@ const generateBasicStructuredData = (pageKey?: string) => {
     },
   };
 
-  // 根据页面类型返回不同的结构化数据
   const baseSchemas: any[] = [organization, website];
 
   // 只在首页添加VideoGame和导航数据
@@ -371,8 +227,7 @@ const generateBasicStructuredData = (pageKey?: string) => {
 
 /**
  * 核心SEO组件
- * 整合了PageSEO、基础结构化数据、轻量级分析和MicrosoftClarity
- * 使用chineseKeywords.ts中的精选配置
+ * 使用新的统一分析系统，整合了丰富的结构化数据
  */
 export const SEO: React.FC<SEOProps> = ({
   title,
@@ -384,11 +239,10 @@ export const SEO: React.FC<SEOProps> = ({
   canonicalUrl,
   pageKey,
   enableAnalytics = true,
-  enableClarity = true,
   enableDebug = false,
   additionalMeta = [],
 }) => {
-  // 获取页面配置 - 使用您精心配置的关键词
+  // 获取页面配置
   const pageConfig = pageKey ? getPageSEOConfig(pageKey) : null;
 
   const finalTitle = title || (pageConfig ? pageConfig.title : DEFAULT_SEO_CONFIG.title);
@@ -404,34 +258,33 @@ export const SEO: React.FC<SEOProps> = ({
     ? image
     : `${DEFAULT_SEO_CONFIG.websiteUrl}${image}`;
 
-  // 初始化分析功能
+  // 初始化分析系统
   useEffect(() => {
     if (enableAnalytics) {
-      initializeSimpleAnalytics(true, enableDebug);
+      initVoidixAnalytics().catch(error => {
+        if (enableDebug) {
+          console.error('[SEO] 分析系统初始化失败:', error);
+        }
+      });
     }
-    if (enableClarity) {
-      initializeClarity(true, enableDebug);
-    }
-    // 始终初始化统一API（内部会检查同意状态）
-    initializeUnifiedAnalytics(enableDebug);
-  }, [enableAnalytics, enableClarity, enableDebug]);
+  }, [enableAnalytics, enableDebug]);
 
-  // 使用SchemaManager管理结构化数据
+  // 管理结构化数据
   useEffect(() => {
     const structuredData = generateBasicStructuredData(pageKey);
 
-    // 为每个schema设置唯一数据（一次性设置，避免重复）
+    // 设置结构化数据
     structuredData.forEach(schema => {
       const schemaType = schema['@type'];
       globalSchemaManager.setSchema(schemaType, schema, 'seo-component');
     });
 
     if (enableDebug) {
-      console.log(`[SEO] 通过SchemaManager设置了 ${structuredData.length} 个基础结构化数据`);
+      console.log(`[SEO] 设置了 ${structuredData.length} 个结构化数据`);
       globalSchemaManager.debug();
     }
 
-    // 清理函数 - 移除本组件生成的schema
+    // 清理函数
     return () => {
       globalSchemaManager.removeSchemaBySource('seo-component');
     };
@@ -472,8 +325,6 @@ export const SEO: React.FC<SEOProps> = ({
       {/* Canonical URL */}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
-      {/* 结构化数据现在通过SchemaManager管理，确保全局唯一 */}
-
       {/* 额外的meta标签 */}
       {additionalMeta.map((meta, index) => (
         <meta
@@ -483,10 +334,14 @@ export const SEO: React.FC<SEOProps> = ({
           content={meta.content}
         />
       ))}
+
+      {/* DNS预解析优化 */}
+      <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      <link rel="dns-prefetch" href="https://www.clarity.ms" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
     </Helmet>
   );
 };
-
-// 全局类型声明已移至 types/analytics.d.ts
 
 export default SEO;

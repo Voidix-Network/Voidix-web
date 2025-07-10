@@ -2,6 +2,7 @@ import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/component
 import { SEO } from '@/components/seo';
 import { FEEDBACK_CHANNELS_CONFIG } from '@/components/seo/feedbackChannels';
 import { FEEDBACK_REQUIREMENTS_CONFIG } from '@/components/seo/feedbackRequirements';
+import { analytics } from '@/services/analytics';
 import { motion } from 'framer-motion';
 import {
   Bug,
@@ -23,25 +24,20 @@ import React, { useEffect } from 'react';
 export const BugReportPage: React.FC = () => {
   // 页面加载时跟踪页面访问
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'page_view',
-        'bug_report',
-        'bug_report_page_visit',
-        1
-      );
-    }
-  }, []); // 处理反馈渠道点击事件
-  const handleChannelClick = (channelName: string) => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackBugReport(channelName, 'channel_click');
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'user_action',
-        'external_link_click',
-        channelName,
-        1
-      );
-    }
+    analytics.page('BugReport', {
+      pageType: 'support',
+      contactChannels: FEEDBACK_CHANNELS_CONFIG.length,
+    });
+  }, []);
+
+  // 处理联系方式点击事件
+  const handleContactClick = (channelName: string) => {
+    analytics.trackBugReport(channelName, 'channel_click');
+    analytics.track('contact_channel_click', {
+      channel: channelName,
+      source: 'bug_report_page',
+      location: 'contact_options',
+    });
   };
 
   // 图标映射
@@ -64,7 +60,6 @@ export const BugReportPage: React.FC = () => {
         type="website"
         url="https://www.voidix.net/bug-report"
         canonicalUrl="https://www.voidix.net/bug-report"
-        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <div className="min-h-screen bg-gray-900">
         {' '}
@@ -132,7 +127,7 @@ export const BugReportPage: React.FC = () => {
                             scale: 0.98,
                           }}
                           whileTap={{ scale: 0.96 }}
-                          onClick={() => handleChannelClick(channel.name)}
+                          onClick={() => handleContactClick(channel.name)}
                         >
                           <div
                             className={`w-10 h-10 bg-gradient-to-br ${channel.color} rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}

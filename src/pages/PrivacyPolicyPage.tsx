@@ -1,5 +1,6 @@
 import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/components';
 import { SEO } from '@/components/seo';
+import { analytics } from '@/services/analytics';
 import { motion } from 'framer-motion';
 import { Cookie, Database, Eye, Lock, Mail, Shield } from 'lucide-react';
 import React, { useEffect } from 'react';
@@ -10,14 +11,10 @@ import React, { useEffect } from 'react';
 export const PrivacyPolicyPage: React.FC = () => {
   // 页面加载时跟踪页面访问
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'page_view',
-        'privacy_policy',
-        'privacy_policy_page_visit',
-        1
-      );
-    }
+    analytics.page('PrivacyPolicy', {
+      pageType: 'legal',
+      timestamp: Date.now(),
+    });
   }, []);
 
   const sections = [
@@ -87,11 +84,6 @@ export const PrivacyPolicyPage: React.FC = () => {
         type="article"
         url="https://www.voidix.net/privacy"
         canonicalUrl="https://www.voidix.net/privacy"
-        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
-        additionalMeta={[
-          { name: 'article:modified_time', content: new Date().toISOString() },
-          { name: 'article:section', content: 'Legal' },
-        ]}
       />
       <div className="min-h-screen bg-gray-900 pt-12 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

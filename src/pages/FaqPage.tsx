@@ -1,5 +1,6 @@
 import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/components';
 import { FAQSchema, SEO } from '@/components/seo';
+import { analytics } from '@/services/analytics';
 import { motion } from 'framer-motion';
 import React, { useEffect } from 'react';
 
@@ -87,9 +88,7 @@ const faqSchemaData = [
 const FaqItemComponent: React.FC<{ item: FaqItem; index: number }> = ({ item, index }) => {
   // 处理FAQ项目点击事件
   const handleFaqClick = () => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackFAQView(item.id.toString(), 'general_faq');
-    }
+    analytics.trackFAQView(item.id.toString(), 'general_faq');
   };
 
   return (
@@ -120,26 +119,19 @@ const FaqItemComponent: React.FC<{ item: FaqItem; index: number }> = ({ item, in
 export const FaqPage: React.FC = () => {
   // 页面加载时跟踪页面访问
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'page_view',
-        'faq',
-        'faq_page_visit',
-        faqData.length
-      );
-    }
+    analytics.page('FAQ', {
+      totalQuestions: faqData.length,
+      pageType: 'faq',
+    });
   }, []);
 
   // 处理社交媒体链接点击
   const handleSocialClick = (platform: string) => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'user_action',
-        'social_link_click',
-        platform,
-        1
-      );
-    }
+    analytics.track('social_link_click', {
+      platform,
+      source: 'faq_page',
+      location: 'contact_section',
+    });
   };
 
   return (
@@ -149,7 +141,6 @@ export const FaqPage: React.FC = () => {
         type="article"
         url="https://www.voidix.net/faq"
         canonicalUrl="https://www.voidix.net/faq"
-        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <FAQSchema faqItems={faqSchemaData} />
       <div className="min-h-screen bg-gray-900 pt-12 pb-16">
