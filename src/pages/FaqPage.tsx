@@ -94,9 +94,10 @@ const FaqItemComponent: React.FC<{ item: FaqItem; index: number }> = ({ item, in
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
       className="border border-gray-700/50 rounded-lg p-6 bg-gray-800/30 backdrop-blur-sm cursor-pointer hover:bg-gray-800/50 transition-colors"
       onClick={handleFaqClick}
     >
@@ -155,7 +156,7 @@ export const FaqPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <BreadcrumbNavigation className="mb-8" />
 
-          <AnimatedSection variant="fadeInUp" className="mb-12">
+          <AnimatedSection variant="fadeIn" className="mb-12">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 <GradientText variant="primary">常见问题</GradientText>
@@ -166,7 +167,12 @@ export const FaqPage: React.FC = () => {
             </div>
           </AnimatedSection>
 
-          <AnimatedSection variant="fadeInUp" delay={0.2}>
+          <AnimatedSection
+            variant="fadeIn"
+            delay={0.2}
+            layout
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
             <div className="space-y-4">
               {faqData.map((item, index) => (
                 <FaqItemComponent key={item.id} item={item} index={index} />
@@ -174,7 +180,13 @@ export const FaqPage: React.FC = () => {
             </div>
           </AnimatedSection>
 
-          <AnimatedSection variant="fadeInUp" delay={0.4} className="mt-12">
+          <AnimatedSection
+            variant="fadeIn"
+            delay={0.4}
+            className="mt-12"
+            layout
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
             <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-xl p-8">
               <h2 className="text-2xl font-bold text-white mb-4">还有其他问题？</h2>
               <p className="text-gray-300 mb-6">
