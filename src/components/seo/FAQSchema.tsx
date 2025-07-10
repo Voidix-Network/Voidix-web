@@ -1,5 +1,5 @@
-import { globalSchemaManager } from '@/utils/schemaManager';
-import React from 'react';
+import { useSchema } from '@/hooks/useSchema';
+import React, { useEffect } from 'react';
 
 interface FAQItem {
   question: string;
@@ -15,6 +15,8 @@ interface FAQSchemaProps {
  * 生成符合Schema.org标准的FAQ结构化数据，提升SEO表现
  */
 export const FAQSchema: React.FC<FAQSchemaProps> = ({ faqItems }) => {
+  const { addSchema, removeSchema } = useSchema();
+
   /**
    * 安全地清理HTML标签，只保留纯文本用于结构化数据
    * 使用DOM API作为首选方法，循环替换作为备用方案
@@ -65,17 +67,16 @@ export const FAQSchema: React.FC<FAQSchemaProps> = ({ faqItems }) => {
     })),
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const schemaId = 'faq-page-schema';
     // 使用SchemaManager设置FAQ结构化数据
-    globalSchemaManager.setSchema('FAQPage', faqSchema, 'faq-component');
-
-    console.log('[FAQSchema] 已通过SchemaManager设置FAQ结构化数据');
+    addSchema(schemaId, faqSchema);
 
     // 清理函数
     return () => {
-      globalSchemaManager.removeSchemaBySource('faq-component');
+      removeSchema(schemaId);
     };
-  }, [faqItems]);
+  }, [faqItems, addSchema, removeSchema]); // 依赖项应包括add/remove函数
 
   return null; // 这个组件不渲染任何可见内容
 };

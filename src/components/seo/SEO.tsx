@@ -3,8 +3,8 @@
  * 集成新的统一分析系统，移除重复的脚本加载逻辑
  */
 
+import { useSchema } from '@/hooks/useSchema';
 import { initVoidixAnalytics } from '@/services/analytics';
-import { globalSchemaManager } from '@/utils/schemaManager';
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { generateKeywordsString, getPageSEOConfig } from './chineseKeywords';
@@ -242,6 +242,8 @@ export const SEO: React.FC<SEOProps> = ({
   enableDebug = false,
   additionalMeta = [],
 }) => {
+  const { addSchema, removeSchema } = useSchema();
+
   // 获取页面配置
   const pageConfig = pageKey ? getPageSEOConfig(pageKey) : null;
 
@@ -272,23 +274,23 @@ export const SEO: React.FC<SEOProps> = ({
   // 管理结构化数据
   useEffect(() => {
     const structuredData = generateBasicStructuredData(pageKey);
+    const schemaIds: string[] = [];
 
     // 设置结构化数据
-    structuredData.forEach(schema => {
-      const schemaType = schema['@type'];
-      globalSchemaManager.setSchema(schemaType, schema, 'seo-component');
+    structuredData.forEach((schema, index) => {
+      // 使用 @type 和 index 作为唯一ID
+      const schemaId = `seo-component-${schema['@type'] || 'unknown'}-${index}`;
+      schemaIds.push(schemaId);
+      addSchema(schemaId, schema);
     });
-
-    if (enableDebug) {
-      console.log(`[SEO] 设置了 ${structuredData.length} 个结构化数据`);
-      globalSchemaManager.debug();
-    }
 
     // 清理函数
     return () => {
-      globalSchemaManager.removeSchemaBySource('seo-component');
+      schemaIds.forEach(id => {
+        removeSchema(id);
+      });
     };
-  }, [pageKey, enableDebug]);
+  }, [pageKey, addSchema, removeSchema]);
 
   return (
     <Helmet>
