@@ -143,7 +143,7 @@ export class WebSocketComposer {
   async connect(): Promise<void> {
     // 🚀 预渲染模式检测：跳过WebSocket连接
     if (typeof window !== 'undefined' && window.PRERENDER_MODE) {
-      console.log('[WebSocketComposer] 预渲染模式，跳过WebSocket连接');
+      console.info('[WebSocketComposer] 预渲染模式，跳过WebSocket连接');
       return;
     }
 
@@ -163,7 +163,7 @@ export class WebSocketComposer {
         };
       }
 
-      console.log('[WebSocketComposer] 连接建立成功');
+      console.info('[WebSocketComposer] 连接建立成功');
     } catch (error) {
       console.error('[WebSocketComposer] 连接失败:', error);
       throw error;
@@ -192,6 +192,7 @@ export class WebSocketComposer {
    * 断开WebSocket连接
    */
   disconnect(): void {
+    console.info('[WebSocketComposer] 手动断开WebSocket连接');
     // 清理全局变量
     if (typeof window !== 'undefined') {
       window.voidixWebSocket = undefined;

@@ -52,12 +52,12 @@ export class ConnectionManager {
   async connect(): Promise<WebSocket> {
     // 检查当前状态，避免重复连接
     if (this.state === ConnectionState.CONNECTED) {
-      console.log('[ConnectionManager] 已连接，跳过重复连接');
+      console.debug('[ConnectionManager] 已连接，跳过重复连接');
       return this.ws!;
     }
 
     if (this.state === ConnectionState.CONNECTING) {
-      console.log('[ConnectionManager] 正在连接中，跳过重复连接');
+      console.debug('[ConnectionManager] 正在连接中，跳过重复连接');
       throw new Error('Connection already in progress');
     }
 
@@ -65,7 +65,7 @@ export class ConnectionManager {
       this.setState(ConnectionState.CONNECTING);
 
       try {
-        console.log('[ConnectionManager] 尝试连接到:', this.config.url);
+        console.debug('[ConnectionManager] 尝试连接到:', this.config.url);
         this.ws = new WebSocket(this.config.url);
 
         // 设置连接超时
@@ -91,15 +91,15 @@ export class ConnectionManager {
       const currentState = this.ws.readyState;
 
       if (currentState === WebSocket.OPEN || currentState === WebSocket.CONNECTING) {
-        console.log('[ConnectionManager] 手动断开连接');
+        console.debug('[ConnectionManager] 手动断开连接');
         this.ws.close();
       } else {
-        console.log('[ConnectionManager] 连接已关闭，跳过断开操作');
+        console.debug('[ConnectionManager] 连接已关闭，跳过断开操作');
       }
 
       this.ws = null;
     } else {
-      console.log('[ConnectionManager] 无连接实例，跳过断开操作');
+      console.debug('[ConnectionManager] 无连接实例，跳过断开操作');
     }
 
     this.setState(ConnectionState.DISCONNECTED);
@@ -133,7 +133,7 @@ export class ConnectionManager {
 
     this.connectionTimeout = setTimeout(() => {
       if (this.ws?.readyState !== WebSocket.OPEN) {
-        console.log('[ConnectionManager] 连接超时，关闭连接');
+        console.debug('[ConnectionManager] 连接超时，关闭连接');
         this.ws?.close();
         this.setState(ConnectionState.FAILED);
         reject(new Error('Connection timeout'));
@@ -162,14 +162,14 @@ export class ConnectionManager {
 
     this.ws.onopen = () => {
       this.clearConnectionTimeout();
-      console.log('[ConnectionManager] 连接成功');
+      console.info('[ConnectionManager] 连接成功');
       this.setState(ConnectionState.CONNECTED);
       resolve(this.ws!);
     };
 
     this.ws.onclose = event => {
       this.clearConnectionTimeout();
-      console.log('[ConnectionManager] 连接关闭:', event.code, event.reason);
+      console.info('[ConnectionManager] 连接关闭:', event.code, event.reason);
       this.setState(ConnectionState.DISCONNECTED);
     };
 
@@ -324,10 +324,10 @@ export class ConnectionManager {
     if (typeof document === 'undefined') return;
 
     if (document.visibilityState === 'hidden') {
-      console.log('[ConnectionManager] 页面隐藏，断开WebSocket连接');
+      console.debug('[ConnectionManager] 页面隐藏，断开WebSocket连接');
       this.disconnect();
     } else if (document.visibilityState === 'visible') {
-      console.log('[ConnectionManager] 页面可见，尝试重新连接');
+      console.debug('[ConnectionManager] 页面可见，尝试重新连接');
       // 仅在当前未连接时重新连接
       if (!this.isConnected && !this.isConnecting) {
         this.connect().catch(error => {
