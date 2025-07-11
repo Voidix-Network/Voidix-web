@@ -1,5 +1,6 @@
 import { useSchema } from '@/hooks/useSchema';
 import DOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
 import React, { useEffect } from 'react';
 
 interface FAQItem {
@@ -31,9 +32,15 @@ export const FAQSchema: React.FC<FAQSchemaProps> = ({ faqItems }) => {
 
     // 在浏览器环境中才执行清理
     if (typeof window === 'undefined') {
-      // 在SSR或Node.js环境中，可以采用更简单的清理策略或直接返回
-      // 为简单起见，这里移除标签，但不处理复杂的XSS向量
-      return text.replace(/<[^>]*>/g, '').trim();
+      // 在SSR或Node.js环境中使用jsdom来安全地清理HTML
+      const window = new JSDOM('').window;
+      // @ts-ignore
+      const serverSideDOMPurify = DOMPurify(window);
+      const sanitizedText = serverSideDOMPurify.sanitize(text, {
+        ALLOWED_TAGS: [],
+        ALLOWED_ATTR: [],
+      });
+      return sanitizedText.trim();
     }
 
     // 使用DOMPurify移除所有HTML标签
