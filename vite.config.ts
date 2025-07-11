@@ -190,6 +190,9 @@ export default defineConfig({
       toplevel: false,               // 不压缩顶层
     },
     rollupOptions: {
+      // 在构建时将jsdom视为外部依赖，不打包进最终产物
+      // dompurify必须在浏览器端可用，因此不能设为external
+      external: ['jsdom'],
       output: {
         // 使用hash文件名，确保新版本立即更新
         entryFileNames: 'assets/[name]-[hash].js',
