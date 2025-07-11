@@ -56,9 +56,9 @@ export const PRERENDER_CONFIG = {
     caseSensitive: false,            // ✅ 大小写不敏感
 
     // === 🔥 极限压缩选项 ===
-    removeOptionalTags: true,        // 🔥 移除可选标签（如</li>, </p>）
-    removeAttributeQuotes: true,     // 🔥 移除属性引号（id=test而非id="test"）
-    removeEmptyElements: true,       // 🔥 移除空元素
+    removeOptionalTags: false,
+    removeAttributeQuotes: false,
+    removeEmptyElements: true,      // 🔥 移除空元素
     collapseBooleanAttributes: true, // 🔥 压缩布尔属性（checked而非checked="checked"）
     collapseInlineTagWhitespace: true, // 🔥 压缩内联标签空白
     conservativeCollapse: false,     // 🔥 激进空白压缩
