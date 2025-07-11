@@ -1,6 +1,6 @@
 import { useSchema } from '@/hooks/useSchema';
 import { ChevronRight, Home } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface BreadcrumbItem {
@@ -25,10 +25,13 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
   const location = useLocation();
   const { addSchema, removeSchema } = useSchema();
 
-  // 自动生成面包屑（如果没有提供items）
-  const generateBreadcrumbs = (): BreadcrumbItem[] => {
+  const breadcrumbs = useMemo(() => {
+    if (items) {
+      return items;
+    }
+
     const pathSegments = location.pathname.split('/').filter(Boolean);
-    const breadcrumbs: BreadcrumbItem[] = [{ label: '首页', href: '/' }];
+    const generatedBreadcrumbs: BreadcrumbItem[] = [{ label: '首页', href: '/' }];
 
     // 路径映射
     const pathMap: Record<string, string> = {
@@ -44,17 +47,15 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
       currentPath += `/${segment}`;
       const isLast = index === pathSegments.length - 1;
 
-      breadcrumbs.push({
+      generatedBreadcrumbs.push({
         label: pathMap[segment] || segment,
         href: isLast ? undefined : currentPath,
         isCurrentPage: isLast,
       });
     });
 
-    return breadcrumbs;
-  };
-
-  const breadcrumbs = items || generateBreadcrumbs();
+    return generatedBreadcrumbs;
+  }, [location.pathname, items]);
 
   // 生成结构化数据（全局唯一，强化去重）
   React.useEffect(() => {

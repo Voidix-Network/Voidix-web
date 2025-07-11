@@ -72,9 +72,10 @@ export class WebSocketComposer {
    */
   static destroyInstance(): void {
     if (WebSocketComposer.instance) {
-      console.log('[WebSocketComposer] 销毁单例实例');
-      WebSocketComposer.instance.cleanup();
-      WebSocketComposer.instance = null;
+      // console.log('[WebSocketComposer] 销毁单例实例');
+      // WebSocketComposer.instance.cleanup();
+      // WebSocketComposer.instance = null;
+      console.warn('[WebSocketComposer] destroyInstance调用已被禁用，以防止在生产中意外销毁。');
     }
   }
 
