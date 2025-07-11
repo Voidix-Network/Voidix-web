@@ -111,6 +111,13 @@ export class PuppeteerRenderer {
             const mainContent = document.querySelector('main');
             if (!mainContent) return false;
 
+            // 🔥 关键SEO检查：确保title和description已在head中
+            const title = document.title;
+            const description = document.head.querySelector('meta[name="description"]');
+            if (!title || title.includes('Vite') || !description) {
+              return false;
+            }
+
             // 检查h1标签是否存在（为了SEO）
             const h1Element = document.querySelector('h1');
             if (!h1Element) return false;
