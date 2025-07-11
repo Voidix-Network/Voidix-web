@@ -34,7 +34,7 @@ const faqData: FaqItem[] = [
     id: 3,
     question: '服务器支持哪些Minecraft版本？',
     answer:
-      '我们的小游戏服务器支持1.7.2至最新的Java版（推荐1.8.9），生存服务器则使用最新的Java版，但也支持1.7.2-最新版本。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
+      '我们的小游戏服务器支持1.16.5-1.21.1的Java版，生存服务器则使用最新的Java版，但也支持1.7.2-latest。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
   },
   {
     id: 4,
@@ -72,7 +72,7 @@ const faqSchemaData = [
   {
     question: '服务器支持哪些Minecraft版本？',
     answer:
-      '我们的小游戏服务器支持1.7.2至最新的Java版（推荐1.8.9），生存服务器则使用最新的Java版，但也支持1.7.2-最新版本。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
+      '我们的小游戏服务器支持1.16.5-1.21.1的Java版，生存服务器则使用最新的Java版，但也支持1.7.2-latest。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
   },
   {
     question: '如果我遇到了Bug或者有建议，应该怎么办？',
@@ -158,12 +158,7 @@ export const FaqPage: React.FC = () => {
             </div>
           </AnimatedSection>
 
-          <AnimatedSection
-            variant="fadeIn"
-            delay={0.2}
-            layout
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-          >
+          <AnimatedSection variant="fadeIn" delay={0.2}>
             <div className="space-y-4">
               {faqData.map((item, index) => (
                 <FaqItemComponent key={item.id} item={item} index={index} />
@@ -171,13 +166,7 @@ export const FaqPage: React.FC = () => {
             </div>
           </AnimatedSection>
 
-          <AnimatedSection
-            variant="fadeIn"
-            delay={0.4}
-            className="mt-12"
-            layout
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-          >
+          <AnimatedSection variant="fadeIn" delay={0.4} className="mt-12">
             <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-xl p-8">
               <h2 className="text-2xl font-bold text-white mb-4">还有其他问题？</h2>
               <p className="text-gray-300 mb-6">

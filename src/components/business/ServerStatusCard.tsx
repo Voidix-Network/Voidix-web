@@ -39,7 +39,7 @@ export const ServerStatusCard: React.FC<ServerStatusCardProps> = ({
   const getCompatibilityText = (type: 'MINIGAME' | 'SURVIVAL') => {
     switch (type) {
       case 'MINIGAME':
-        return '兼容 1.8-1.8.9';
+        return '兼容 1.16.5-1.21.1';
       case 'SURVIVAL':
         return '兼容 1.7.2-latest';
       default:
