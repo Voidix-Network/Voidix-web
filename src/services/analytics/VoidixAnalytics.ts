@@ -561,8 +561,7 @@ class VoidixAnalytics {
             reject(error);
           };
 
-          const firstScript = document.getElementsByTagName('script')[0];
-          firstScript.parentNode?.insertBefore(script, firstScript);
+          document.head.appendChild(script);
         } catch (error) {
           this.logger.error('[VoidixAnalytics] Baidu Analytics 初始化时发生异常', error);
           reject(error);
