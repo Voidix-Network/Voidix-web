@@ -82,7 +82,7 @@ export const PrivacyPolicyPage: React.FC = () => {
       title: '我们收集的信息',
       content: `我们致力于最小化数据收集。我们主要收集以下类型的匿名化信息：
       • 访问日志：匿名的IP地址、浏览器类型、访问时间，用于安全审计和流量分析。
-      • 使用数据：通过Google Analytics和Microsoft Clarity收集匿名的页面浏览、点击、停留时间等聚合统计数据，以了解服务使用情况。
+      • 使用数据：通过Google Analytics、Microsoft Clarity和百度统计(Baidu Tongji)收集匿名的页面浏览、点击、停留时间等聚合统计数据，以了解服务使用情况。
       • 技术信息：设备类型、操作系统等匿名技术信息，用于优化兼容性。
       我们不会收集或存储任何可直接识别您个人身份的信息（如姓名、邮箱地址）。`,
     },
@@ -101,14 +101,14 @@ export const PrivacyPolicyPage: React.FC = () => {
       title: 'Cookie及类似技术政策',
       content: `我们使用Cookie来运营和改善我们的网站。Cookie是存储在您设备上的小文本文件。我们主要使用以下两类Cookie：
       • 必要Cookie：这些Cookie是网站核心功能运行所必需的，例如保持会话状态。您无法禁用这些Cookie。
-      • 分析Cookie：这些Cookie（来自Google Analytics和Clarity）帮助我们统计访问量和流量来源，以便我们衡量和改进我们网站的性能。如果您不允许使用这些Cookie，我们将不知道您何时访问了我们的网站。
+      • 分析Cookie：这些Cookie（来自Google Analytics、Clarity和百度统计）帮助我们统计访问量和流量来源，以便我们衡量和改进我们网站的性能。如果您不允许使用这些Cookie，我们将不知道您何时访问了我们的网站。
       您可以通过我们网站页脚的Cookie横幅随时管理您的Cookie偏好。`,
     },
     {
       icon: Database,
       title: '数据共享与披露',
       content: `我们不会出售您的任何信息。我们仅在以下情况下与第三方共享匿名的聚合数据：
-      • 分析服务提供商：与Google(Google Analytics)和Microsoft(Clarity)共享匿名的使用数据，以帮助我们分析服务。这些提供商有其自身的隐私政策，并被禁止将数据用于其他目的。
+      • 分析服务提供商：与Google(Google Analytics)、Microsoft(Clarity)和百度(Baidu Tongji)共享匿名的使用数据，以帮助我们分析服务。这些提供商有其自身的隐私政策，并被禁止将数据用于其他目的。
       • 法律要求：在法律法规要求或响应有效的法律程序时，我们可能会披露必要的信息。`,
     },
     {

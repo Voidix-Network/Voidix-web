@@ -14,6 +14,10 @@ export interface AnalyticsConfig {
     projectId: string;
     enabled: boolean;
   };
+  baiduAnalytics: {
+    hmId: string;
+    enabled: boolean;
+  };
   privacy: {
     requireConsent: boolean;
     cookielessMode: boolean;
@@ -339,16 +343,16 @@ class VoidixAnalytics {
   }
 
   private async initializeAnalyticsServices(): Promise<void> {
-    const promises: Promise<void>[] = [];
-
+    const promises = [];
     if (this.config?.googleAnalytics.enabled) {
       promises.push(this.initializeGoogleAnalytics());
     }
-
     if (this.config?.microsoftClarity.enabled) {
       promises.push(this.initializeMicrosoftClarity());
     }
-
+    if (this.config?.baiduAnalytics.enabled) {
+      promises.push(this.initializeBaiduAnalytics());
+    }
     await Promise.allSettled(promises);
   }
 
@@ -516,6 +520,57 @@ class VoidixAnalytics {
     });
   }
 
+  private async initializeBaiduAnalytics(): Promise<void> {
+    if (!this.config?.baiduAnalytics.hmId) {
+      this.logger.warn('[VoidixAnalytics] 百度统计已启用但缺少hmId');
+      return;
+    }
+
+    const hmId = this.config.baiduAnalytics.hmId;
+
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          if (window._hmt) {
+            this.logger.debug('[VoidixAnalytics] 百度统计脚本已加载');
+            return resolve();
+          }
+
+          window._hmt = window._hmt || [];
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = `https://hm.baidu.com/hm.js?${hmId}`;
+          script.id = 'baidu-analytics-script';
+
+          const timeoutId = setTimeout(() => {
+            script.remove();
+            reject(new Error('Baidu Analytics 脚本加载超时'));
+          }, 10000);
+
+          script.onload = () => {
+            clearTimeout(timeoutId);
+            this.logger.info('[VoidixAnalytics] Baidu Analytics 初始化完成');
+            resolve();
+          };
+
+          script.onerror = () => {
+            clearTimeout(timeoutId);
+            script.remove();
+            const error = new Error('Baidu Analytics 脚本加载失败');
+            this.logger.error('[VoidixAnalytics] Baidu Analytics 初始化失败', error);
+            reject(error);
+          };
+
+          const firstScript = document.getElementsByTagName('script')[0];
+          firstScript.parentNode?.insertBefore(script, firstScript);
+        } catch (error) {
+          this.logger.error('[VoidixAnalytics] Baidu Analytics 初始化时发生异常', error);
+          reject(error);
+        }
+      }, this.config?.performance.scriptDelay || 3000);
+    });
+  }
+
   /**
    * 重试操作机制
    */
@@ -601,6 +656,24 @@ class VoidixAnalytics {
         ...event.customProperties,
       });
     }
+
+    // Baidu Analytics 追踪
+    if (this.config?.baiduAnalytics.enabled && typeof window._hmt !== 'undefined') {
+      if (event.category === 'page') {
+        const pagePath = event.label || window.location.pathname;
+        window._hmt.push(['_trackPageview', pagePath]);
+        this.logger.debug('[VoidixAnalytics] Baidu Analytics 追踪页面浏览', { path: pagePath });
+      } else {
+        // 追踪自定义事件
+        window._hmt.push(['_trackEvent', event.category, event.action, event.label, event.value]);
+        this.logger.debug('[VoidixAnalytics] Baidu Analytics 追踪自定义事件', {
+          category: event.category,
+          action: event.action,
+          label: event.label,
+          value: event.value,
+        });
+      }
+    }
   }
 
   private updateThirdPartyConsent(): void {
@@ -616,9 +689,15 @@ class VoidixAnalytics {
   }
 
   private getFirstContentfulPaint(): number | undefined {
-    const paintEntries = performance.getEntriesByType('paint');
-    const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-    return fcpEntry?.startTime;
+    const po = new PerformanceObserver(list => {
+      for (const entry of list.getEntries()) {
+        if (entry.name === 'first-contentful-paint') {
+          return entry.startTime;
+        }
+      }
+    });
+    po.observe({ type: 'paint', buffered: true });
+    return undefined; // PerformanceObserver 是异步的，这里返回 undefined 表示需要等待
   }
 
   private getLargestContentfulPaint(): number | undefined {
@@ -649,3 +728,10 @@ if (typeof window !== 'undefined') {
 }
 
 export default VoidixAnalytics;
+
+// 扩展 window 类型以包含 _hmt
+declare global {
+  interface Window {
+    _hmt?: any[];
+  }
+}
