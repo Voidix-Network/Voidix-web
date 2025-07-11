@@ -665,12 +665,17 @@ class VoidixAnalytics {
         this.logger.debug('[VoidixAnalytics] Baidu Analytics 追踪页面浏览', { path: pagePath });
       } else {
         // 追踪自定义事件
-        window._hmt.push(['_trackEvent', event.category, event.action, event.label, event.value]);
+        const { action, customProperties } = event;
+        const category = customProperties?.category || event.category;
+        const label = customProperties?.label || event.label;
+        const value = customProperties?.value || event.value;
+
+        window._hmt.push(['_trackEvent', category, action, label, value]);
         this.logger.debug('[VoidixAnalytics] Baidu Analytics 追踪自定义事件', {
-          category: event.category,
-          action: event.action,
-          label: event.label,
-          value: event.value,
+          category,
+          action,
+          label,
+          value,
         });
       }
     }
