@@ -337,12 +337,6 @@ export const SEO: React.FC<SEOProps> = ({
           content={meta.content}
         />
       ))}
-
-      {/* DNS预解析优化 */}
-      <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-      <link rel="dns-prefetch" href="https://www.clarity.ms" />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
     </Helmet>
   );
 };
