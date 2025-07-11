@@ -42,7 +42,7 @@ export const PRERENDER_CONFIG = {
     { path: '/not-found', outputDir: 'not-found' },
   ],
 
-  // 🔥 HTML终极压缩配置 - 极限优化
+  // 🔥 HTML终极压缩配置 - 平衡优化版
   htmlMinify: {
     // === 基础压缩 ===
     collapseWhitespace: true,        // ✅ 压缩空白符
