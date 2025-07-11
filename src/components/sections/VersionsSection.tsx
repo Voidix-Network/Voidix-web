@@ -180,7 +180,7 @@ export const VersionsSection: React.FC = () => {
 
     if (!javaEl || !bedrockEl) return 0;
 
-    console.log(`开始测量${targetIndex === 0 ? 'Java版' : '基岩版'}高度`);
+    console.debug(`开始测量${targetIndex === 0 ? 'Java版' : '基岩版'}高度`);
 
     // 保存原始display状态
     const javaOriginalDisplay = javaEl.style.display;
@@ -197,7 +197,7 @@ export const VersionsSection: React.FC = () => {
     const targetEl = targetIndex === 0 ? javaEl : bedrockEl;
     const height = targetEl.getBoundingClientRect().height;
 
-    console.log(`${targetIndex === 0 ? 'Java版' : '基岩版'}实际高度:`, height);
+    console.debug(`${targetIndex === 0 ? 'Java版' : '基岩版'}实际高度:`, height);
 
     // 恢复原始display状态
     javaEl.style.display = javaOriginalDisplay;
@@ -212,7 +212,7 @@ export const VersionsSection: React.FC = () => {
       const height = measureContentHeight(activeTab);
       if (height > 0) {
         setContainerHeight(height);
-        console.log('初始高度设置为:', height);
+        console.debug('初始高度设置为:', height);
       }
     };
 
@@ -221,14 +221,14 @@ export const VersionsSection: React.FC = () => {
   }, []);
 
   const handleTabClick = (index: number) => {
-    console.log('切换到tab:', index, '当前containerHeight:', containerHeight);
+    console.debug('切换到tab:', index, '当前containerHeight:', containerHeight);
     setActiveTab(index);
 
     // 测量目标内容的准确高度
     setTimeout(() => {
       const height = measureContentHeight(index);
       if (height > 0) {
-        console.log(`设置容器高度为: ${height}px`);
+        console.debug(`设置容器高度为: ${height}px`);
         setContainerHeight(height);
       }
     }, 50);

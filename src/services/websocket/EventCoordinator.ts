@@ -30,7 +30,7 @@ export class EventCoordinator {
   setupConnectionEvents(connectionManager: ConnectionManager): void {
     // 监听连接状态变化
     connectionManager.onStateChange(data => {
-      console.log('[EventCoordinator] 连接状态变化:', data.currentState);
+      console.debug('[EventCoordinator] 连接状态变化:', data.currentState);
       this.resetOnNewConnection(data.currentState);
     });
 
@@ -54,7 +54,7 @@ export class EventCoordinator {
       }
     });
 
-    console.log('[EventCoordinator] 连接事件处理器已设置');
+    console.debug('[EventCoordinator] 连接事件处理器已设置');
   }
 
   /**

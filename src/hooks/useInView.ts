@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, RefObject } from 'react';
+import { RefObject, useEffect, useRef, useState } from 'react';
 
 /**
  * 自定义useInView Hook配置选项
@@ -50,7 +50,7 @@ export const useInView = <T extends HTMLElement = HTMLElement>(
 
     // 移动端或偏好减少动画时，立即显示 - 完全跳过viewport检测
     if (isMobile || reducedMotion || mobileImmediate) {
-      console.log('📱 [useInView] Mobile/reduced motion detected, immediate display', {
+      console.debug('📱 [useInView] Mobile/reduced motion detected, immediate display', {
         isMobile,
         reducedMotion,
         mobileImmediate,
@@ -76,7 +76,7 @@ export const useInView = <T extends HTMLElement = HTMLElement>(
         const isVisible = entry.isIntersecting;
 
         if (isVisible && (!hasBeenSeen || !triggerOnce)) {
-          console.log('👁️ [useInView] Element entered viewport', {
+          console.debug('👁️ [useInView] Element entered viewport', {
             target: entry.target,
             intersectionRatio: entry.intersectionRatio,
             boundingClientRect: entry.boundingClientRect,
@@ -95,21 +95,21 @@ export const useInView = <T extends HTMLElement = HTMLElement>(
     );
 
     observer.observe(element);
-    console.log('🔍 [useInView] Observer attached to element', {
+    console.debug('🔍 [useInView] Observer attached to element', {
       threshold,
       rootMargin,
     });
 
     return () => {
       observer.disconnect();
-      console.log('🔌 [useInView] Observer disconnected');
+      console.debug('🔌 [useInView] Observer disconnected');
     };
   }, [threshold, rootMargin, triggerOnce, mobileImmediate, hasBeenSeen]);
 
   // 调试信息
   useEffect(() => {
     if (import.meta.env.DEV) {
-      console.log('🎬 [useInView] State update', {
+      console.debug('🎬 [useInView] State update', {
         isInView,
         hasBeenSeen,
         element: elementRef.current?.tagName,

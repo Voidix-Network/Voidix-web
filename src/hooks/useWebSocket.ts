@@ -154,13 +154,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
     // 注册事件监听器
     service.on('connected', () => {
-      console.log('[useWebSocket] WebSocket连接成功');
+      console.info('[useWebSocket] WebSocket连接成功');
       updateConnectionStatus('connected');
       onConnected?.();
     });
 
     service.on('disconnected', (data: { code: number; reason: string }) => {
-      console.log('[useWebSocket] WebSocket连接断开:', data);
+      console.info('[useWebSocket] WebSocket连接断开:', data);
       updateConnectionStatus('disconnected');
       onDisconnected?.(data);
     });
@@ -171,20 +171,20 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     });
 
     service.on('reconnecting', (data: { attempt: number; delay: number; maxAttempts: number }) => {
-      console.log('[useWebSocket] WebSocket重连中...', data);
+      console.info('[useWebSocket] WebSocket重连中...', data);
       updateConnectionStatus('reconnecting');
       onReconnecting?.(data);
     });
 
     service.on('connectionFailed', (data: { maxAttempts: number; totalAttempts: number }) => {
-      console.log('[useWebSocket] WebSocket连接失败:', data);
+      console.info('[useWebSocket] WebSocket连接失败:', data);
       updateConnectionStatus('failed');
       onConnectionFailed?.(data);
     });
 
     // 注册业务消息处理器
     service.on('fullUpdate', (data: any) => {
-      console.log('[useWebSocket] 收到完整状态更新:', data);
+      console.debug('[useWebSocket] 收到完整状态更新:', data);
       handleFullUpdate(data);
     });
 
@@ -195,7 +195,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         maintenanceStartTime: string | null;
         forceShowMaintenance: boolean;
       }) => {
-        console.log('[useWebSocket] 收到维护状态更新:', data);
+        console.debug('[useWebSocket] 收到维护状态更新:', data);
         updateMaintenanceStatus(
           data.isMaintenance,
           data.maintenanceStartTime,
@@ -219,7 +219,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       }
     );
     service.on('serverUpdate', (data: { servers: Record<string, any> }) => {
-      console.log('[useWebSocket] 收到服务器状态更新:', data);
+      console.debug('[useWebSocket] 收到服务器状态更新:', data);
+      // 假设data.servers已经是Zustand store期望的格式
       updateMultipleServers(data.servers);
     }); // 玩家跟踪事件监听器
     service.on(
@@ -227,70 +228,30 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       (data: {
         playerId: string;
         serverId: string;
-        playerInfo: any;
-        player?: { uuid: string; username?: string; ign?: string };
+        playerInfo?: { uuid: string; username: string };
+        player?: { uuid: string; username: string };
       }) => {
-        console.log('[useWebSocket] 玩家上线 - 完整数据:', JSON.stringify(data, null, 2));
-        console.log('[useWebSocket] 玩家上线 - 数据字段检查:', {
-          hasPlayer: !!data.player,
-          hasUuid: data.player?.uuid,
-          hasUsername: data.player?.username,
-          hasIgn: data.player?.ign,
-          playerId: data.playerId,
-          serverId: data.serverId,
-          playerInfoKeys: data.playerInfo ? Object.keys(data.playerInfo) : 'undefined',
-          playerKeys: data.player ? Object.keys(data.player) : 'undefined',
-        });
-
-        // 处理基础的玩家位置追踪
-        handlePlayerAdd(data.playerId, data.serverId); // 处理IGN数据 - 优先从playerInfo获取，fallback到player字段
+        console.debug('[useWebSocket] 玩家加入:', data);
+        handlePlayerAdd(data.playerId, data.serverId);
         const playerData = data.playerInfo || data.player;
-        if (playerData && playerData.uuid) {
-          const ign = playerData.ign || playerData.username || data.playerId;
-          console.log('[useWebSocket] 保存玩家IGN数据:', {
-            uuid: playerData.uuid,
-            ign: ign,
-            serverId: data.serverId,
-          });
-          addPlayerIgn(playerData.uuid, ign, data.serverId);
-        } else {
-          console.warn('[useWebSocket] 玩家上线事件缺少必要字段，无法保存IGN数据:', {
-            missingPlayerInfo: !data.playerInfo,
-            missingPlayer: !data.player,
-            missingUuid: !playerData?.uuid,
-            availableData: data,
-          });
+        if (playerData?.uuid && playerData?.username) {
+          addPlayerIgn(playerData.uuid, playerData.username, data.serverId);
         }
       }
     );
+
     service.on(
       'playerRemove',
       (data: { playerId: string; playerInfo: any; player?: { uuid: string } }) => {
-        console.log('[useWebSocket] 玩家下线 - 完整数据:', JSON.stringify(data, null, 2));
-        console.log('[useWebSocket] 玩家下线 - 数据字段检查:', {
-          hasPlayer: !!data.player,
-          hasUuid: data.player?.uuid,
-          playerId: data.playerId,
-          playerInfoKeys: data.playerInfo ? Object.keys(data.playerInfo) : 'undefined',
-          playerKeys: data.player ? Object.keys(data.player) : 'undefined',
-        });
-
-        // 处理基础的玩家位置追踪
+        console.debug('[useWebSocket] 玩家离开:', data);
         handlePlayerRemove(data.playerId); // 移除IGN数据 - 优先从playerInfo获取，fallback到player字段
         const playerData = data.playerInfo || data.player;
         if (playerData && playerData.uuid) {
-          console.log('[useWebSocket] 移除玩家IGN数据:', playerData.uuid);
           removePlayerIgn(playerData.uuid);
-        } else {
-          console.warn('[useWebSocket] 玩家下线事件缺少uuid字段，无法移除IGN数据:', {
-            missingPlayerInfo: !data.playerInfo,
-            missingPlayer: !data.player,
-            missingUuid: !playerData?.uuid,
-            availableData: data,
-          });
         }
       }
     );
+
     service.on(
       'playerMove',
       (data: {
@@ -300,8 +261,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         playerInfo: any;
         player?: { uuid: string };
       }) => {
-        console.log('[useWebSocket] 玩家移动 - 完整数据:', JSON.stringify(data, null, 2));
-        console.log('[useWebSocket] 玩家移动 - 数据字段检查:', {
+        console.debug('[useWebSocket] 玩家移动 - 完整数据:', data);
+        console.debug('[useWebSocket] 玩家移动 - 数据字段检查:', {
           hasPlayer: !!data.player,
           hasUuid: data.player?.uuid,
           playerId: data.playerId,
@@ -315,7 +276,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         handlePlayerMove(data.playerId, data.fromServer, data.toServer); // 更新IGN数据中的服务器位置 - 优先从playerInfo获取，fallback到player字段
         const playerData = data.playerInfo || data.player;
         if (playerData && playerData.uuid) {
-          console.log('[useWebSocket] 更新玩家IGN服务器位置:', {
+          console.debug('[useWebSocket] 更新玩家IGN服务器位置:', {
             uuid: playerData.uuid,
             fromServer: data.fromServer,
             toServer: data.toServer,
@@ -357,7 +318,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
   const connect = useCallback(async () => {
     // 🚀 预渲染模式检测：跳过WebSocket连接
     if (typeof window !== 'undefined' && window.PRERENDER_MODE) {
-      console.log('[useWebSocket] 预渲染模式，跳过WebSocket连接');
+      console.info('[useWebSocket] 预渲染模式，跳过WebSocket连接');
       return;
     }
 
@@ -376,9 +337,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
    * 断开WebSocket连接
    */
   const disconnect = useCallback(() => {
-    if (serviceRef.current) {
-      serviceRef.current.disconnect();
-    }
+    console.info('[useWebSocket] 手动断开WebSocket连接');
+    serviceRef.current?.disconnect();
     updateConnectionStatus('disconnected');
   }, [updateConnectionStatus]); /**
    * 组件挂载时的副作用
@@ -388,7 +348,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
     // 🚀 预渲染模式检测：跳过自动连接
     if (typeof window !== 'undefined' && window.PRERENDER_MODE) {
-      console.log('[useWebSocket] 预渲染模式，跳过自动连接');
+      console.info('[useWebSocket] 预渲染模式，跳过自动连接');
       return;
     }
 
@@ -435,12 +395,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     const handleVisibilityChange = () => {
       if (document.hidden) {
         // 页面隐藏时不主动断开连接，让WebSocket自然处理
-        console.log('[useWebSocket] 页面隐藏');
+        console.info('[useWebSocket] 页面隐藏');
       } else {
         // 页面可见时检查连接状态
-        console.log('[useWebSocket] 页面可见');
+        console.info('[useWebSocket] 页面可见');
         if (serviceRef.current && !serviceRef.current.isConnected) {
-          console.log('[useWebSocket] 页面可见时发现连接断开，尝试重连');
+          console.info('[useWebSocket] 页面可见时发现连接断开，尝试重连');
           connect().catch(error => {
             console.error('[useWebSocket] 页面可见时重连失败:', error);
           });

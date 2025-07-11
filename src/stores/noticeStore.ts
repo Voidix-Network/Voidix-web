@@ -23,7 +23,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
 
     // Actions
     setNotices: (notices: Record<string, Notice>) => {
-      console.log('[NoticeStore] 设置公告数据:', notices);
+      console.debug('[NoticeStore] 设置公告数据:', notices);
       set({
         notices,
         lastFetchTime: Date.now(),
@@ -33,7 +33,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
     },
 
     addNotice: (id: string, notice: Notice) => {
-      console.log('[NoticeStore] 添加新公告:', { id, notice });
+      console.debug('[NoticeStore] 添加新公告:', { id, notice });
       set(state => ({
         notices: {
           ...state.notices,
@@ -43,7 +43,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
     },
 
     removeNotice: (id: string) => {
-      console.log('[NoticeStore] 移除公告:', id);
+      console.debug('[NoticeStore] 移除公告:', id);
       set(state => {
         const newNotices = { ...state.notices };
         delete newNotices[id];
@@ -68,12 +68,12 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
     },
 
     setTotalCount: (totalCount: number) => {
-      console.log('[NoticeStore] 设置总公告数:', totalCount);
+      console.debug(`[NoticeStore] 设置总公告数: ${totalCount}`);
       set({ totalCount });
     },
 
     reset: () => {
-      console.log('[NoticeStore] 重置store状态');
+      console.debug('[NoticeStore] 重置store状态');
       set({
         notices: {},
         isLoading: false,
@@ -93,7 +93,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
 
       // 防抖机制：同一页面在2秒内不重复请求
       if (state.lastFetchTime && now - state.lastFetchTime < 2000 && state.currentPage === page) {
-        console.log('[NoticeStore] 防抖拦截重复请求:', {
+        console.debug('[NoticeStore] 防抖拦截重复请求:', {
           page,
           counts,
           lastFetch: state.lastFetchTime,
@@ -101,7 +101,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         return;
       }
 
-      console.log('[NoticeStore] 请求公告数据:', { page, counts });
+      console.debug('[NoticeStore] 请求公告数据:', { page, counts });
 
       const request: NoticeRequest = {
         type: 'get_notice',
@@ -151,7 +151,15 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
       pageSize: number,
       noticeTotalCount?: number
     ) => {
-      const noticeCount = Object.keys(notices).length;
+      console.debug('[NoticeStore] 处理分页响应:', {
+        requestedPage,
+        pageSize,
+        noticeCount: Object.keys(notices).length,
+        noticeTotalCount,
+        isLastPage: get().hasMore,
+        totalPages: get().totalPages,
+        currentTotalPages: get().totalPages,
+      });
 
       let isLastPage: boolean;
       let totalPages: number;
@@ -161,7 +169,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         totalPages = Math.max(1, Math.ceil(noticeTotalCount / pageSize));
         isLastPage = requestedPage >= totalPages;
 
-        console.log('[NoticeStore] 使用精确总数计算分页:', {
+        console.debug('[NoticeStore] 使用精确总数计算分页:', {
           noticeTotalCount,
           pageSize,
           calculatedTotalPages: totalPages,
@@ -175,7 +183,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
           totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
           isLastPage = requestedPage >= totalPages;
 
-          console.log('[NoticeStore] 使用存储的总数计算分页:', {
+          console.debug('[NoticeStore] 使用存储的总数计算分页:', {
             totalCount,
             pageSize,
             calculatedTotalPages: totalPages,
@@ -184,10 +192,10 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
           });
         } else {
           // 回退到估算逻辑（向后兼容）
-          if (noticeCount < pageSize) {
+          if (Object.keys(notices).length < pageSize) {
             isLastPage = true;
             totalPages = requestedPage;
-          } else if (noticeCount === pageSize && requestedPage === 1) {
+          } else if (Object.keys(notices).length === pageSize && requestedPage === 1) {
             isLastPage = true;
             totalPages = 1;
           } else {
@@ -196,8 +204,8 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
             totalPages = Math.max(currentTotal, requestedPage + 1);
           }
 
-          console.log('[NoticeStore] 使用估算逻辑计算分页:', {
-            noticeCount,
+          console.debug('[NoticeStore] 使用估算逻辑计算分页:', {
+            noticeCount: Object.keys(notices).length,
             pageSize,
             requestedPage,
             isLastPage,
@@ -206,18 +214,8 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         }
       }
 
-      console.log('[NoticeStore] 处理分页响应:', {
-        requestedPage,
-        pageSize,
-        noticeCount,
-        noticeTotalCount,
-        isLastPage,
-        totalPages,
-        currentTotalPages: get().totalPages,
-      });
-
       // 检查页码偏移问题：如果请求的页面没有数据且不是第1页
-      if (noticeCount === 0 && requestedPage > 1) {
+      if (Object.keys(notices).length === 0 && requestedPage > 1) {
         console.warn('[NoticeStore] 检测到页码偏移，但不自动跳转防止循环请求');
         // 设置为第1页状态，但不发起新请求
         set({
@@ -233,8 +231,8 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
       }
 
       // 特殊处理：如果第1页也没有数据，标记为真正的"无公告"状态
-      if (noticeCount === 0 && requestedPage === 1) {
-        console.log('[NoticeStore] 第1页无公告，设置为无公告状态');
+      if (Object.keys(notices).length === 0 && requestedPage === 1) {
+        console.debug('[NoticeStore] 第1页无公告，设置为无公告状态');
         set({
           notices: {},
           currentPage: 1,
@@ -274,7 +272,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         page = totalPages;
       }
 
-      console.log('[NoticeStore] 跳转到页面:', page);
+      console.debug('[NoticeStore] 跳转到页面:', page);
       get().requestNotices(page, pageSize);
     },
 
@@ -302,7 +300,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
 
     // 智能更新：检测是否需要刷新当前页
     smartUpdateNotices: (newNotices: Record<string, Notice>) => {
-      console.log('[NoticeStore] 智能更新公告');
+      console.debug('[NoticeStore] 智能更新公告');
       const { currentPage, pageSize } = get();
 
       // 直接使用新数据，并重新评估分页状态（没有总数时使用估算逻辑）
@@ -311,7 +309,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
 
     // 增强版请求（获取更多以检测删除）
     requestNoticesEnhanced: (page: number = 1, counts: number = 10) => {
-      console.log('[NoticeStore] 增强版请求:', { page, counts });
+      console.debug('[NoticeStore] 增强版请求:', { page, counts });
       get().requestNotices(page, counts);
     },
 
@@ -324,7 +322,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         sendType: typeof window.voidixWebSocket?.send,
         readyState: window.voidixWebSocket?.readyState,
       };
-      console.log('[NoticeStore] WebSocket状态调试:', wsStatus);
+      console.debug('[NoticeStore] WebSocket状态调试:', wsStatus);
       return wsStatus;
     },
   }))
@@ -335,7 +333,7 @@ if (import.meta.env.DEV) {
   useNoticeStore.subscribe(
     state => state,
     state => {
-      console.log('[NoticeStore] 状态变更:', {
+      console.debug('[NoticeStore] 状态变更:', {
         noticeCount: Object.keys(state.notices).length,
         isLoading: state.isLoading,
         error: state.error,

@@ -93,13 +93,14 @@ export class MaintenanceHandler {
       this.state.maintenanceStartTime = data.maintenanceStartTime;
     }
 
-    console.log('[MaintenanceHandler] 处理完整消息维护状态:', {
-      fromMessage: data.isMaintenance,
-      forceShow: this.state.forceShowMaintenance,
-      final: this.state.isMaintenance,
-      startTime: this.state.maintenanceStartTime,
-    });
-
+    if (import.meta.env.DEV) {
+      console.debug('[MaintenanceHandler] 处理完整消息维护状态:', {
+        fromMessage: data.isMaintenance,
+        forceShow: this.state.forceShowMaintenance,
+        final: this.state.isMaintenance,
+        startTime: this.state.maintenanceStartTime,
+      });
+    }
     // 如果状态有变化，触发通知
     if (this.hasStateChanged(previousState, this.state)) {
       this.notifyStateChange(previousState, 'message');
@@ -112,18 +113,19 @@ export class MaintenanceHandler {
    * 强制设置维护模式
    */
   forceMaintenanceMode(force: boolean): MaintenanceState {
-    const previousState = { ...this.state };
+    if (this.state.forceShowMaintenance !== force) {
+      const previousState = { ...this.state };
+      this.state.forceShowMaintenance = force;
+      this.state.isMaintenance = force;
 
-    this.state.forceShowMaintenance = force;
-    this.state.isMaintenance = force;
+      console.debug('[MaintenanceHandler] 强制维护模式:', {
+        force,
+        previousState: previousState.isMaintenance,
+        newState: this.state.isMaintenance,
+      });
 
-    console.log('[MaintenanceHandler] 强制维护模式:', {
-      force,
-      previousState: previousState.isMaintenance,
-      currentState: this.state.isMaintenance,
-    });
-
-    this.notifyStateChange(previousState, 'force');
+      this.notifyStateChange(previousState, 'force');
+    }
 
     return { ...this.state };
   }

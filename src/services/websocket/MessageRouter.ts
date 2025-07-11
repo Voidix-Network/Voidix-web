@@ -65,14 +65,14 @@ export class MessageRouter {
    * 处理'full'消息 - 完整状态更新
    */
   private handleFullMessage(data: WebSocketMessage): void {
-    console.log('[MessageRouter] 处理fullUpdate消息 - 原始数据:', JSON.stringify(data, null, 2));
+    console.debug('[MessageRouter] 处理fullUpdate消息 - 原始数据:', JSON.stringify(data, null, 2));
 
     // 首先检查协议版本
     if (!this.protocolVersionVerified) {
       const serverProtocolVersion = data.protocol_version;
       const supportedVersion = WEBSOCKET_CONFIG.SUPPORTED_PROTOCOL_VERSION;
 
-      console.log(
+      console.debug(
         `[MessageRouter] 协议版本检查: 服务器=${serverProtocolVersion}, 支持=${supportedVersion}`
       );
 
@@ -95,10 +95,10 @@ export class MessageRouter {
       }
 
       this.protocolVersionVerified = true;
-      console.log('[MessageRouter] 协议版本验证通过');
+      console.debug('[MessageRouter] 协议版本验证通过');
     }
 
-    console.log('[MessageRouter] fullUpdate数据结构分析:', {
+    console.debug('[MessageRouter] fullUpdate数据结构分析:', {
       hasServers: !!data.servers,
       serverCount: data.servers ? Object.keys(data.servers).length : 0,
       hasPlayers: !!data.players,
@@ -130,7 +130,7 @@ export class MessageRouter {
 
     // 处理公告总数（如果存在）
     if (data.notice_total_count !== undefined) {
-      console.log('[MessageRouter] full消息中包含公告总数:', data.notice_total_count);
+      console.debug('[MessageRouter] full消息中包含公告总数:', data.notice_total_count);
       const noticeStore = useNoticeStore.getState();
       noticeStore.setTotalCount(data.notice_total_count);
     }
@@ -138,9 +138,9 @@ export class MessageRouter {
     // 移除重复的玩家数据处理，统一由aggregatedStore处理
     if (import.meta.env.DEV) {
       if (data.players?.currentPlayers && Object.keys(data.players.currentPlayers).length > 0) {
-        console.log('[MessageRouter] fullUpdate包含玩家详情数据，将由aggregatedStore统一处理');
+        console.debug('[MessageRouter] fullUpdate包含玩家详情数据，将由aggregatedStore统一处理');
       } else {
-        console.log('[MessageRouter] fullUpdate不包含玩家详情数据');
+        console.debug('[MessageRouter] fullUpdate不包含玩家详情数据');
       }
     }
 
@@ -156,15 +156,15 @@ export class MessageRouter {
       maintenanceStartTime: data.maintenanceStartTime,
     });
 
-    console.log('[MessageRouter] 维护状态更新结果:', result);
+    console.debug('[MessageRouter] 维护状态更新结果:', result);
   }
 
   /**
    * 处理玩家数量更新
    */
   private handlePlayerUpdate(data: WebSocketMessage): void {
-    console.log('[MessageRouter] 处理玩家数量更新 - 原始数据:', JSON.stringify(data, null, 2));
-    console.log('[MessageRouter] 玩家数据字段检查:', {
+    console.debug('[MessageRouter] 处理玩家数量更新 - 原始数据:', JSON.stringify(data, null, 2));
+    console.debug('[MessageRouter] 玩家数据字段检查:', {
       hasPlayer: !!data.player,
       playerKeys: data.player ? Object.keys(data.player) : 'undefined',
       hasUuid: data.player?.uuid,
@@ -179,7 +179,7 @@ export class MessageRouter {
       switch (data.type) {
         case 'players_update_add':
           const serverId = data.player.currentServer || data.player.newServer || 'unknown';
-          console.log(`[MessageRouter] 玩家 ${data.player.uuid} 上线到 ${serverId}`);
+          console.debug(`[MessageRouter] 玩家 ${data.player.uuid} 上线到 ${serverId}`);
           this.eventEmitter.emit('playerAdd', {
             playerId: data.player.uuid,
             serverId: serverId,
@@ -189,7 +189,7 @@ export class MessageRouter {
           break;
 
         case 'players_update_remove':
-          console.log(`[MessageRouter] 玩家 ${data.player.uuid} 下线`);
+          console.debug(`[MessageRouter] 玩家 ${data.player.uuid} 下线`);
           this.eventEmitter.emit('playerRemove', {
             playerId: data.player.uuid,
             playerInfo: data.player,
@@ -228,7 +228,7 @@ export class MessageRouter {
   private handleServerUpdate(data: WebSocketMessage): void {
     // 处理玩家移动（如果包含玩家信息）
     if (data.player && data.player.uuid && data.player.previousServer && data.player.newServer) {
-      console.log(
+      console.debug(
         `[MessageRouter] 玩家 ${data.player.uuid} 从 ${data.player.previousServer} 移动到 ${data.player.newServer}`
       );
       this.eventEmitter.emit('playerMove', {
@@ -240,7 +240,7 @@ export class MessageRouter {
     }
 
     if (data.servers) {
-      console.log('[MessageRouter] 原始server_update数据:', data.servers);
+      console.debug('[MessageRouter] 原始server_update数据:', data.servers);
 
       // 检查数据格式：server_update消息使用简化格式 { serverId: playerCount }
       const firstKey = Object.keys(data.servers)[0];
@@ -257,13 +257,13 @@ export class MessageRouter {
             isOnline: true, // server_update消息中出现的服务器都是在线的
           };
         });
-        console.log('[MessageRouter] 转换server_update格式:', normalizedServers);
+        console.debug('[MessageRouter] 转换server_update格式:', normalizedServers);
       } else {
         // 已经是完整格式（full消息）
         normalizedServers = data.servers;
       }
 
-      console.log('[MessageRouter] 发送标准化服务器数据:', {
+      console.debug('[MessageRouter] 发送标准化服务器数据:', {
         serverCount: Object.keys(normalizedServers).length,
         servers: Object.keys(normalizedServers),
         serverData: normalizedServers,
@@ -281,7 +281,7 @@ export class MessageRouter {
    * 处理公告返回消息
    */
   private handleNoticeReturn(data: any) {
-    console.log('[MessageRouter] 处理公告返回:', data);
+    console.debug('[MessageRouter] 处理公告返回:', data);
 
     try {
       const { notices, error_msg, page = 1, counts = 5, notice_total_count } = data;
@@ -310,8 +310,8 @@ export class MessageRouter {
           };
         });
 
-        console.log('[MessageRouter] 处理后的公告数据:', processedNotices);
-        console.log('[MessageRouter] 公告总数:', notice_total_count);
+        console.debug('[MessageRouter] 处理后的公告数据:', processedNotices);
+        console.debug('[MessageRouter] 公告总数:', notice_total_count);
 
         // 使用新的分页响应处理方法
         const noticeStore = useNoticeStore.getState();
@@ -339,7 +339,7 @@ export class MessageRouter {
    * 处理公告更新消息（新增/删除）
    */
   private handleNoticeUpdate(data: WebSocketMessage): void {
-    console.log('[MessageRouter] 处理公告更新消息:', data.type, data);
+    console.debug('[MessageRouter] 处理公告更新消息:', data.type, data);
 
     this.eventEmitter.emit('noticeUpdate', {
       type: data.type,

@@ -13,11 +13,11 @@ export const DEFAULT_ANALYTICS_CONFIG: AnalyticsConfig = {
   },
   microsoftClarity: {
     projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || 's3xbh0qmun',
-    enabled: import.meta.env.VITE_ENABLE_CLARITY !== 'false',
+    enabled: import.meta.env.VITE_ENABLE_ANALYTICS !== 'false',
   },
   baiduAnalytics: {
     hmId: import.meta.env.VITE_BAIDU_HM_ID || '57ae7e11272151066255c405cc93d1d8',
-    enabled: import.meta.env.VITE_ENABLE_BAIDU_ANALYTICS !== 'false',
+    enabled: import.meta.env.VITE_ENABLE_ANALYTICS !== 'false',
   },
   privacy: {
     requireConsent: true,
