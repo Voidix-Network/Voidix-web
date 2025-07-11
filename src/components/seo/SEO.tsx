@@ -3,7 +3,7 @@
  * 集成新的统一分析系统，移除重复的脚本加载逻辑
  */
 
-import { useSchema } from '@/hooks/useSchema';
+import { useCookieConsent, useSchema } from '@/hooks';
 import { initVoidixAnalytics } from '@/services/analytics';
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -243,6 +243,7 @@ export const SEO: React.FC<SEOProps> = ({
   additionalMeta = [],
 }) => {
   const { addSchema, removeSchema } = useSchema();
+  const { hasConsent } = useCookieConsent();
 
   // 获取页面配置
   const pageConfig = pageKey ? getPageSEOConfig(pageKey) : null;
@@ -260,16 +261,16 @@ export const SEO: React.FC<SEOProps> = ({
     ? image
     : `${DEFAULT_SEO_CONFIG.websiteUrl}${image}`;
 
-  // 初始化分析系统
+  // 初始化分析系统，现在会检查Cookie同意状态
   useEffect(() => {
-    if (enableAnalytics) {
+    if (enableAnalytics && hasConsent('analytics')) {
       initVoidixAnalytics().catch(error => {
         if (enableDebug) {
           console.error('[SEO] 分析系统初始化失败:', error);
         }
       });
     }
-  }, [enableAnalytics, enableDebug]);
+  }, [enableAnalytics, enableDebug, hasConsent]);
 
   // 管理结构化数据
   useEffect(() => {

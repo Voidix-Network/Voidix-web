@@ -1,45 +1,58 @@
+import { useCookieConsent } from '@/hooks';
+import { setConsent } from '@/services/cookieConsentService';
 import React, { useEffect, useState } from 'react';
 
 interface CookieConsentProps {
   className?: string;
-  enableCustomization?: boolean;
 }
 
 /**
- * 简化的Cookie同意组件
- * 符合GDPR要求，提供基础的Cookie管理功能
+ * 增强版Cookie同意组件
+ * 提供分类别的Cookie管理功能，符合GDPR要求。
  */
-export const CookieConsent: React.FC<CookieConsentProps> = ({
-  className = '',
-  enableCustomization = false,
-}) => {
+export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) => {
+  const { consent, hasMadeChoice } = useCookieConsent();
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
+  // 用于设置面板的本地状态
+  const [analyticsConsent, setAnalyticsConsent] = useState(consent.analytics);
+  const [marketingConsent, setMarketingConsent] = useState(consent.marketing);
+
   useEffect(() => {
-    // 检查是否已经做出选择
-    const consent = localStorage.getItem('voidix-analytics-consent');
-    if (consent === null) {
+    // 仅当用户从未做出选择时显示横幅
+    if (!hasMadeChoice) {
       setShowBanner(true);
+    } else {
+      setShowBanner(false);
     }
-  }, []);
+  }, [hasMadeChoice]);
+
+  // 当全局consent状态更新时（例如，从其他标签页），同步本地设置面板的状态
+  useEffect(() => {
+    setAnalyticsConsent(consent.analytics);
+    setMarketingConsent(consent.marketing);
+  }, [consent]);
 
   const handleAcceptAll = () => {
-    localStorage.setItem('voidix-analytics-consent', 'true');
+    setConsent({ analytics: true, marketing: true });
     setShowBanner(false);
     setShowSettings(false);
-    window.dispatchEvent(new Event('cookieConsentChanged'));
   };
 
   const handleDecline = () => {
-    localStorage.setItem('voidix-analytics-consent', 'false');
+    setConsent({ analytics: false, marketing: false });
     setShowBanner(false);
     setShowSettings(false);
-    window.dispatchEvent(new Event('cookieConsentChanged'));
   };
 
-  const handleCustomize = () => {
-    setShowSettings(true);
+  const handleSaveSettings = () => {
+    setConsent({
+      analytics: analyticsConsent,
+      marketing: marketingConsent,
+    });
+    setShowBanner(false);
+    setShowSettings(false);
   };
 
   if (!showBanner) return null;
@@ -66,14 +79,12 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">
-            {enableCustomization && (
-              <button
-                onClick={handleCustomize}
-                className="px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors text-sm"
-              >
-                自定义设置
-              </button>
-            )}
+            <button
+              onClick={() => setShowSettings(true)}
+              className="px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+            >
+              自定义设置
+            </button>
             <button
               onClick={handleDecline}
               className="px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors text-sm"
@@ -97,29 +108,43 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({
             <h2 className="text-xl font-bold text-white mb-4">Cookie设置</h2>
 
             <div className="space-y-4 mb-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-800">
                 <div>
                   <h3 className="text-white font-medium">必要Cookie</h3>
-                  <p className="text-gray-300 text-sm">网站基本功能所需</p>
+                  <p className="text-gray-400 text-sm">网站基本功能所需，始终启用。</p>
                 </div>
-                <div className="w-10 h-6 bg-purple-600 rounded-full flex items-center px-1">
+                <div className="w-10 h-6 bg-purple-600 rounded-full flex items-center px-1 cursor-not-allowed">
                   <div className="w-4 h-4 bg-white rounded-full ml-auto"></div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-800">
                 <div>
                   <h3 className="text-white font-medium">分析Cookie</h3>
-                  <p className="text-gray-300 text-sm">帮助我们了解网站使用情况</p>
+                  <p className="text-gray-400 text-sm">帮助我们了解网站使用情况。</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     className="sr-only peer"
-                    defaultChecked={false}
-                    onChange={() => {
-                      // 可以添加更详细的Cookie类别控制
-                    }}
+                    checked={analyticsConsent}
+                    onChange={e => setAnalyticsConsent(e.target.checked)}
+                  />
+                  <div className="w-10 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-800">
+                <div>
+                  <h3 className="text-white font-medium">营销Cookie</h3>
+                  <p className="text-gray-400 text-sm">用于提供个性化广告和内容。</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={marketingConsent}
+                    onChange={e => setMarketingConsent(e.target.checked)}
                   />
                   <div className="w-10 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                 </label>
@@ -134,7 +159,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({
                 取消
               </button>
               <button
-                onClick={handleAcceptAll}
+                onClick={handleSaveSettings}
                 className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
                 保存设置
