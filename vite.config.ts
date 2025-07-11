@@ -123,7 +123,7 @@ export default defineConfig({
         booleans: true,              // 优化布尔值
         conditionals: true,          // 优化条件语句
         dead_code: true,             // 移除死代码
-        drop_console: ['log', 'debug', 'info', 'warn'], // 移除console（保留error）
+        drop_console: ['debug', 'info', 'warn'], // 移除console（保留log和error）
         drop_debugger: true,         // 移除debugger
         evaluate: true,              // 计算常量表达式
         if_return: true,             // 优化if-return结构
