@@ -15,6 +15,10 @@ export const DEFAULT_ANALYTICS_CONFIG: AnalyticsConfig = {
     projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || 's3xbh0qmun',
     enabled: import.meta.env.VITE_ENABLE_CLARITY !== 'false',
   },
+  baiduAnalytics: {
+    hmId: import.meta.env.VITE_BAIDU_HM_ID || '57ae7e11272151066255c405cc93d1d8',
+    enabled: import.meta.env.VITE_ENABLE_BAIDU_ANALYTICS !== 'false',
+  },
   privacy: {
     requireConsent: true,
     cookielessMode: false,
@@ -36,6 +40,10 @@ export const DEV_ANALYTICS_CONFIG: AnalyticsConfig = {
   },
   microsoftClarity: {
     ...DEFAULT_ANALYTICS_CONFIG.microsoftClarity,
+    enabled: false, // 开发环境默认禁用
+  },
+  baiduAnalytics: {
+    ...DEFAULT_ANALYTICS_CONFIG.baiduAnalytics,
     enabled: false, // 开发环境默认禁用
   },
   performance: {
@@ -79,6 +87,11 @@ export function validateAnalyticsConfig(config: AnalyticsConfig): boolean {
 
   if (config.microsoftClarity.enabled && !config.microsoftClarity.projectId) {
     console.warn('[Analytics Config] Microsoft Clarity 已启用但缺少 Project ID');
+    return false;
+  }
+
+  if (config.baiduAnalytics.enabled && !config.baiduAnalytics.hmId) {
+    console.warn('[Analytics Config] Baidu Analytics 已启用但缺少 hmId');
     return false;
   }
 
