@@ -40,6 +40,7 @@ export const NotFoundPage: React.FC = () => {
         type="website"
         url="https://www.voidix.net/not-found"
         canonicalUrl="https://www.voidix.net/not-found"
+        additionalMeta={[{ name: 'robots', content: 'noindex,nofollow' }]}
       />
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
         <div className="text-center max-w-2xl mx-auto">

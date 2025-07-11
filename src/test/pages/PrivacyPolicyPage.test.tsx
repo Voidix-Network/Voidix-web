@@ -19,6 +19,7 @@ vi.mock('lucide-react', () => ({
   Database: () => <div data-testid="database-icon" />,
   Lock: () => <div data-testid="lock-icon" />,
   Mail: () => <div data-testid="mail-icon" />,
+  FileText: () => <div data-testid="file-text-icon" />,
 }));
 
 // Mock components

@@ -23,7 +23,7 @@ function App() {
   return (
     <SEOProvider>
       {/* 简化的Cookie同意管理 */}
-      <CookieConsent enableCustomization={true} />
+      <CookieConsent />
 
       {/* 搜索引擎抓取脚本 */}
       <SearchEngineScript />

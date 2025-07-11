@@ -24,16 +24,7 @@ const prefersReducedMotion = (): boolean => {
 /**
  * 动画变体定义 - 基于原项目的动画系统
  */
-interface AnimationVariants {
-  fadeIn: Variants;
-  fadeInUp: Variants;
-  fadeInLeft: Variants;
-  fadeInRight: Variants;
-  staggerContainer: Variants;
-  scaleIn: Variants;
-}
-
-export const animationVariants: AnimationVariants = {
+export const animationVariants: Record<string, Variants> = {
   fadeIn: {
     initial: {
       opacity: 0,
@@ -128,7 +119,7 @@ export const animationVariants: AnimationVariants = {
  */
 interface AnimatedSectionProps extends MotionProps {
   children: React.ReactNode;
-  variant?: keyof AnimationVariants;
+  variant?: keyof typeof animationVariants;
   delay?: number;
   className?: string;
   id?: string;

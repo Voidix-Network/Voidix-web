@@ -1,4 +1,4 @@
-import { globalSchemaManager } from '@/utils/schemaManager';
+import { useSchema } from '@/hooks/useSchema';
 import { ChevronRight, Home } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -23,6 +23,7 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
   className = '',
 }) => {
   const location = useLocation();
+  const { addSchema, removeSchema } = useSchema();
 
   // 自动生成面包屑（如果没有提供items）
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
@@ -96,15 +97,14 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
     };
 
     // 使用SchemaManager设置面包屑结构化数据
-    globalSchemaManager.setSchema('BreadcrumbList', breadcrumbSchema, 'breadcrumb-component');
-
-    console.log('[BreadcrumbNavigation] 已通过SchemaManager设置面包屑结构化数据');
+    addSchema('BreadcrumbList', breadcrumbSchema);
+    console.log('[BreadcrumbNavigation] 已通过useSchema设置面包屑结构化数据');
 
     // 清理函数
     return () => {
-      globalSchemaManager.removeSchemaBySource('breadcrumb-component');
+      removeSchema('BreadcrumbList');
     };
-  }, [breadcrumbs]);
+  }, [breadcrumbs, addSchema, removeSchema]);
 
   // 不显示面包屑如果只有首页
   if (breadcrumbs.length <= 1) {

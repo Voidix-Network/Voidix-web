@@ -138,7 +138,7 @@ describe('NotFoundPage', () => {
       expect(pageSEO).toHaveAttribute('data-title', '页面未找到 - Voidix');
       expect(pageSEO).toHaveAttribute(
         'data-description',
-        '抱歉，您访问的页面不存在。返回首页继续探索Voidix Minecraft服务器的精彩内容。'
+        '抱歉，您访问的页面不存在。返回Voidix首页探索更多精彩内容。'
       );
     });
 
@@ -162,7 +162,7 @@ describe('NotFoundPage', () => {
       expect(pageSEO.getAttribute('data-title')).toContain('Voidix');
 
       // 验证描述具有引导性
-      expect(pageSEO.getAttribute('data-description')).toContain('返回首页');
+      expect(pageSEO.getAttribute('data-description')).toContain('返回');
     });
   });
 

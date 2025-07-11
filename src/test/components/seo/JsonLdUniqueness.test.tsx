@@ -1,3 +1,4 @@
+import { SEOProvider } from '@/components/seo';
 import { BugReportPage } from '@/pages/BugReportPage';
 import { FaqPage } from '@/pages/FaqPage';
 import { HomePage } from '@/pages/HomePage';
@@ -75,7 +76,9 @@ describe('JSON-LD结构化数据唯一性测试', () => {
     return render(
       <HelmetProvider context={helmetContext}>
         <MemoryRouter>
-          <Component />
+          <SEOProvider>
+            <Component />
+          </SEOProvider>
         </MemoryRouter>
       </HelmetProvider>
     );
