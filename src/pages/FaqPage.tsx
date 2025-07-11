@@ -1,5 +1,6 @@
 import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/components';
 import { FAQSchema, SEO } from '@/components/seo';
+import { analytics } from '@/services/analytics';
 import { motion } from 'framer-motion';
 import React, { useEffect } from 'react';
 
@@ -33,7 +34,7 @@ const faqData: FaqItem[] = [
     id: 3,
     question: '服务器支持哪些Minecraft版本？',
     answer:
-      '我们的小游戏服务器支持1.7.2至最新的Java版（推荐1.8.9），生存服务器则使用最新的Java版，但也支持1.7.2-最新版本。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
+      '我们的小游戏服务器支持1.16.5-1.21.1的Java版，生存服务器则使用最新的Java版，但也支持1.7.2-latest。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
   },
   {
     id: 4,
@@ -71,7 +72,7 @@ const faqSchemaData = [
   {
     question: '服务器支持哪些Minecraft版本？',
     answer:
-      '我们的小游戏服务器支持1.7.2至最新的Java版（推荐1.8.9），生存服务器则使用最新的Java版，但也支持1.7.2-最新版本。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
+      '我们的小游戏服务器支持1.16.5-1.21.1的Java版，生存服务器则使用最新的Java版，但也支持1.7.2-latest。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
   },
   {
     question: '如果我遇到了Bug或者有建议，应该怎么办？',
@@ -87,16 +88,15 @@ const faqSchemaData = [
 const FaqItemComponent: React.FC<{ item: FaqItem; index: number }> = ({ item, index }) => {
   // 处理FAQ项目点击事件
   const handleFaqClick = () => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackFAQView(item.id.toString(), 'general_faq');
-    }
+    analytics.trackFAQView(item.id.toString(), 'general_faq');
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
       className="border border-gray-700/50 rounded-lg p-6 bg-gray-800/30 backdrop-blur-sm cursor-pointer hover:bg-gray-800/50 transition-colors"
       onClick={handleFaqClick}
     >
@@ -119,26 +119,19 @@ const FaqItemComponent: React.FC<{ item: FaqItem; index: number }> = ({ item, in
 export const FaqPage: React.FC = () => {
   // 页面加载时跟踪页面访问
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'page_view',
-        'faq',
-        'faq_page_visit',
-        faqData.length
-      );
-    }
+    analytics.page('FAQ', {
+      totalQuestions: faqData.length,
+      pageType: 'faq',
+    });
   }, []);
 
   // 处理社交媒体链接点击
   const handleSocialClick = (platform: string) => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'user_action',
-        'social_link_click',
-        platform,
-        1
-      );
-    }
+    analytics.track('social_link_click', {
+      platform,
+      source: 'faq_page',
+      location: 'contact_section',
+    });
   };
 
   return (
@@ -148,14 +141,13 @@ export const FaqPage: React.FC = () => {
         type="article"
         url="https://www.voidix.net/faq"
         canonicalUrl="https://www.voidix.net/faq"
-        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <FAQSchema faqItems={faqSchemaData} />
       <div className="min-h-screen bg-gray-900 pt-12 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <BreadcrumbNavigation className="mb-8" />
 
-          <AnimatedSection variant="fadeInUp" className="mb-12">
+          <AnimatedSection variant="fadeIn" className="mb-12">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 <GradientText variant="primary">常见问题</GradientText>
@@ -166,7 +158,7 @@ export const FaqPage: React.FC = () => {
             </div>
           </AnimatedSection>
 
-          <AnimatedSection variant="fadeInUp" delay={0.2}>
+          <AnimatedSection variant="fadeIn" delay={0.2}>
             <div className="space-y-4">
               {faqData.map((item, index) => (
                 <FaqItemComponent key={item.id} item={item} index={index} />
@@ -174,7 +166,7 @@ export const FaqPage: React.FC = () => {
             </div>
           </AnimatedSection>
 
-          <AnimatedSection variant="fadeInUp" delay={0.4} className="mt-12">
+          <AnimatedSection variant="fadeIn" delay={0.4} className="mt-12">
             <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-xl p-8">
               <h2 className="text-2xl font-bold text-white mb-4">还有其他问题？</h2>
               <p className="text-gray-300 mb-6">

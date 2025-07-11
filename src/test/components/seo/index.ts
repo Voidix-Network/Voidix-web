@@ -1,10 +1,12 @@
-// SEO测试组件导出
+/**
+ * SEO组件测试导出
+ */
 
-// JSON-LD结构化数据唯一性测试
-export * from './JsonLdUniqueness.test';
+// 面包屑URL测试
+export * from './BreadcrumbUrl.test';
 
-// Cookie同意组件测试
+// Cookie同意测试
 export * from './CookieConsent.test';
 
-// 搜索引擎脚本测试
-export * from './SearchEngineScript.test';
+// JSON-LD唯一性测试
+export * from './JsonLdUniqueness.test';

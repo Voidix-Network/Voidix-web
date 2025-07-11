@@ -1,4 +1,4 @@
-import { motion, Variants } from 'framer-motion';
+import { motion, MotionProps, Variants } from 'framer-motion';
 import React from 'react';
 import { useInView } from '../../hooks/useInView';
 
@@ -24,15 +24,22 @@ const prefersReducedMotion = (): boolean => {
 /**
  * 动画变体定义 - 基于原项目的动画系统
  */
-interface AnimationVariants {
-  fadeInUp: Variants;
-  fadeInLeft: Variants;
-  fadeInRight: Variants;
-  staggerContainer: Variants;
-  scaleIn: Variants;
-}
-
-export const animationVariants: AnimationVariants = {
+export const animationVariants: Record<string, Variants> = {
+  fadeIn: {
+    initial: {
+      opacity: 0,
+    },
+    animate: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.25, 0.8, 0.25, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+    },
+  },
   fadeInUp: {
     initial: {
       opacity: 0,
@@ -110,9 +117,9 @@ export const animationVariants: AnimationVariants = {
 /**
  * 动画容器组件
  */
-interface AnimatedSectionProps {
+interface AnimatedSectionProps extends MotionProps {
   children: React.ReactNode;
-  variant?: keyof AnimationVariants;
+  variant?: keyof typeof animationVariants;
   delay?: number;
   className?: string;
   id?: string;
@@ -126,6 +133,7 @@ export const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   className,
   id,
   stagger = false,
+  ...rest // 捕获所有其他传入的 motion 属性
 }) => {
   const variants = stagger ? animationVariants.staggerContainer : animationVariants[variant];
 
@@ -178,6 +186,7 @@ export const AnimatedSection: React.FC<AnimatedSectionProps> = ({
       style={{
         transitionDelay: mobile ? '0s' : `${delay}s`,
       }}
+      {...rest} // 将捕获到的所有其他 motion 属性传递给 motion.section
     >
       {stagger ? (
         <motion.div variants={animationVariants.staggerContainer}>

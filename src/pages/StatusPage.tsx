@@ -9,6 +9,7 @@ import {
 import { SEO } from '@/components/seo';
 import { SERVER_DISPLAY_NAMES, getDynamicServerGroups } from '@/constants';
 import { useWebSocketStatus } from '@/hooks/useWebSocket';
+import { analytics } from '@/services/analytics';
 import { calculateGroupStats, formatRunningTime, getServerDisplayName } from '@/utils';
 import React, { useEffect, useState } from 'react';
 
@@ -92,48 +93,38 @@ export const StatusPage: React.FC = () => {
         newSet.add(groupKey);
 
         // 跟踪组详情查看事件
-        if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-          const groupInfo = dynamicServerGroups[groupKey as keyof typeof dynamicServerGroups];
-          const groupStats = calculateGroupStats(groupInfo.servers, servers);
-          window.voidixUnifiedAnalytics.trackCustomEvent(
-            'server_group',
-            'group_expand',
-            groupKey,
-            groupStats.totalPlayers
-          );
-        }
+        const groupInfo = dynamicServerGroups[groupKey as keyof typeof dynamicServerGroups];
+        const groupStats = calculateGroupStats(groupInfo.servers, servers);
+        analytics.track('server_group_expand', {
+          groupKey,
+          totalPlayers: groupStats.totalPlayers,
+          source: 'status_page',
+        });
       }
       return newSet;
     });
   };
 
-  // 页面加载时跟踪状态页面访问
+  // 页面访问跟踪
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.voidixUnifiedAnalytics) {
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'page_view',
-        'status_page',
-        'status_page_visit',
-        Object.keys(servers).length
-      );
-    }
+    analytics.page('ServerStatus', {
+      pageType: 'monitoring',
+      totalServers: Object.keys(servers).length,
+    });
   }, []);
 
-  // 跟踪服务器状态变化
+  // 服务器状态变化跟踪
   useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      window.voidixUnifiedAnalytics &&
-      Object.keys(servers).length > 0
-    ) {
-      // 跟踪整体状态
-      window.voidixUnifiedAnalytics.trackCustomEvent(
-        'server_status',
-        'status_update',
-        'aggregate_stats',
-        aggregateStats.totalPlayers
-      );
-    }
+    const serverList = Object.values(servers);
+    const onlineCount = serverList.filter((server: any) => server.isOnline).length;
+    const totalCount = serverList.length;
+
+    analytics.track('server_status_view', {
+      onlineServers: onlineCount,
+      totalServers: totalCount,
+      totalPlayers: aggregateStats.totalPlayers,
+      timestamp: Date.now(),
+    });
   }, [servers, aggregateStats]);
 
   // 动态获取服务器分组
@@ -146,7 +137,6 @@ export const StatusPage: React.FC = () => {
         type="website"
         url="https://www.voidix.net/status"
         canonicalUrl="https://www.voidix.net/status"
-        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <div className="min-h-screen bg-gray-900 py-16">
         <div className="container mx-auto px-4 max-w-6xl">

@@ -4,9 +4,6 @@ import { clsx, type ClassValue } from 'clsx';
 // 导出服务器相关工具函数
 export * from './serverUtils';
 
-// 导出结构化数据管理器
-export { globalSchemaManager, default as SchemaManager } from './schemaManager';
-
 /**
  * 合并CSS类名的工具函数
  */

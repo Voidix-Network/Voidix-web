@@ -20,7 +20,6 @@ export const HomePage: React.FC = () => {
         type="website"
         url="https://www.voidix.net/"
         canonicalUrl="https://www.voidix.net/"
-        enableAnalytics={import.meta.env.VITE_ENABLE_ANALYTICS !== 'false'}
       />
       <PerformanceOptimizer />
       <HeroSection />

@@ -9,7 +9,6 @@
     "build": "npx tsc && vite build --mode production && npm run generate:sitemap && npm run prerender:puppeteer",
     "build:basic": "npx tsc && vite build",
     "build:http": "npx tsc && vite build && npm run generate:sitemap",
-
     "build:analyze": "npx tsc && vite build --mode production && npx serve dist -l 4174",
     "check:preload": "node scripts/checkPreloadTags.js",
     "prerender:puppeteer": "node scripts/prerenderPuppeteer.js",
@@ -31,14 +30,17 @@
     "license:check": "npx license-checker --production --onlyAllow \"MIT;Apache-2.0;ISC;0BSD;BSD-2-Clause;BSD-3-Clause;BlueOak-1.0.0;MIT-0;CC-BY-4.0;UNLICENSED\" --excludePrivatePackages"
   },
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
     "clsx": "^2.0.0",
     "dayjs": "^1.11.13",
+    "dompurify": "^3.2.6",
     "framer-motion": "^10.16.16",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet-async": "^2.0.5",
     "react-router-dom": "^7.6.2",
+    "schema-dts": "^1.1.5",
     "web-vitals": "^5.0.2",
     "zustand": "^4.4.7"
   },
@@ -46,6 +48,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^22.15.30",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",

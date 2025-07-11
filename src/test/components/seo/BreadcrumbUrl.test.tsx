@@ -1,3 +1,4 @@
+import { SEOProvider } from '@/components/seo';
 import { FaqPage } from '@/pages/FaqPage';
 import { render } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
@@ -54,7 +55,9 @@ describe('BreadcrumbList URL正确性测试', () => {
     return render(
       <HelmetProvider context={helmetContext}>
         <MemoryRouter initialEntries={[initialPath]}>
-          <Component />
+          <SEOProvider>
+            <Component />
+          </SEOProvider>
         </MemoryRouter>
       </HelmetProvider>
     );
