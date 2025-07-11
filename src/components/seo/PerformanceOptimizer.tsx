@@ -41,30 +41,29 @@ export const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({
 
       {/* DNS预获取优化 - 使用CDN代理 */}
       <link rel="dns-prefetch" href="//cdn.voidix.net" />
-      <link rel="dns-prefetch" href="//www.google-analytics.com" />
 
       {/* Critical CSS内联优化标记 */}
       <style>{`
         /* Critical CSS for LCP optimization */
-        body { 
+        body {
           font-display: swap;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
-        
+
         /* 防止CLS的基础样式 */
         img {
           max-width: 100%;
           height: auto;
         }
-        
+
         /* 骨架屏样式减少CLS */
         .loading-skeleton {
           background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
           background-size: 200% 100%;
           animation: loading 1.5s infinite;
         }
-        
+
         @keyframes loading {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
