@@ -197,7 +197,6 @@ export class UptimeRobotApiService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'VoidixWeb/1.0',
         },
         body: formData.toString(),
         signal: controller.signal,

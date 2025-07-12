@@ -19,6 +19,15 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
   // 用于设置面板的本地状态
   const [analyticsConsent, setAnalyticsConsent] = useState(consent.analytics);
 
+  // Determine if we are server-side rendering
+  const isSSR = typeof window === 'undefined';
+
+  // If server-side rendering and a choice has already been made, do not render the component at all.
+  // This prevents any unstyled content from appearing before hydration.
+  if (isSSR && hasMadeChoice) {
+    return null;
+  }
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -57,13 +66,17 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
     setShowSettings(false);
   };
 
+  // On the client, if not mounted or not showing banner, return null to prevent rendering.
+  // This ensures the banner only appears after client-side hydration and condition checks.
   if (!isMounted || !showBanner) return null;
 
   return (
     <>
       {/* Cookie横幅 */}
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 ${className}`}
+        className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 transition-opacity duration-300 ${
+          isMounted && showBanner ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        } ${className}`}
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-1">
