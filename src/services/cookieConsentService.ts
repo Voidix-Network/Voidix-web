@@ -45,7 +45,7 @@ export const setConsent = (newConsent: Partial<Omit<CookieConsent, 'necessary'>>
 
   try {
     const currentConsent = getConsent();
-    const updatedConsent = { ...currentConsent, ...newConsent, necessary: true, marketing: false };
+    const updatedConsent = { ...currentConsent, ...newConsent, necessary: true };
     localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(updatedConsent));
     // 触发全局事件，以便应用的其他部分可以响应变化
     window.dispatchEvent(new CustomEvent('cookieConsentChanged', { detail: updatedConsent }));

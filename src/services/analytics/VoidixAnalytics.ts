@@ -32,7 +32,6 @@ export interface AnalyticsConfig {
 export interface ConsentSettings {
   analytics: boolean;
   performance: boolean;
-  marketing: boolean;
 }
 
 export interface TrackingEvent {
@@ -58,7 +57,6 @@ class VoidixAnalytics {
   private consentStatus: ConsentSettings = {
     analytics: false,
     performance: false,
-    marketing: false,
   };
   private scriptLoadPromises: Map<string, Promise<void>> = new Map();
   private eventQueue: TrackingEvent[] = [];
@@ -315,13 +313,11 @@ class VoidixAnalytics {
         this.consentStatus = {
           analytics: true,
           performance: true,
-          marketing: false,
         };
       } else if (consentString === 'false') {
         this.consentStatus = {
           analytics: false,
           performance: false,
-          marketing: false,
         };
       }
     } catch (error) {
@@ -685,7 +681,6 @@ class VoidixAnalytics {
     if (window.gtag) {
       window.gtag('consent', 'update', {
         analytics_storage: this.consentStatus.analytics ? 'granted' : 'denied',
-        ad_storage: this.consentStatus.marketing ? 'granted' : 'denied',
       });
     }
 

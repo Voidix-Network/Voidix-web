@@ -45,8 +45,7 @@ import { setAnalyticsConsent } from '@/services/analytics';
 // 设置用户同意状态
 setAnalyticsConsent(
   true, // analytics: 允许分析数据收集
-  true, // performance: 允许性能数据收集
-  false // marketing: 不允许营销数据收集
+  true // performance: 允许性能数据收集
 );
 ```
 
@@ -99,7 +98,7 @@ setAnalyticsConsent(
 
 获取分析系统状态。
 
-#### `setAnalyticsConsent(analytics, performance?, marketing?)`
+#### `setAnalyticsConsent(analytics, performance?)`
 
 设置用户同意状态。
 
