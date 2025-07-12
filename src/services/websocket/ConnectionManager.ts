@@ -328,12 +328,16 @@ export class ConnectionManager {
       this.disconnect();
     } else if (document.visibilityState === 'visible') {
       console.debug('[ConnectionManager] 页面可见，尝试重新连接');
-      // 仅在当前未连接时重新连接
-      if (!this.isConnected && !this.isConnecting) {
-        this.connect().catch(error => {
-          console.error('[ConnectionManager] 页面可见时重新连接失败:', error);
-        });
-      }
+      // 引入一个短延迟，确保在重新连接前连接已完全断开
+      setTimeout(() => {
+        if (!this.isConnected && !this.isConnecting) {
+          this.connect().catch(error => {
+            console.error('[ConnectionManager] 页面可见时重新连接失败:', error);
+          });
+        } else {
+          console.debug('[ConnectionManager] 页面可见，但连接已在进行中或已连接，跳过重新连接');
+        }
+      }, 100); // 100毫秒延迟，可根据需要调整
     }
   };
 }
