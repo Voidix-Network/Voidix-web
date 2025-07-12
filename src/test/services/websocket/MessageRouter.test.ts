@@ -275,7 +275,7 @@ describe('MessageRouter', () => {
 
   describe('公告系统消息处理', () => {
     it('应该记录但不处理公告系统消息', () => {
-      const consoleLogSpy = vi.spyOn(console, 'log');
+      const consoleDebugSpy = vi.spyOn(console, 'debug');
       const messageData = {
         type: 'notice_update_add_respond',
         data: 'test notice',
@@ -286,7 +286,7 @@ describe('MessageRouter', () => {
 
       messageRouter.handleMessage(event);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect(consoleDebugSpy).toHaveBeenCalledWith(
         '[MessageRouter] 处理公告更新消息:',
         'notice_update_add_respond',
         messageData

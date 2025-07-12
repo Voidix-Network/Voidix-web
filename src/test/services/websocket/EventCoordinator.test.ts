@@ -206,7 +206,7 @@ describe('EventCoordinator', () => {
       });
 
       const mockConnect = vi.fn().mockResolvedValue(undefined);
-      const consoleLogSpy = vi.spyOn(console, 'log');
+      const consoleDebugSpy = vi.spyOn(console, 'debug');
       const mockEmit = vi.spyOn(eventEmitter, 'emit');
 
       eventCoordinatorDisabled.setupReconnectEvents(mockConnect);
@@ -216,7 +216,7 @@ describe('EventCoordinator', () => {
       connectionManager.simulateStateChange(ConnectionState.FAILED);
 
       // 验证状态变化被记录
-      expect(consoleLogSpy).toHaveBeenCalledWith('[EventCoordinator] 连接状态变化:', 'failed');
+      expect(consoleDebugSpy).toHaveBeenCalledWith('[EventCoordinator] 连接状态变化:', 'failed');
 
       // 验证error事件被触发
       expect(mockEmit).toHaveBeenCalledWith('error', expect.any(Event));

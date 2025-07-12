@@ -14,9 +14,14 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
   const { consent, hasMadeChoice } = useCookieConsent();
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // 用于设置面板的本地状态
   const [analyticsConsent, setAnalyticsConsent] = useState(consent.analytics);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     // 仅当用户从未做出选择时显示横幅
@@ -52,7 +57,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
     setShowSettings(false);
   };
 
-  if (!showBanner) return null;
+  if (!isMounted || !showBanner) return null;
 
   return (
     <>

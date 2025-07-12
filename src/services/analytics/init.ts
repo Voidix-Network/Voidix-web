@@ -90,15 +90,10 @@ export function getAnalyticsStatus() {
 /**
  * 手动设置用户同意（用于Cookie同意组件）
  */
-export function setAnalyticsConsent(
-  analytics: boolean,
-  performance: boolean = true,
-  marketing: boolean = false
-) {
+export function setAnalyticsConsent(analytics: boolean, performance: boolean = true) {
   voidixAnalytics.setConsent({
     analytics,
     performance,
-    marketing,
   });
 
   // 如果用户同意且系统未初始化，则立即初始化
