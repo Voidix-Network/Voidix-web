@@ -29,7 +29,7 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
   home: {
     title: 'Voidix Minecraft公益服务器 - 免费我的世界生存与小游戏服务器',
     description:
-      'Voidix是一个永久免费的Minecraft公益服务器，我们提供稳定的MC小游戏与生存服务器。低延迟，致力于为玩家打造一个公平、互助、绿色的MC玩家社区。',
+      'Voidix是一个永久免费的Minecraft公益服务器，提供稳定的MC小游戏与生存服务器体验。包含起床战争、空岛战争等热门小游戏，低延迟连接，致力于为玩家打造公平、互助、绿色的MC玩家社区。',
     keywords: {
       primary: [
         'Voidix',
@@ -54,7 +54,7 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
   status: {
     title: '服务器实时状态 - 在线玩家与延迟监控 | Voidix',
     description:
-      '查看Voidix服务器的实时状态。我们提供精确的在线玩家数量、服务器延迟和版本信息。我们的目标是为所有玩家提供一个稳定、流畅的低延迟游戏环境。',
+      '查看Voidix服务器的实时状态监控。我们提供精确的在线玩家数量、服务器延迟和版本信息，支持Java版和基岩版连接。实时监控确保为所有玩家提供稳定、流畅的低延迟游戏环境。',
     keywords: {
       primary: ['Voidix', '小游戏服务器监控', '我的世界服务器监控', 'MC服务器监控'],
       secondary: ['我的世界小游戏服务器', '我的世界生存服务器'],
@@ -86,7 +86,7 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
   faq: {
     title: '常见问题解答 - Voidix问题解答 | Voidix',
     description:
-      'Voidix服务器常见问题（FAQ）。为新手玩家提供保姆级教程，涵盖如何免费加入服务器、游戏规则、小游戏玩法介绍、连接方法等，助您快速开始游戏。',
+      'Voidix服务器常见问题（FAQ）完整解答。为新手玩家提供保姆级教程，涵盖如何免费加入服务器、游戏规则、小游戏玩法介绍、连接方法等详细指南，助您快速开始游戏体验。',
     keywords: {
       primary: ['Voidix', 'Minecraft服务器', '服务器FAQ'],
       secondary: ['我的世界小游戏服务器', '我的世界生存服务器'],
