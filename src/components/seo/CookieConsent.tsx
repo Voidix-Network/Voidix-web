@@ -1,6 +1,7 @@
 import { useCookieConsent } from '@/hooks';
 import { setConsent } from '@/services/cookieConsentService';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface CookieConsentProps {
   className?: string;
@@ -16,6 +17,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const navigate = useNavigate();
 
   // 用于设置面板的本地状态
   const [analyticsConsent, setAnalyticsConsent] = useState(consent.analytics);
@@ -82,14 +84,14 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
               我们使用Cookie来改善您的浏览体验，提供个性化内容和分析网站流量。
               您可以选择接受所有Cookie或自定义设置。
               <button
-                onClick={() => (window.location.href = '/privacy')}
+                onClick={() => navigate('/privacy')}
                 className="text-purple-400 hover:text-purple-300 underline ml-1 cursor-pointer bg-transparent border-none p-0"
               >
                 隐私政策
               </button>
               {' 和 '}
               <button
-                onClick={() => (window.location.href = '/terms')}
+                onClick={() => navigate('/terms')}
                 className="text-purple-400 hover:text-purple-300 underline cursor-pointer bg-transparent border-none p-0"
               >
                 服务条款
