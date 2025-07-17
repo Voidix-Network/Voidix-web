@@ -30,10 +30,6 @@ vi.mock('@/components/layout/footer/CommunityLinksSection', () => ({
   ),
 }));
 
-vi.mock('@/components/layout/footer/LegalLinksSection', () => ({
-  LegalLinksSection: () => <div data-testid="legal-links-section">Legal Links Section</div>,
-}));
-
 vi.mock('@/components/layout/footer/ServerStatusBar', () => ({
   ServerStatusBar: () => <div data-testid="server-status-bar">Server Status Bar</div>,
 }));
@@ -57,7 +53,6 @@ describe('Footer', () => {
     // 验证所有子组件是否渲染
     expect(screen.getByTestId('quick-join-section')).toBeInTheDocument();
     expect(screen.getByTestId('community-links-section')).toBeInTheDocument();
-    expect(screen.getByTestId('legal-links-section')).toBeInTheDocument();
     expect(screen.getByTestId('server-status-bar')).toBeInTheDocument();
     expect(screen.getByTestId('copyright-section')).toBeInTheDocument();
   });
@@ -89,13 +84,13 @@ describe('Footer', () => {
       'py-20'
     );
 
-    // 验证网格布局 - 现在是4列布局
+    // 验证网格布局 - 现在是3列布局
     const gridContainer = mainContainer?.querySelector('.grid');
     expect(gridContainer).toHaveClass(
       'grid',
       'grid-cols-1',
       'sm:grid-cols-2',
-      'lg:grid-cols-4',
+      'lg:grid-cols-3',
       'gap-16',
       'lg:gap-20'
     );
