@@ -24,7 +24,15 @@ export const SERVER_GROUPS = {
     description: '小游戏服务器',
     address: 'minigame.voidix.net',
     // 移除lobby服务器，只保留其他游戏服务器
-    servers: ['login', 'bedwars', 'bedwars_solo', 'bedwars_other', 'thepit', 'knockioffa'],
+    servers: [
+      'login',
+      'bedwars',
+      'bedwars_solo',
+      'bedwars_other',
+      'thepit',
+      'knockioffa',
+      'buildbattle',
+    ],
   },
 };
 
