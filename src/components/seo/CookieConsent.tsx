@@ -74,9 +74,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
     <>
       {/* Cookie横幅 */}
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 transition-opacity duration-300 ${
-          isMounted && showBanner ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        } ${className}`}
+        className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 transition-opacity duration-300 opacity-100 ${className}`}
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-1">
