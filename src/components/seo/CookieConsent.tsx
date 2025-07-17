@@ -88,7 +88,14 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
                 onClick={() => (window.location.href = '/privacy')}
                 className="text-purple-400 hover:text-purple-300 underline ml-1 cursor-pointer bg-transparent border-none p-0"
               >
-                了解更多
+                隐私政策
+              </button>
+              {' 和 '}
+              <button
+                onClick={() => (window.location.href = '/terms')}
+                className="text-purple-400 hover:text-purple-300 underline cursor-pointer bg-transparent border-none p-0"
+              >
+                服务条款
               </button>
             </p>
           </div>

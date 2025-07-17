@@ -1,5 +1,6 @@
 import { Footer } from '@/components/layout/Footer';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 // Mock child components
@@ -29,6 +30,10 @@ vi.mock('@/components/layout/footer/CommunityLinksSection', () => ({
   ),
 }));
 
+vi.mock('@/components/layout/footer/LegalLinksSection', () => ({
+  LegalLinksSection: () => <div data-testid="legal-links-section">Legal Links Section</div>,
+}));
+
 vi.mock('@/components/layout/footer/ServerStatusBar', () => ({
   ServerStatusBar: () => <div data-testid="server-status-bar">Server Status Bar</div>,
 }));
@@ -38,18 +43,27 @@ vi.mock('@/components/layout/footer/CopyrightSection', () => ({
 }));
 
 describe('Footer', () => {
+  const renderFooter = () => {
+    return render(
+      <MemoryRouter>
+        <Footer />
+      </MemoryRouter>
+    );
+  };
+
   it('应该渲染所有子组件', () => {
-    render(<Footer />);
+    renderFooter();
 
     // 验证所有子组件是否渲染
     expect(screen.getByTestId('quick-join-section')).toBeInTheDocument();
     expect(screen.getByTestId('community-links-section')).toBeInTheDocument();
+    expect(screen.getByTestId('legal-links-section')).toBeInTheDocument();
     expect(screen.getByTestId('server-status-bar')).toBeInTheDocument();
     expect(screen.getByTestId('copyright-section')).toBeInTheDocument();
   });
 
   it('应该渲染 Logo 区域', () => {
-    render(<Footer />);
+    renderFooter();
 
     // 验证 Logo
     expect(screen.getByTestId('voidix-logo')).toBeInTheDocument();
@@ -59,7 +73,7 @@ describe('Footer', () => {
   });
 
   it('应该应用正确的 CSS 类名结构', () => {
-    const { container } = render(<Footer />);
+    const { container } = renderFooter();
 
     const footer = container.querySelector('footer');
     expect(footer).toHaveClass('bg-gray-800/70', 'border-t', 'border-gray-600');
@@ -75,20 +89,20 @@ describe('Footer', () => {
       'py-20'
     );
 
-    // 验证网格布局
+    // 验证网格布局 - 现在是4列布局
     const gridContainer = mainContainer?.querySelector('.grid');
     expect(gridContainer).toHaveClass(
       'grid',
       'grid-cols-1',
       'sm:grid-cols-2',
-      'lg:grid-cols-3',
+      'lg:grid-cols-4',
       'gap-16',
       'lg:gap-20'
     );
   });
 
   it('应该在底部渲染分隔线和底部内容', () => {
-    const { container } = render(<Footer />);
+    const { container } = renderFooter();
 
     // 验证底部分割线
     const bottomSection = container.querySelector('.mt-20.pt-8.border-t.border-gray-700\\/50');
@@ -100,7 +114,7 @@ describe('Footer', () => {
   });
 
   it('应该正确设置 Logo 区域的隐藏样式', () => {
-    const { container } = render(<Footer />);
+    const { container } = renderFooter();
 
     // Logo区域应该在小屏幕上隐藏，在大屏幕上显示
     const logoSection = container.querySelector('.hidden.lg\\:flex');
@@ -115,7 +129,7 @@ describe('Footer', () => {
   });
 
   it('应该渲染 Logo 区域的描述文本', () => {
-    const { container } = render(<Footer />);
+    const { container } = renderFooter();
 
     // 查找Logo区域的文本中心容器
     const logoTextCenter = container.querySelector('.text-center');
@@ -124,7 +138,7 @@ describe('Footer', () => {
   });
 
   it('应该为组件部分正确设置间距', () => {
-    const { container } = render(<Footer />);
+    const { container } = renderFooter();
 
     // 验证主要部分和底部部分之间的间距
     const bottomSection = container.querySelector('.mt-20');

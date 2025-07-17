@@ -135,7 +135,7 @@ export const PrivacyPolicyPage: React.FC = () => {
       content: `如有隐私相关问题，请联系：
       • QQ群：186438621
       • Discord：https://discord.gg/fUMyfhuQ5b
-      • 邮箱：contact@voidix.net
+      • 邮箱：support@voidix.net
       我们将在收到请求后的合理时间内回复您的询问。`,
     },
   ];

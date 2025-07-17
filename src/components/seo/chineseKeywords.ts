@@ -118,6 +118,38 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
       email: '发送邮件获取技术支持',
     },
   },
+
+  privacy: {
+    title: '隐私政策 | Voidix',
+    description:
+      'Voidix隐私政策。我们尊重并保护您的隐私，不会收集任何不必要的个人信息。我们承诺只收集必要的数据，并确保数据的安全性和隐私性。',
+    keywords: {
+      primary: ['Voidix', '隐私政策', '数据保护', '个人信息保护', '隐私保护'],
+      secondary: ['我的世界小游戏服务器', '我的世界生存服务器'],
+      longTail: [],
+      gameTerms: [],
+      localTerms: [],
+    },
+    socialTags: {},
+  },
+
+  terms: {
+    title: '服务条款 | Voidix',
+    description:
+      'Voidix服务条款。使用我们的Minecraft服务器服务需要遵守的规则和条款，包括用户行为准则、账户安全、公益性质等内容。',
+    keywords: {
+      primary: ['Voidix', '服务条款', '用户协议', '使用条款', '游戏规则'],
+      secondary: ['我的世界小游戏服务器', '我的世界生存服务器'],
+      longTail: ['Minecraft服务器规则', '游戏服务器条款'],
+      gameTerms: [],
+      localTerms: [],
+    },
+    socialTags: {
+      qq: '加入QQ群了解详细规则',
+      discord: 'Discord社区讨论游戏规则',
+      email: '发送邮件咨询条款问题',
+    },
+  },
 };
 
 /**
