@@ -36,11 +36,6 @@ const PrivacyPolicyPage = React.lazy(() =>
     default: module.PrivacyPolicyPage,
   }))
 );
-const TermsPage = React.lazy(() =>
-  import(/* webpackPreload: false */ '@/pages/TermsPage').then(module => ({
-    default: module.TermsPage,
-  }))
-);
 const NotFoundPage = React.lazy(() =>
   import(/* webpackPreload: false */ '@/pages/NotFoundPage').then(module => ({
     default: module.NotFoundPage,
@@ -63,7 +58,6 @@ const RouteAwareFallback: React.FC = () => {
     '/bug-report',
     '/monitor',
     '/privacy',
-    '/terms',
     '/not-found',
   ].includes(currentPath);
 
@@ -137,7 +131,6 @@ const RouteStateManager: React.FC<{ children: React.ReactNode }> = ({ children }
       '/bug-report',
       '/monitor',
       '/privacy',
-      '/terms',
       '/not-found',
     ].includes(currentPath);
 
@@ -186,7 +179,6 @@ const RouteContent: React.FC = () => {
             <Route path="/bug-report" element={<BugReportPage />} />
             <Route path="/monitor" element={<MonitorPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
             {/* 静态文件404重定向路径 */}
             <Route path="/not-found" element={<NotFoundPage />} />
             {/* 404页面 - 必须放在最后 */}

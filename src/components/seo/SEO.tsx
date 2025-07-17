@@ -72,12 +72,6 @@ const generateSitelinksData = () => {
         description: '提交游戏问题反馈和建议',
         url: 'https://www.voidix.net/bug-report',
       },
-      {
-        '@type': 'SiteNavigationElement',
-        name: '服务条款',
-        description: '使用Voidix服务需要遵守的规则和条款',
-        url: 'https://www.voidix.net/terms',
-      },
     ],
   };
 };
@@ -169,12 +163,6 @@ const generateBasicStructuredData = (pageKey?: string) => {
         '@id': 'https://www.voidix.net/monitor',
         name: '监控面板',
         description: '服务器性能监控',
-      },
-      {
-        '@type': 'WebPage',
-        '@id': 'https://www.voidix.net/terms',
-        name: '服务条款',
-        description: '使用Voidix服务需要遵守的规则和条款',
       },
     ],
   };

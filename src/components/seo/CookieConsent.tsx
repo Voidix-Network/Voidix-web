@@ -1,7 +1,6 @@
 import { useCookieConsent } from '@/hooks';
 import { setConsent } from '@/services/cookieConsentService';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface CookieConsentProps {
   className?: string;
@@ -17,7 +16,6 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const navigate = useNavigate();
 
   // 用于设置面板的本地状态
   const [analyticsConsent, setAnalyticsConsent] = useState(consent.analytics);
@@ -75,7 +73,9 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
     <>
       {/* Cookie横幅 */}
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 transition-opacity duration-300 opacity-100 ${className}`}
+        className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 transition-opacity duration-300 ${
+          isMounted && showBanner ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        } ${className}`}
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-1">
@@ -84,17 +84,10 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
               我们使用Cookie来改善您的浏览体验，提供个性化内容和分析网站流量。
               您可以选择接受所有Cookie或自定义设置。
               <button
-                onClick={() => navigate('/privacy')}
+                onClick={() => (window.location.href = '/privacy')}
                 className="text-purple-400 hover:text-purple-300 underline ml-1 cursor-pointer bg-transparent border-none p-0"
               >
-                隐私政策
-              </button>
-              {' 和 '}
-              <button
-                onClick={() => navigate('/terms')}
-                className="text-purple-400 hover:text-purple-300 underline cursor-pointer bg-transparent border-none p-0"
-              >
-                服务条款
+                了解更多
               </button>
             </p>
           </div>
