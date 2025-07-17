@@ -4,10 +4,10 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import React from 'react';
-import { HelmetProvider } from 'react-helmet-async';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
+import { HelmetProvider } from 'react-helmet-async';
 
 /**
  * 通用的页面组件Mock工厂
@@ -33,11 +33,6 @@ export const createPageMocks = () => {
     BugReportPage: () => (
       <div data-testid="page-content" data-page="bug-report">
         Bug Report Page
-      </div>
-    ),
-    TermsPage: () => (
-      <div data-testid="page-content" data-page="terms">
-        Terms Page
       </div>
     ),
     NotFoundPage: () => (
@@ -132,14 +127,6 @@ export const createRouteTest = (options: RouteTestOptions = {}) => {
         element={
           <div data-testid="page-content" data-page="bug-report">
             Bug Report Page
-          </div>
-        }
-      />
-      <Route
-        path="/terms"
-        element={
-          <div data-testid="page-content" data-page="terms">
-            Terms Page
           </div>
         }
       />
@@ -360,7 +347,6 @@ export const createRouteTestSuite = (config: RouteTestSuiteConfig = {}) => {
       { path: '/status', expectedPage: 'status' },
       { path: '/faq', expectedPage: 'faq' },
       { path: '/bug-report', expectedPage: 'bug-report' },
-      { path: '/terms', expectedPage: 'terms' },
       { path: '/not-found', expectedPage: '404' },
     ],
 
@@ -373,7 +359,6 @@ export const createRouteTestSuite = (config: RouteTestSuiteConfig = {}) => {
           { path: '/status', expectedPage: 'status' },
           { path: '/faq', expectedPage: 'faq' },
           { path: '/bug-report', expectedPage: 'bug-report' },
-          { path: '/terms', expectedPage: 'terms' },
         ]);
       }
 
