@@ -34,7 +34,8 @@ export class ConnectionManager {
 
   constructor(config: WebSocketConfig) {
     this.config = config;
-    this.setupVisibilityChangeListener();
+    // 移除页面可见性变化监听器，让useWebSocket hook统一处理
+    // this.setupVisibilityChangeListener();
   }
 
   /**
@@ -43,7 +44,8 @@ export class ConnectionManager {
   cleanup(): void {
     console.log('[ConnectionManager] 正在清理资源...');
     this.forceClose();
-    this.removeVisibilityChangeListener();
+    // 移除页面可见性变化监听器清理
+    // this.removeVisibilityChangeListener();
   }
 
   /**
@@ -79,6 +81,42 @@ export class ConnectionManager {
         reject(error);
       }
     });
+  }
+
+  /**
+   * 安全连接尝试
+   * 如果已经在连接中，返回现有的Promise
+   */
+  private connectionPromise: Promise<WebSocket> | null = null;
+
+  async safeConnect(): Promise<WebSocket> {
+    // 如果已经有连接尝试在进行中，返回现有的Promise
+    if (this.connectionPromise) {
+      console.debug('[ConnectionManager] 连接尝试已在进行中，返回现有Promise');
+      return this.connectionPromise;
+    }
+
+    // 检查当前状态
+    if (this.state === ConnectionState.CONNECTED) {
+      console.debug('[ConnectionManager] 已连接，跳过重复连接');
+      return this.ws!;
+    }
+
+    if (this.state === ConnectionState.CONNECTING) {
+      console.debug('[ConnectionManager] 正在连接中，跳过重复连接');
+      throw new Error('Connection already in progress');
+    }
+
+    console.debug('[ConnectionManager] 开始新的安全连接尝试');
+
+    // 创建新的连接Promise
+    this.connectionPromise = this.connect().finally(() => {
+      // 连接完成后清理Promise引用
+      console.debug('[ConnectionManager] 连接尝试完成，清理Promise引用');
+      this.connectionPromise = null;
+    });
+
+    return this.connectionPromise;
   }
 
   /**
@@ -296,48 +334,40 @@ export class ConnectionManager {
     }
   }
 
-  /**
-   * 设置页面可见性变化监听器
-   */
-  private setupVisibilityChangeListener(): void {
-    // 确保在浏览器环境中
-    if (typeof document === 'undefined') return;
+  // 移除页面可见性变化相关方法，让useWebSocket hook统一处理
+  // private setupVisibilityChangeListener(): void {
+  //   // 确保在浏览器环境中
+  //   if (typeof document === 'undefined') return;
 
-    document.addEventListener('visibilitychange', this.handleVisibilityChange);
-  }
+  //   document.addEventListener('visibilitychange', this.handleVisibilityChange);
+  // }
 
-  /**
-   * 移除页面可见性变化监听器
-   */
-  private removeVisibilityChangeListener(): void {
-    // 确保在浏览器环境中
-    if (typeof document === 'undefined') return;
+  // private removeVisibilityChangeListener(): void {
+  //   // 确保在浏览器环境中
+  //   if (typeof document === 'undefined') return;
 
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-  }
+  //   document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+  // }
 
-  /**
-   * 处理页面可见性变化
-   */
-  private handleVisibilityChange = (): void => {
-    // 确保在浏览器环境中
-    if (typeof document === 'undefined') return;
+  // private handleVisibilityChange = (): void => {
+  //   // 确保在浏览器环境中
+  //   if (typeof document === 'undefined') return;
 
-    if (document.visibilityState === 'hidden') {
-      console.debug('[ConnectionManager] 页面隐藏，断开WebSocket连接');
-      this.disconnect();
-    } else if (document.visibilityState === 'visible') {
-      console.debug('[ConnectionManager] 页面可见，尝试重新连接');
-      // 引入一个短延迟，确保在重新连接前连接已完全断开
-      setTimeout(() => {
-        if (!this.isConnected && !this.isConnecting) {
-          this.connect().catch(error => {
-            console.error('[ConnectionManager] 页面可见时重新连接失败:', error);
-          });
-        } else {
-          console.debug('[ConnectionManager] 页面可见，但连接已在进行中或已连接，跳过重新连接');
-        }
-      }, 100); // 100毫秒延迟，可根据需要调整
-    }
-  };
+  //   if (document.visibilityState === 'hidden') {
+  //     console.debug('[ConnectionManager] 页面隐藏，断开WebSocket连接');
+  //     this.disconnect();
+  //   } else if (document.visibilityState === 'visible') {
+  //     console.debug('[ConnectionManager] 页面可见，尝试重新连接');
+  //     // 引入一个短延迟，确保在重新连接前连接已完全断开
+  //     setTimeout(() => {
+  //       if (!this.isConnected && !this.isConnecting) {
+  //         this.connect().catch(error => {
+  //           console.error('[ConnectionManager] 页面可见时重新连接失败:', error);
+  //         });
+  //       } else {
+  //         console.debug('[ConnectionManager] 页面可见，但连接已在进行中或已连接，跳过重新连接');
+  //       }
+  //     }, 100); // 100毫秒延迟，可根据需要调整
+  //   }
+  // };
 }
