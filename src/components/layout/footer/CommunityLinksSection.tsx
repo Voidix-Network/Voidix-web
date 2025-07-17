@@ -3,10 +3,11 @@
 /**
  * 社区链接部分组件
  * 显示QQ群、Discord、GitHub等社区链接
+ * 优化以防止布局偏移 (CLS)
  */
 export const CommunityLinksSection: React.FC = () => {
   return (
-    <div>
+    <div className="min-h-[200px]">
       <h3 className="font-semibold mb-6 text-lg">社区链接</h3>
       <ul className="space-y-3">
         <li>
@@ -14,11 +15,11 @@ export const CommunityLinksSection: React.FC = () => {
             href="https://qm.qq.com/cgi-bin/qm/qr?k=aMRoacVuxcGVSzEwfjb49oN4CWCv6yHj&jump_from=webapi&authKey=hw0EhRKGDGN1vmHD4AfK2yJCzPzSA+AXGJOEcugZpsA7KfK9GhNXpe9GNWCjCcmr"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group"
+            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group h-8"
           >
             <span>QQ群</span>
             <svg
-              className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity"
+              className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -40,11 +41,11 @@ export const CommunityLinksSection: React.FC = () => {
             href="https://discord.gg/fUMyfhuQ5b"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group"
+            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group h-8"
           >
             <span>Discord</span>
             <svg
-              className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity"
+              className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -66,11 +67,11 @@ export const CommunityLinksSection: React.FC = () => {
             href="https://github.com/Voidix-Network"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group"
+            className="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-3 group h-8"
           >
             <span>GitHub</span>
             <svg
-              className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity"
+              className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
