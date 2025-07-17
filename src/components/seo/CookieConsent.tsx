@@ -1,4 +1,4 @@
-import { useCookieConsent } from '@/hooks';
+import { useCookieConsent, useSSRSafeRender } from '@/hooks';
 import { setConsent } from '@/services/cookieConsentService';
 import React, { useEffect, useState } from 'react';
 
@@ -9,37 +9,25 @@ interface CookieConsentProps {
 /**
  * 增强版Cookie同意组件
  * 提供分类别的Cookie管理功能，符合GDPR要求。
- * 只在用户没有选择Cookie时才显示，防止SSR渲染横幅。
+ * 使用SSR hook防止服务端渲染横幅，避免闪烁。
  */
 export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) => {
   const { consent, hasMadeChoice } = useCookieConsent();
+  const { shouldRender } = useSSRSafeRender(!hasMadeChoice);
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
 
   // 用于设置面板的本地状态
   const [analyticsConsent, setAnalyticsConsent] = useState(consent.analytics);
 
-  // 检测是否为服务端渲染
-  const isSSR = typeof window === 'undefined';
-
-  // SSR时直接返回null，防止服务端渲染横幅
-  if (isSSR) {
-    return null;
-  }
-
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    // 只在客户端挂载后且用户从未做出选择时才显示横幅
-    if (isMounted && !hasMadeChoice) {
+    // 只在客户端且用户从未做出选择时才显示横幅
+    if (shouldRender) {
       setShowBanner(true);
     } else {
       setShowBanner(false);
     }
-  }, [isMounted, hasMadeChoice]);
+  }, [shouldRender]);
 
   // 当全局consent状态更新时（例如，从其他标签页），同步本地设置面板的状态
   useEffect(() => {
@@ -66,15 +54,15 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
     setShowSettings(false);
   };
 
-  // 如果未挂载或不需要显示横幅，返回null
-  if (!isMounted || !showBanner) return null;
+  // 如果不需要显示横幅，返回null
+  if (!shouldRender || !showBanner) return null;
 
   return (
     <>
       {/* Cookie横幅 */}
       <div
         className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 transition-opacity duration-300 ${
-          isMounted && showBanner ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          showBanner ? 'opacity-100' : 'opacity-0 pointer-events-none'
         } ${className}`}
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-4">
