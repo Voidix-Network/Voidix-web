@@ -9,6 +9,7 @@ interface CookieConsentProps {
 /**
  * 增强版Cookie同意组件
  * 提供分类别的Cookie管理功能，符合GDPR要求。
+ * 只在用户没有选择Cookie时才显示，防止SSR渲染横幅。
  */
 export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) => {
   const { consent, hasMadeChoice } = useCookieConsent();
@@ -19,12 +20,11 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
   // 用于设置面板的本地状态
   const [analyticsConsent, setAnalyticsConsent] = useState(consent.analytics);
 
-  // Determine if we are server-side rendering
+  // 检测是否为服务端渲染
   const isSSR = typeof window === 'undefined';
 
-  // If server-side rendering and a choice has already been made, do not render the component at all.
-  // This prevents any unstyled content from appearing before hydration.
-  if (isSSR && hasMadeChoice) {
+  // SSR时直接返回null，防止服务端渲染横幅
+  if (isSSR) {
     return null;
   }
 
@@ -33,13 +33,13 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
   }, []);
 
   useEffect(() => {
-    // 仅当用户从未做出选择时显示横幅
-    if (!hasMadeChoice) {
+    // 只在客户端挂载后且用户从未做出选择时才显示横幅
+    if (isMounted && !hasMadeChoice) {
       setShowBanner(true);
     } else {
       setShowBanner(false);
     }
-  }, [hasMadeChoice]);
+  }, [isMounted, hasMadeChoice]);
 
   // 当全局consent状态更新时（例如，从其他标签页），同步本地设置面板的状态
   useEffect(() => {
@@ -66,17 +66,14 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
     setShowSettings(false);
   };
 
-  // On the client, if not mounted or not showing banner, return null to prevent rendering.
-  // This ensures the banner only appears after client-side hydration and condition checks.
+  // 如果未挂载或不需要显示横幅，返回null
   if (!isMounted || !showBanner) return null;
 
   return (
     <>
       {/* Cookie横幅 */}
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 transition-opacity duration-300 ${
-          isMounted && showBanner ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        } ${className}`}
+        className={`fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50 transition-opacity duration-300 opacity-100 ${className}`}
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-1">
