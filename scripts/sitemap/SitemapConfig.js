@@ -1,5 +1,5 @@
-import { SITE_CONFIG, getSiteUrl, getCurrentDate } from '../siteConfig.js';
 import { SITEMAP_CONFIG } from '../buildConfig.js';
+import { SITE_CONFIG, getCurrentDate, getSiteUrl } from '../siteConfig.js';
 
 /**
  * Sitemap配置生成器
@@ -44,6 +44,12 @@ export function createSitemapConfig(baseUrl = SITE_CONFIG.baseUrl, routes = null
     },
     {
       path: '/privacy',
+      priority: 0.6,
+      changefreq: 'monthly',
+      lastmod: getCurrentDate(),
+    },
+    {
+      path: '/terms',
       priority: 0.6,
       changefreq: 'monthly',
       lastmod: getCurrentDate(),

@@ -40,6 +40,7 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
       faq: '常见问题',
       'bug-report': 'Bug反馈',
       privacy: '隐私政策',
+      terms: '服务条款',
     };
 
     let currentPath = '';

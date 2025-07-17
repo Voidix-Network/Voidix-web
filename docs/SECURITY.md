@@ -302,11 +302,11 @@ CCKpbBTkF4mSwnCVY4PO+iS043+TMeEM6wU4uj09YIQT2LAK5cMW41myXJ7UaQ==
 
 - **🔔 订阅更新**: Watch 此仓库的安全更新
 - **📱 RSS 订阅**: 通过 GitHub RSS 获取安全公告
-- **📧 邮件通知**: security-announce@voidix.net
+- **📧 邮件通知**: security@voidix.net
 
 ---
 
 > 🛡️ **安全是我们共同的责任**。感谢您帮助保护 Voidix Web 和用户的安全！
 
-**最后更新**: 2025年6月15日  
+**最后更新**: 2025年6月15日
 **版本**: 1.0.0

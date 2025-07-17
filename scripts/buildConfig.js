@@ -39,6 +39,7 @@ export const PRERENDER_CONFIG = {
     { path: '/faq', outputDir: 'faq' },
     { path: '/bug-report', outputDir: 'bug-report' },
     { path: '/privacy', outputDir: 'privacy' },
+    { path: '/terms', outputDir: 'terms' },
     { path: '/not-found', outputDir: 'not-found' },
   ],
 
