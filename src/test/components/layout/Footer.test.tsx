@@ -71,7 +71,7 @@ describe('Footer', () => {
     const { container } = renderFooter();
 
     const footer = container.querySelector('footer');
-    expect(footer).toHaveClass('bg-gray-800/70', 'border-t', 'border-gray-600');
+    expect(footer).toHaveClass('bg-gray-800/70', 'border-t', 'border-gray-600', 'cls-optimized');
 
     // 验证主容器
     const mainContainer = footer?.querySelector('.max-w-7xl');
@@ -92,7 +92,9 @@ describe('Footer', () => {
       'sm:grid-cols-2',
       'lg:grid-cols-3',
       'gap-16',
-      'lg:gap-20'
+      'lg:gap-20',
+      'min-h-[200px]',
+      'cls-optimized'
     );
   });
 
@@ -119,7 +121,9 @@ describe('Footer', () => {
       'lg:flex',
       'flex-col',
       'items-center',
-      'justify-center'
+      'justify-center',
+      'min-h-[120px]',
+      'cls-optimized'
     );
   });
 

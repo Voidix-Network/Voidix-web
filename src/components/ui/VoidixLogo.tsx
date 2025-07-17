@@ -1,5 +1,5 @@
 import { LOGO_ASSETS } from '@/constants';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GradientText } from './GradientText';
 
 // 图片预加载钩子 - 防止重复请求
@@ -19,12 +19,15 @@ interface VoidixLogoProps {
 /**
  * Voidix Logo 组件
  * 提供多种尺寸和变体的品牌logo
+ * 优化以防止布局偏移 (CLS)
  */
 const VoidixLogoComponent: React.FC<VoidixLogoProps> = ({
   size = 'md',
   variant = 'full',
   className = '',
 }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   // 预加载Logo图片，防止重复请求
   useImagePreload(LOGO_ASSETS.BRAND_LOGO);
 
@@ -65,13 +68,20 @@ const VoidixLogoComponent: React.FC<VoidixLogoProps> = ({
       <img
         src={LOGO_ASSETS.BRAND_LOGO}
         alt="Voidix Logo"
-        className={`${config.container} object-contain`}
+        className={`${config.container} object-contain transition-opacity duration-300 ${
+          imageLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
         loading="lazy"
         decoding="async"
+        onLoad={() => setImageLoaded(true)}
         style={{
           filter: 'drop-shadow(0 0 8px rgba(147, 51, 234, 0.3))', // 添加紫色光晕效果
         }}
       />
+      {/* 骨架屏 - 图片加载前显示 */}
+      {!imageLoaded && (
+        <div className={`${config.container} bg-gray-600 animate-pulse rounded-2xl absolute`} />
+      )}
     </div>
   );
 
@@ -104,7 +114,7 @@ const VoidixLogoComponent: React.FC<VoidixLogoProps> = ({
 
       <div className={`flex items-center ${config.spacing} ${className}`}>
         <VoidixIcon />
-        <div className="flex flex-col">
+        <div className="flex flex-col min-w-[120px]">
           <span
             className={`${config.text} font-bold leading-tight`}
             style={{

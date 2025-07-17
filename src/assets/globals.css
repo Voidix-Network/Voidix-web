@@ -175,6 +175,47 @@
     }
   }
 
+  /* CLS优化 - 防止布局偏移 */
+  .cls-optimized {
+    contain: layout;
+  }
+
+  /* 图片容器优化 */
+  .img-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 骨架屏动画 */
+  .skeleton-pulse {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* 固定尺寸容器 */
+  .fixed-size-container {
+    box-sizing: border-box;
+  }
+
+  /* 防止文本换行导致的布局偏移 */
+  .no-wrap {
+    white-space: nowrap;
+  }
+
+  /* 最小宽度容器 */
+  .min-width-container {
+    min-width: 0;
+  }
+
   /* 卡片悬停效果 - 复现原项目的card-hover */
   .card-hover {
     transition: all var(--transition-hover-duration) ease;
