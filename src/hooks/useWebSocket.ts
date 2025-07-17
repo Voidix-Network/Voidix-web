@@ -389,31 +389,144 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
   }, [autoConnect]); // 移除connect依赖，避免重复连接
 
   /**
-   * 页面可见性变化处理
+   * 页面可见变化处理
    */
   useEffect(() => {
+    let visibilityChangeTimeout: NodeJS.Timeout | null = null;
+    let isProcessingVisibilityChange = false;
+    let lastVisibilityChangeTime = 0;
+    let isPageHidden = false; // 跟踪页面隐藏状态
+    const MIN_VISIBILITY_CHANGE_INTERVAL = 1000; // 最小1秒间隔
+
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // 页面隐藏时不主动断开连接，让WebSocket自然处理
-        console.info('[useWebSocket] 页面隐藏');
-      } else {
-        // 页面可见时检查连接状态
-        console.info('[useWebSocket] 页面可见');
-        if (serviceRef.current && !serviceRef.current.isConnected) {
-          console.info('[useWebSocket] 页面可见时发现连接断开，尝试重连');
-          connect().catch(error => {
-            console.error('[useWebSocket] 页面可见时重连失败:', error);
-          });
-        }
+      const now = Date.now();
+
+      // 防抖处理，避免快速切换导致的重复操作
+      if (visibilityChangeTimeout) {
+        clearTimeout(visibilityChangeTimeout);
       }
+
+      // 检查是否在最小间隔内
+      if (now - lastVisibilityChangeTime < MIN_VISIBILITY_CHANGE_INTERVAL) {
+        console.debug('[useWebSocket] 页面可见性变化过于频繁，跳过处理');
+        return;
+      }
+
+      visibilityChangeTimeout = setTimeout(() => {
+        // 防止重复处理
+        if (isProcessingVisibilityChange) {
+          console.debug('[useWebSocket] 页面可见性变化处理中，跳过重复操作');
+          return;
+        }
+
+        isProcessingVisibilityChange = true;
+        lastVisibilityChangeTime = now;
+
+        try {
+          if (document.hidden) {
+            // 页面隐藏时，暂时禁用重连机制，然后断开连接
+            if (!isPageHidden) {
+              // 只有在之前不是隐藏状态时才处理
+              console.info('[useWebSocket] 页面隐藏');
+              isPageHidden = true;
+
+              if (serviceRef.current) {
+                const connectionManager = serviceRef.current.modules.connectionManager;
+                const isConnected = serviceRef.current.isConnected;
+                const isConnecting = connectionManager.isConnecting;
+
+                // 只有在连接状态不是已断开时才进行断开操作
+                if (isConnected || isConnecting) {
+                  const eventCoordinator = serviceRef.current.modules.eventCoordinator;
+                  eventCoordinator.disableReconnect();
+                  console.debug('[useWebSocket] 页面隐藏时禁用重连机制');
+
+                  // 断开连接
+                  serviceRef.current.disconnect();
+                  // 更新状态为断开，确保UI显示正确
+                  updateConnectionStatus('disconnected');
+                } else {
+                  console.debug('[useWebSocket] 页面隐藏，但连接已断开，跳过断开操作');
+                }
+              }
+            } else {
+              console.debug('[useWebSocket] 页面已处于隐藏状态，跳过重复处理');
+            }
+          } else {
+            // 页面可见时检查连接状态
+            if (isPageHidden) {
+              // 只有在之前是隐藏状态时才处理
+              console.info('[useWebSocket] 页面可见');
+              isPageHidden = false;
+
+              // 检查服务是否存在且连接状态
+              if (serviceRef.current) {
+                // 重新启用重连机制
+                const eventCoordinator = serviceRef.current.modules.eventCoordinator;
+                eventCoordinator.enableReconnect();
+                console.debug('[useWebSocket] 页面可见时重新启用重连机制');
+
+                const isConnected = serviceRef.current.isConnected;
+                const connectionManager = serviceRef.current.modules.connectionManager;
+                const isConnecting = connectionManager.isConnecting;
+                const isReconnecting = connectionManager.isReconnecting;
+
+                console.debug('[useWebSocket] 当前连接状态:', {
+                  isConnected,
+                  isConnecting,
+                  isReconnecting,
+                  connectionStatus: connectionManager.connectionState,
+                });
+
+                // 只有在确实断开连接时才尝试重连
+                if (!isConnected && !isConnecting && !isReconnecting) {
+                  console.info('[useWebSocket] 页面可见时发现连接断开，尝试重连');
+
+                  // 先设置状态为重连中，让用户界面显示正确的状态
+                  // 但只有在当前状态不是重连中时才设置，避免重复设置
+                  if (connectionStatus !== 'reconnecting') {
+                    updateConnectionStatus('reconnecting');
+                  }
+
+                  // 使用connect方法进行重连
+                  serviceRef.current.connect().catch((error: Error) => {
+                    // 忽略"Connection already in progress"错误，这是正常的
+                    if (error.message !== 'Connection already in progress') {
+                      console.error('[useWebSocket] 页面可见时重连失败:', error);
+                      // 重连失败时设置状态为失败
+                      updateConnectionStatus('failed');
+                    } else {
+                      console.debug('[useWebSocket] 页面可见时重连被跳过（已有连接进行中）');
+                    }
+                  });
+                } else {
+                  console.debug('[useWebSocket] 页面可见，但连接状态正常，跳过重连');
+                }
+              } else {
+                console.debug('[useWebSocket] 页面可见，但服务未初始化，跳过重连');
+              }
+            } else {
+              console.debug('[useWebSocket] 页面已处于可见状态，跳过重复处理');
+            }
+          }
+        } finally {
+          // 重置处理标志
+          setTimeout(() => {
+            isProcessingVisibilityChange = false;
+          }, 1000); // 1秒冷却时间，防止快速切换
+        }
+      }, 300); // 300ms防抖延迟
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (visibilityChangeTimeout) {
+        clearTimeout(visibilityChangeTimeout);
+      }
     };
-  }, [connect]);
+  }, []); // 移除connect依赖，避免重复绑定事件监听器
 
   // 监听协议版本错误
   useEffect(() => {

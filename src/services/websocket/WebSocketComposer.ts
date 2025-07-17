@@ -149,7 +149,7 @@ export class WebSocketComposer {
     }
 
     try {
-      const ws = await this.connectionManager.connect();
+      const ws = await this.connectionManager.safeConnect();
 
       // 设置消息处理器 - 委托给MessageRouter
       ws.onmessage = event => {

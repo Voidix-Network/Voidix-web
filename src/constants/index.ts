@@ -29,7 +29,14 @@ export const TIME_CONSTANTS: TimeConstants = {
 };
 
 // 小游戏服务器键值
-export const MINIGAME_KEYS = ['bedwars', 'bedwars_solo', 'bedwars_other', 'knockioffa'];
+export const MINIGAME_KEYS = [
+  'bedwars',
+  'bedwars_solo',
+  'bedwars_other',
+  'knockioffa',
+  'buildbattle',
+  'thepit',
+];
 
 // 服务器显示名称
 export const SERVER_DISPLAY_NAMES = {
@@ -42,6 +49,7 @@ export const SERVER_DISPLAY_NAMES = {
   login: '登录服务器',
   thepit: '天坑乱斗 (thepit)',
   knockioffa: '击退战场 (knockioffa)',
+  buildbattle: '建筑大师 (buildbattle)',
 } as const;
 
 // 状态文本常量
@@ -152,6 +160,14 @@ export const SERVER_CONFIG: ServerConfig = {
       displayNameEl: 'knockioffa-display-name',
     },
     keys: ['knockioffa'],
+  },
+  buildbattle: {
+    statusPageElements: {
+      statusEl: 'buildbattle-live-status',
+      dotEl: 'buildbattle-dot',
+      displayNameEl: 'buildbattle-display-name',
+    },
+    keys: ['buildbattle'],
   },
   thepit: {
     statusPageElements: {

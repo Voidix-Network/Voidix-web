@@ -652,23 +652,6 @@ export const TeamSection: React.FC = () => {
       ],
     },
     {
-      name: 'XXJNOTFOUND',
-      displayName: 'XXJNOTFOUND',
-      role: '服务器管理员',
-      roleColor: 'text-blue-400',
-      description: '拥有出色的服务器配置能力与玩家管理能力',
-      gradientFrom: 'from-blue-900/40',
-      gradientTo: 'to-indigo-900/40',
-      textColor: 'text-blue-400',
-      abbreviation: 'XXJ',
-      minecraftUsername: 'ixiangpro',
-      contributions: [
-        '2025-至今: 服务器技术与社区管理',
-        'WTFXXJ服务器创始人',
-        '技术能力出众但情绪管理有待提高',
-      ],
-    },
-    {
       name: 'ASKLL',
       displayName: 'ASKLL',
       role: '服务器管理员',
