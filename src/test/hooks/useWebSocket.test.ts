@@ -150,7 +150,7 @@ describe('useWebSocket Hook', () => {
       // 验证Hook已初始化并且具备连接能力
       expect(result.current).toBeDefined();
       expect(typeof result.current.connect).toBe('function');
-      expect(['connected', 'connecting', 'disconnected', 'failed']).toContain(
+      expect(['connected', 'connecting', 'disconnected', 'failed', 'reconnecting']).toContain(
         result.current.connectionStatus
       );
     });

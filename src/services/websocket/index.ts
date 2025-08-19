@@ -4,42 +4,22 @@
  * Phase 3: 完全模块化架构
  */
 
-// 核心模块 (Phase 1)
+// 核心模块导出
+export { ConnectionManager, ConnectionState } from './ConnectionManager';
+export { EventCoordinator } from './EventCoordinator';
 export { WebSocketEventEmitter } from './EventEmitter';
+export { MaintenanceHandler } from './MaintenanceHandler';
 export { WebSocketMessageParser } from './MessageParser';
+export { MessageRouter } from './MessageRouter';
 export { ReconnectStrategy } from './ReconnectStrategy';
 
-// 高级模块 (Phase 2)
-export { ConnectionManager } from './ConnectionManager';
-export { MaintenanceHandler } from './MaintenanceHandler';
-
-// 协调模块 (Phase 3)
-export { MessageRouter } from './MessageRouter';
-export { EventCoordinator } from './EventCoordinator';
+// 单连接WebSocket组合器（原有）
 export { WebSocketComposer, WebSocketService } from './WebSocketComposer';
 
-// 类型定义
-export type {
-  EventListener,
-  ReconnectProgress,
-  ReconnectEventData,
-  ConnectionFailedEventData,
-  DisconnectedEventData,
-  BasePlayerEventData,
-  PlayerAddEventData,
-  PlayerRemoveEventData,
-  PlayerMoveEventData,
-  PlayerUpdateEventData,
-  MaintenanceUpdateEventData,
-  ServerUpdateEventData,
-  FullUpdateEventData,
-  WebSocketEventMap,
-  ParseResult,
-  MessageDebugInfo,
-  ReconnectDebugInfo,
-  ConnectionStateChangeData,
-  MaintenanceState,
-  MaintenanceStateChangeData,
-} from './types';
+// 多连接WebSocket组合器（新增）
+export { MultiConnectionManager, type MultiConnectionConfig } from './MultiConnectionManager';
+export { MultiMessageRouter } from './MultiMessageRouter';
+export { MultiWebSocketComposer, MultiWebSocketService } from './MultiWebSocketComposer';
 
-export { ConnectionState } from './types';
+// 类型定义导出
+export type * from './types';
