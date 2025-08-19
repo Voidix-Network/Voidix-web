@@ -32,6 +32,9 @@ export const SERVER_GROUPS = {
       'thepit',
       'knockioffa',
       'buildbattle',
+      'murdermystery',
+      'skywars',
+      'thebridge',
     ],
   },
 };

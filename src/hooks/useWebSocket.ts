@@ -1,4 +1,4 @@
-import { WebSocketService } from '@/services/websocket';
+import { MultiWebSocketService } from '@/services/websocket';
 import { useServerStore } from '@/stores';
 import { useAggregatedStore } from '@/stores/aggregatedStore';
 import type { ConnectionStatus } from '@/types';
@@ -25,7 +25,7 @@ interface UseWebSocketReturn {
   reconnectAttempts: number;
   connect: () => Promise<void>;
   disconnect: () => void;
-  service: InstanceType<typeof WebSocketService> | null;
+  service: InstanceType<typeof MultiWebSocketService> | null;
 }
 
 /**
@@ -43,7 +43,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     onConnectionFailed,
   } = options;
 
-  const serviceRef = useRef<InstanceType<typeof WebSocketService> | null>(null);
+  const serviceRef = useRef<InstanceType<typeof MultiWebSocketService> | null>(null);
 
   const aggregatedStore = useAggregatedStore();
 
@@ -150,41 +150,48 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     }
 
     // 使用单例模式获取 WebSocket 服务实例
-    const service = WebSocketService.getInstance();
+    const service = MultiWebSocketService.getInstance();
 
     // 注册事件监听器
     service.on('connected', () => {
-      console.info('[useWebSocket] WebSocket连接成功');
+      console.info('[useWebSocket] 多连接WebSocket连接成功');
       updateConnectionStatus('connected');
       onConnected?.();
     });
 
     service.on('disconnected', (data: { code: number; reason: string }) => {
-      console.info('[useWebSocket] WebSocket连接断开:', data);
+      console.info('[useWebSocket] 多连接WebSocket连接断开:', data);
       updateConnectionStatus('disconnected');
       onDisconnected?.(data);
     });
 
     service.on('error', (error: Event) => {
-      console.error('[useWebSocket] WebSocket错误:', error);
+      console.error('[useWebSocket] 多连接WebSocket错误:', error);
       onError?.(error);
     });
 
     service.on('reconnecting', (data: { attempt: number; delay: number; maxAttempts: number }) => {
-      console.info('[useWebSocket] WebSocket重连中...', data);
+      console.info('[useWebSocket] 多连接WebSocket重连中...', data);
       updateConnectionStatus('reconnecting');
       onReconnecting?.(data);
     });
 
     service.on('connectionFailed', (data: { maxAttempts: number; totalAttempts: number }) => {
-      console.info('[useWebSocket] WebSocket连接失败:', data);
+      console.info('[useWebSocket] 多连接WebSocket连接失败:', data);
       updateConnectionStatus('failed');
       onConnectionFailed?.(data);
     });
 
     // 注册业务消息处理器
     service.on('fullUpdate', (data: any) => {
-      console.debug('[useWebSocket] 收到完整状态更新:', data);
+      console.debug('[useWebSocket] 收到完整状态更新 - 来源:', data.source || 'unknown');
+
+      if (data.source === 'survival') {
+        console.debug('[useWebSocket] 处理生存服数据更新');
+      } else if (data.source === 'minigames') {
+        console.debug('[useWebSocket] 处理小游戏服数据更新');
+      }
+
       handleFullUpdate(data);
     });
 
@@ -261,18 +268,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         playerInfo: any;
         player?: { uuid: string };
       }) => {
-        console.debug('[useWebSocket] 玩家移动 - 完整数据:', data);
-        console.debug('[useWebSocket] 玩家移动 - 数据字段检查:', {
-          hasPlayer: !!data.player,
-          hasUuid: data.player?.uuid,
-          playerId: data.playerId,
-          fromServer: data.fromServer,
-          toServer: data.toServer,
-          playerInfoKeys: data.playerInfo ? Object.keys(data.playerInfo) : 'undefined',
-          playerKeys: data.player ? Object.keys(data.player) : 'undefined',
-        });
-
-        // 处理基础的玩家位置追踪
+        console.debug('[useWebSocket] 玩家移动:', data);
         handlePlayerMove(data.playerId, data.fromServer, data.toServer); // 更新IGN数据中的服务器位置 - 优先从playerInfo获取，fallback到player字段
         const playerData = data.playerInfo || data.player;
         if (playerData && playerData.uuid) {
@@ -337,7 +333,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
    * 断开WebSocket连接
    */
   const disconnect = useCallback(() => {
-    console.info('[useWebSocket] 手动断开WebSocket连接');
+    console.info('[useWebSocket] 手动断开多连接WebSocket连接');
     serviceRef.current?.disconnect();
     updateConnectionStatus('disconnected');
   }, [updateConnectionStatus]); /**
@@ -430,24 +426,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
               console.info('[useWebSocket] 页面隐藏');
               isPageHidden = true;
 
-              if (serviceRef.current) {
-                const connectionManager = serviceRef.current.modules.connectionManager;
-                const isConnected = serviceRef.current.isConnected;
-                const isConnecting = connectionManager.isConnecting;
-
+              if (serviceRef.current && serviceRef.current.isConnected) {
                 // 只有在连接状态不是已断开时才进行断开操作
-                if (isConnected || isConnecting) {
-                  const eventCoordinator = serviceRef.current.modules.eventCoordinator;
-                  eventCoordinator.disableReconnect();
-                  console.debug('[useWebSocket] 页面隐藏时禁用重连机制');
-
-                  // 断开连接
-                  serviceRef.current.disconnect();
-                  // 更新状态为断开，确保UI显示正确
-                  updateConnectionStatus('disconnected');
-                } else {
-                  console.debug('[useWebSocket] 页面隐藏，但连接已断开，跳过断开操作');
-                }
+                serviceRef.current.disconnect();
+                // 更新状态为断开，确保UI显示正确
+                updateConnectionStatus('disconnected');
+              } else {
+                console.debug('[useWebSocket] 页面隐藏，但连接已断开，跳过断开操作');
               }
             } else {
               console.debug('[useWebSocket] 页面已处于隐藏状态，跳过重复处理');
@@ -460,50 +445,29 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
               isPageHidden = false;
 
               // 检查服务是否存在且连接状态
-              if (serviceRef.current) {
+              if (serviceRef.current && !serviceRef.current.isConnected) {
                 // 重新启用重连机制
-                const eventCoordinator = serviceRef.current.modules.eventCoordinator;
-                eventCoordinator.enableReconnect();
-                console.debug('[useWebSocket] 页面可见时重新启用重连机制');
+                console.info('[useWebSocket] 页面可见时发现连接断开，尝试重连');
 
-                const isConnected = serviceRef.current.isConnected;
-                const connectionManager = serviceRef.current.modules.connectionManager;
-                const isConnecting = connectionManager.isConnecting;
-                const isReconnecting = connectionManager.isReconnecting;
-
-                console.debug('[useWebSocket] 当前连接状态:', {
-                  isConnected,
-                  isConnecting,
-                  isReconnecting,
-                  connectionStatus: connectionManager.connectionState,
-                });
-
-                // 只有在确实断开连接时才尝试重连
-                if (!isConnected && !isConnecting && !isReconnecting) {
-                  console.info('[useWebSocket] 页面可见时发现连接断开，尝试重连');
-
-                  // 先设置状态为重连中，让用户界面显示正确的状态
-                  // 但只有在当前状态不是重连中时才设置，避免重复设置
-                  if (connectionStatus !== 'reconnecting') {
-                    updateConnectionStatus('reconnecting');
-                  }
-
-                  // 使用connect方法进行重连
-                  serviceRef.current.connect().catch((error: Error) => {
-                    // 忽略"Connection already in progress"错误，这是正常的
-                    if (error.message !== 'Connection already in progress') {
-                      console.error('[useWebSocket] 页面可见时重连失败:', error);
-                      // 重连失败时设置状态为失败
-                      updateConnectionStatus('failed');
-                    } else {
-                      console.debug('[useWebSocket] 页面可见时重连被跳过（已有连接进行中）');
-                    }
-                  });
-                } else {
-                  console.debug('[useWebSocket] 页面可见，但连接状态正常，跳过重连');
+                // 先设置状态为重连中，让用户界面显示正确的状态
+                // 但只有在当前状态不是重连中时才设置，避免重复设置
+                if (connectionStatus !== 'reconnecting') {
+                  updateConnectionStatus('reconnecting');
                 }
+
+                // 使用connect方法进行重连
+                serviceRef.current.connect().catch((error: Error) => {
+                  // 忽略"Connection already in progress"错误，这是正常的
+                  if (error.message !== 'Connection already in progress') {
+                    console.error('[useWebSocket] 页面可见时重连失败:', error);
+                    // 重连失败时设置状态为失败
+                    updateConnectionStatus('failed');
+                  } else {
+                    console.debug('[useWebSocket] 页面可见时重连被跳过（已有连接进行中）');
+                  }
+                });
               } else {
-                console.debug('[useWebSocket] 页面可见，但服务未初始化，跳过重连');
+                console.debug('[useWebSocket] 页面可见，但连接状态正常，跳过重连');
               }
             } else {
               console.debug('[useWebSocket] 页面已处于可见状态，跳过重复处理');
