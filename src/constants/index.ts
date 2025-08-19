@@ -20,6 +20,30 @@ export const WEBSOCKET_CONFIG: WebSocketConfig = {
   connectionTimeout: 5000, // 5秒连接超时
 };
 
+// 多连接WebSocket配置
+export const MULTI_WEBSOCKET_CONFIG = {
+  // 小游戏服务器连接
+  minigames: {
+    url: 'wss://server.voidix.top:10203',
+    name: 'minigames',
+    maxReconnectAttempts: 5,
+    reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
+    disableReconnect: false,
+    SUPPORTED_PROTOCOL_VERSION: 2,
+    connectionTimeout: 5000,
+  },
+  // 生存服务器连接
+  survival: {
+    url: 'wss://server1.voidix.top:10203/',
+    name: 'survival',
+    maxReconnectAttempts: 5,
+    reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
+    disableReconnect: false,
+    SUPPORTED_PROTOCOL_VERSION: 2,
+    connectionTimeout: 5000,
+  },
+} as const;
+
 // 时间常量
 export const TIME_CONSTANTS: TimeConstants = {
   SECONDS_IN_MINUTE: 60,
@@ -36,6 +60,9 @@ export const MINIGAME_KEYS = [
   'knockioffa',
   'buildbattle',
   'thepit',
+  'murdermystery',
+  'skywars',
+  'thebridge',
 ];
 
 // 服务器显示名称
@@ -50,6 +77,9 @@ export const SERVER_DISPLAY_NAMES = {
   thepit: '天坑乱斗 (thepit)',
   knockioffa: '击退战场 (knockioffa)',
   buildbattle: '建筑大师 (buildbattle)',
+  murdermystery: '密室杀手 (murdermystery)',
+  skywars: '空岛战争 (skywars)',
+  thebridge: '战桥 (thebridge)',
 } as const;
 
 // 状态文本常量
@@ -176,6 +206,30 @@ export const SERVER_CONFIG: ServerConfig = {
       displayNameEl: 'thepit-display-name',
     },
     keys: ['thepit'],
+  },
+  murdermystery: {
+    statusPageElements: {
+      statusEl: 'murdermystery-live-status',
+      dotEl: 'murdermystery-dot',
+      displayNameEl: 'murdermystery-display-name',
+    },
+    keys: ['murdermystery'],
+  },
+  skywars: {
+    statusPageElements: {
+      statusEl: 'skywars-live-status',
+      dotEl: 'skywars-dot',
+      displayNameEl: 'skywars-display-name',
+    },
+    keys: ['skywars'],
+  },
+  thebridge: {
+    statusPageElements: {
+      statusEl: 'thebridge-live-status',
+      dotEl: 'thebridge-dot',
+      displayNameEl: 'thebridge-display-name',
+    },
+    keys: ['thebridge'],
   },
 };
 
