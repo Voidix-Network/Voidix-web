@@ -7,6 +7,7 @@ import {
 } from '@/components';
 import { TeamSection } from '@/components/sections/TeamSection';
 import { PerformanceOptimizer, SEO } from '@/components/seo';
+import { LiveChatSection } from '@/components/sections/LiveChatSection.tsx';
 
 /**
  * 首页组件 - 复现原项目的完整设计
@@ -24,6 +25,7 @@ export const HomePage: React.FC = () => {
       <PerformanceOptimizer />
       <HeroSection />
       <AboutSection />
+      <LiveChatSection />
       <ServersSection />
       <VersionsSection />
       <TimelineSection />
