@@ -130,7 +130,7 @@ export function TestMultiConnectionPage() {
               <span>状态: {status.minigames.connected ? '已连接' : '未连接'}</span>
             </div>
             <div>ReadyState: {getReadyStateText(status.minigames.readyState)}</div>
-            <div>地址: wss://server.voidix.top:10203</div>
+            <div>地址: wss://api.voidix.top:10203</div>
             {status.minigames.lastMessage && (
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 最新消息: {status.minigames.lastMessage}
@@ -163,7 +163,7 @@ export function TestMultiConnectionPage() {
               <span>状态: {status.survival.connected ? '已连接' : '未连接'}</span>
             </div>
             <div>ReadyState: {getReadyStateText(status.survival.readyState)}</div>
-            <div>地址: wss://server1.voidix.top:10203/</div>
+            <div>地址: wss://server1.voidix.top:10203</div>
             {status.survival.lastMessage && (
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 最新消息: {status.survival.lastMessage}

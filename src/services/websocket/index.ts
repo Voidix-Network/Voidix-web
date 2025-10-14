@@ -21,5 +21,9 @@ export { MultiConnectionManager, type MultiConnectionConfig } from './MultiConne
 export { MultiMessageRouter } from './MultiMessageRouter';
 export { MultiWebSocketComposer, MultiWebSocketService } from './MultiWebSocketComposer';
 
+// OmniCore API 模块
+export { OmniCoreMessageParser } from './OmniCoreMessageParser';
+export { OmniCoreRequestBuilder } from './OmniCoreRequestBuilder';
+
 // 类型定义导出
 export type * from './types';

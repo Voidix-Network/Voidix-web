@@ -1,6 +1,7 @@
 import { MultiWebSocketService } from '@/services/websocket';
 import { useServerStore } from '@/stores';
 import { useAggregatedStore } from '@/stores/aggregatedStore';
+import { useUptimeStore } from '@/stores/uptimeStore';
 import type { ConnectionStatus } from '@/types';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -194,6 +195,30 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
       handleFullUpdate(data);
     });
+
+    // 监听运行时间更新
+    service.on(
+      'runtimeUpdate',
+      (data: { runningTime: number; totalRunningTime: number; source: string }) => {
+        console.log('[useWebSocket] 收到运行时间更新:', {
+          runningTime: data.runningTime,
+          totalRunningTime: data.totalRunningTime,
+          source: data.source,
+        });
+
+        try {
+          const uptimeStore = useUptimeStore.getState();
+          console.log('[useWebSocket] 调用 uptimeStore.updateRunningTime');
+          uptimeStore.updateRunningTime(data.runningTime, data.totalRunningTime);
+          console.log('[useWebSocket] uptimeStore 更新成功，启动实时跟踪');
+
+          // 启动实时跟踪
+          uptimeStore.startRealtimeUptimeTracking();
+        } catch (error) {
+          console.error('[useWebSocket] uptimeStore 更新失败:', error);
+        }
+      }
+    );
 
     service.on(
       'maintenanceUpdate',

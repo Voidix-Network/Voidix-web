@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import type { UptimeState, UptimeActions } from './types';
+import type { UptimeActions, UptimeState } from './types';
 
 /**
  * 运行时间初始状态
@@ -85,9 +85,22 @@ export const useUptimeStore = create<UptimeState & UptimeActions>()(
      * @param totalRunningTime - 总运行时间（秒）
      */
     updateRunningTime: (runningTime: number, totalRunningTime: number) => {
+      const now = Date.now();
+
       set({
         runningTime,
         totalRunningTime,
+        initialRunningTimeSeconds: runningTime,
+        initialTotalRunningTimeSeconds: totalRunningTime,
+        lastUptimeUpdateTimestamp: now,
+      });
+
+      console.log('[UptimeStore] 运行时间已更新:', {
+        runningTime,
+        totalRunningTime,
+        initialRunningTimeSeconds: runningTime,
+        initialTotalRunningTimeSeconds: totalRunningTime,
+        lastUptimeUpdateTimestamp: now,
       });
     },
 

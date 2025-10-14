@@ -1,10 +1,8 @@
 // filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\pages\StatusPage.tsx
 import {
-  AnimatedSection,
-  BreadcrumbNavigation,
-  NoticeList,
-  ServerCard,
-  ServerGroupCard,
+    BreadcrumbNavigation,
+    ServerCard,
+    ServerGroupCard
 } from '@/components';
 import { SEO } from '@/components/seo';
 import { SERVER_DISPLAY_NAMES, getDynamicServerGroups } from '@/constants';
@@ -228,10 +226,11 @@ export const StatusPage: React.FC = () => {
             )}
           </div>
 
-          {/* 公告系统 */}
+          {/* 公告系统 - 已禁用（OmniCore API 不支持）
           <AnimatedSection className="mb-12">
             <NoticeList className="mb-8" pageSize={5} showHeader={true} />
           </AnimatedSection>
+          */}
 
           {/* 服务器状态列表 */}
           <div className="space-y-4">

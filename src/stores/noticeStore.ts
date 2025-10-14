@@ -1,4 +1,4 @@
-import type { Notice, NoticeRequest } from '@/types';
+import type { Notice } from '@/types';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import type { NoticeActions, NoticeState } from './types';
@@ -101,7 +101,17 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         return;
       }
 
-      console.debug('[NoticeStore] 请求公告数据:', { page, counts });
+      // OmniCore API 不支持公告功能，暂时禁用
+      console.debug('[NoticeStore] 公告功能已禁用 - OmniCore API 不支持');
+      set({
+        isLoading: false,
+        error: 'OmniCore API 不支持公告功能',
+        currentPage: page,
+        pageSize: counts,
+        lastFetchTime: now,
+      });
+
+      /* 以下代码已禁用 - OmniCore API 不支持公告功能
 
       const request: NoticeRequest = {
         type: 'get_notice',
@@ -109,7 +119,6 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
         counts,
       };
 
-      // 检查全局WebSocket连接，支持重试
       const checkAndSend = (retryCount = 0) => {
         if (window.voidixWebSocket?.send && typeof window.voidixWebSocket.send === 'function') {
           try {
@@ -119,7 +128,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
               error: null,
               currentPage: page,
               pageSize: counts,
-              lastFetchTime: now, // 更新请求时间
+              lastFetchTime: now,
             });
           } catch (error) {
             console.error('[NoticeStore] 发送公告请求失败:', error);
@@ -129,7 +138,6 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
             });
           }
         } else if (retryCount < 3) {
-          // 最多重试3次，每次延迟100ms
           console.warn(`[NoticeStore] WebSocket连接不可用，重试第${retryCount + 1}次...`);
           setTimeout(() => checkAndSend(retryCount + 1), 100);
         } else {
@@ -142,6 +150,7 @@ export const useNoticeStore = create<NoticeState & NoticeActions>()(
       };
 
       checkAndSend();
+      */
     },
 
     // 处理分页公告响应

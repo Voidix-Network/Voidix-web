@@ -87,9 +87,10 @@ export const useServerDataStore = create<ServerDataState & ServerDataActions>()(
     updateServerFromData: (serverId: string, data: ServerData) => {
       const displayName = getServerDisplayName(serverId, SERVER_DISPLAY_NAMES);
 
-      // 智能判断服务器在线状态
-      const isServerOnline =
-        data.isOnline !== undefined ? data.isOnline : data.online !== undefined && data.online >= 0;
+      // 严格判断服务器在线状态
+      // 1. 优先使用 isOnline 字段
+      // 2. 如果没有 isOnline，则永远视为离线（OmniCore API 明确提供 isOnline）
+      const isServerOnline = data.isOnline === true;
 
       const currentServer = get().servers[serverId];
       const serverInfo: ServerInfo = {
@@ -152,10 +153,8 @@ export const useServerDataStore = create<ServerDataState & ServerDataActions>()(
         (acc, [serverId, data]) => {
           const displayName = getServerDisplayName(serverId, SERVER_DISPLAY_NAMES);
 
-          const isServerOnline =
-            data.isOnline !== undefined
-              ? data.isOnline
-              : data.online !== undefined && data.online >= 0;
+          // 严格判断服务器在线状态（OmniCore API 明确提供 isOnline）
+          const isServerOnline = data.isOnline === true;
 
           const currentServer = currentServers[serverId];
 

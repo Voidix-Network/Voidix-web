@@ -7,6 +7,7 @@ import {
 } from './index';
 import { MultiConnectionManager, type MultiConnectionConfig } from './MultiConnectionManager';
 import { MultiMessageRouter } from './MultiMessageRouter';
+import { OmniCoreRequestBuilder } from './OmniCoreRequestBuilder';
 import type { WebSocketEventMap } from './types';
 
 export class MultiWebSocketComposer {
@@ -43,7 +44,7 @@ export class MultiWebSocketComposer {
     });
     this.maintenanceHandler = new MaintenanceHandler();
     this.multiConnectionManager = new MultiConnectionManager(this.eventEmitter, this.config);
-    this.multiMessageRouter = new MultiMessageRouter(this.eventEmitter, this.maintenanceHandler);
+    this.multiMessageRouter = new MultiMessageRouter(this.eventEmitter);
     this.eventCoordinator = new EventCoordinator(this.eventEmitter, this.reconnectStrategy, {
       disableReconnect: this.config.minigames.disableReconnect,
     });
@@ -94,6 +95,11 @@ export class MultiWebSocketComposer {
 
       // 防抖检查整体连接状态变化
       this.debouncedCheckConnectionState();
+
+      // 如果连接已建立，发送初始化请求
+      if (data.currentState === 'connected') {
+        this.initializeConnection(data.connectionName as 'minigames' | 'survival');
+      }
     });
   }
 
@@ -328,6 +334,67 @@ export class MultiWebSocketComposer {
       reconnectStrategy: this.reconnectStrategy,
     };
   }
+
+  /**
+   * 初始化连接 - 发送 OmniCore API 请求
+   */
+  private initializeConnection(connectionName: 'minigames' | 'survival'): void {
+    console.log(`[MultiWebSocketComposer] 初始化 ${connectionName} 连接，发送 OmniCore API 请求`);
+
+    // 延迟发送请求，确保 WebSocket 完全就绪
+    setTimeout(() => {
+      try {
+        // 1. 订阅玩家事件（实时推送）
+        const subscribeRequest = OmniCoreRequestBuilder.batchSubscribeEvents(
+          ['player_join', 'player_quit', 'player_switch_server'],
+          {
+            rate_limit_ms: 500, // 500ms 频率限制
+          }
+        );
+
+        console.log(
+          `[MultiWebSocketComposer] ${connectionName} 发送订阅请求:`,
+          subscribeRequest
+        );
+        this.send(connectionName, subscribeRequest);
+
+        // 2. 请求初始服务器状态（只请求一次）
+        const statusRequest = OmniCoreRequestBuilder.getAllServerStatus({
+          use_cache: false,
+          include_players: true,
+          include_ping: true,
+        });
+
+        console.log(
+          `[MultiWebSocketComposer] ${connectionName} 发送初始服务器状态请求:`,
+          statusRequest
+        );
+        this.send(connectionName, statusRequest);
+
+        // 3. 请求元信息（运行时间等）
+        const metaInfoRequest = OmniCoreRequestBuilder.getMetaInfoAll({
+          use_cache: false,
+          include_runtime: true,
+          include_proxy_stats: true,
+        });
+
+        console.log(
+          `[MultiWebSocketComposer] ${connectionName} 发送元信息请求:`,
+          metaInfoRequest
+        );
+        this.send(connectionName, metaInfoRequest);
+
+        // 注意：不再设置轮询，依赖事件订阅实时更新
+        console.log(`[MultiWebSocketComposer] ${connectionName} 初始化完成，依赖事件订阅实时更新`);
+      } catch (error) {
+        console.error(
+          `[MultiWebSocketComposer] ${connectionName} 初始化请求失败:`,
+          error
+        );
+      }
+    }, 100); // 100ms 延迟
+  }
+
 }
 
 export const MultiWebSocketService = Object.assign(MultiWebSocketComposer, {

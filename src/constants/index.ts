@@ -11,7 +11,7 @@ export * from './serverGroups';
 
 // WebSocket配置常量
 export const WEBSOCKET_CONFIG: WebSocketConfig = {
-  url: 'wss://server.voidix.top:10203',
+  url: 'wss://api.voidix.top:10203',
   maxReconnectAttempts: 5,
   reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
   disableReconnect: false,
@@ -22,9 +22,9 @@ export const WEBSOCKET_CONFIG: WebSocketConfig = {
 
 // 多连接WebSocket配置
 export const MULTI_WEBSOCKET_CONFIG = {
-  // 小游戏服务器连接
+  // 小游戏服务器连接 (OmniCore)
   minigames: {
-    url: 'wss://server.voidix.top:10203',
+    url: 'wss://api.voidix.top:10203',
     name: 'minigames',
     maxReconnectAttempts: 5,
     reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
@@ -32,9 +32,9 @@ export const MULTI_WEBSOCKET_CONFIG = {
     SUPPORTED_PROTOCOL_VERSION: 2,
     connectionTimeout: 5000,
   },
-  // 生存服务器连接
+  // 生存服务器连接 (独立服务器)
   survival: {
-    url: 'wss://server1.voidix.top:10203/',
+    url: 'wss://server1.voidix.top:10203',
     name: 'survival',
     maxReconnectAttempts: 5,
     reconnectIntervals: [1000, 2000, 5000, 10000, 30000],

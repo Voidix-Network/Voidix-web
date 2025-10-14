@@ -67,19 +67,9 @@ export const useAggregatedStore = create<AggregatedStoreState & AggregatedStoreA
         serverDataStore.updateMultipleServers(data.servers);
       }
 
-      // 更新运行时间
-      if (data.runningTime !== undefined || data.totalRunningTime !== undefined) {
-        const runningTime =
-          typeof data.runningTime === 'string' ? parseInt(data.runningTime) : data.runningTime;
-        const totalRunningTime =
-          typeof data.totalRunningTime === 'string'
-            ? parseInt(data.totalRunningTime)
-            : data.totalRunningTime;
-
-        if (runningTime !== undefined && totalRunningTime !== undefined) {
-          uptimeStore.updateRunningTime(runningTime, totalRunningTime);
-        }
-      }
+      // 注意：运行时间现在通过独立的 runtimeUpdate 事件处理
+      // fullUpdate 不再包含 runningTime 和 totalRunningTime 字段
+      // 如果 fullUpdate 意外包含这些字段，这里会忽略它们以避免覆盖正确的值
 
       // 更新维护状态
       connectionStore.updateMaintenanceStatus(
@@ -91,13 +81,18 @@ export const useAggregatedStore = create<AggregatedStoreState & AggregatedStoreA
       // 更新全局数据更新时间
       connectionStore.updateLastUpdateTime();
 
+      // 注意：运行时间现在通过 runtimeUpdate 事件单独更新
+      // 这里不再从 fullUpdate 中更新运行时间
       // 只有在连接正常且不在维护模式时才启动实时运行时间跟踪
       const isConnected = connectionStore.connectionStatus === 'connected';
       const shouldTrackTime =
         isConnected && !data.isMaintenance && !connectionStore.forceShowMaintenance;
 
       if (shouldTrackTime) {
-        uptimeStore.startRealtimeUptimeTracking();
+        // 如果有运行时间数据，确保实时跟踪已启动
+        if (uptimeStore.runningTime !== null && uptimeStore.runningTime !== undefined) {
+          uptimeStore.startRealtimeUptimeTracking();
+        }
       } else {
         uptimeStore.stopRealtimeUptimeTracking();
       }
