@@ -27,6 +27,9 @@ vi.mock('@/components/sections/TimelineSection', () => ({
 vi.mock('@/components/sections/TeamSection', () => ({
   TeamSection: () => <div data-testid="team-section">Team Section</div>,
 }));
+vi.mock('@/components/sections/LiveChatSection.tsx', () => ({
+  LiveChatSection: () => <div data-testid="live-chat-section">Live Chat Section</div>,
+}));
 
 // Mock SEO组件
 vi.mock('@/components/seo', () => ({
@@ -72,6 +75,7 @@ describe('HomePage', () => {
       // 验证所有section组件都被渲染
       expect(screen.getByTestId('hero-section')).toBeInTheDocument();
       expect(screen.getByTestId('about-section')).toBeInTheDocument();
+      expect(screen.getByTestId('live-chat-section')).toBeInTheDocument();
       expect(screen.getByTestId('servers-section')).toBeInTheDocument();
       expect(screen.getByTestId('versions-section')).toBeInTheDocument();
       expect(screen.getByTestId('timeline-section')).toBeInTheDocument();
@@ -129,8 +133,8 @@ describe('HomePage', () => {
       // 由于Fragment渲染，组件直接在container下
       const allChildren = Array.from(container.children);
 
-      // 验证有足够的子元素 (PageSEO + PerformanceOptimizer + 6个section = 8个)
-      expect(allChildren.length).toBe(8);
+      // 验证有足够的子元素 (PageSEO + PerformanceOptimizer + 7个section = 9个)
+      expect(allChildren.length).toBe(9);
 
       // 验证SEO和性能优化组件在内容组件之前
       expect(allChildren[0]).toHaveAttribute('data-testid', 'page-seo');
@@ -144,6 +148,7 @@ describe('HomePage', () => {
       const sections = [
         'hero-section',
         'about-section',
+        'live-chat-section',
         'servers-section',
         'versions-section',
         'timeline-section',
@@ -162,7 +167,7 @@ describe('HomePage', () => {
 
       // 验证React Fragment直接渲染子元素，没有额外wrapper
       // Fragment的所有子元素直接作为container的children
-      expect(container.children.length).toBe(8); // PageSEO + PerformanceOptimizer + 6个section
+      expect(container.children.length).toBe(9); // PageSEO + PerformanceOptimizer + 7个section
 
       // 验证第一个元素是PageSEO
       expect(container.firstElementChild?.tagName).toBe('DIV');

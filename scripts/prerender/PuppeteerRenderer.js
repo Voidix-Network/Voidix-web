@@ -48,7 +48,7 @@ export class PuppeteerRenderer {
 
       // 🚀 优化：禁用可能造成阻塞的功能
       await page.setRequestInterception(true);
-      page.on('request', (request) => {
+      page.on('request', request => {
         const resourceType = request.resourceType();
         // 阻止可能造成TBT的资源
         if (['websocket', 'eventsource', 'font', 'media', 'image'].includes(resourceType)) {
@@ -129,7 +129,6 @@ export class PuppeteerRenderer {
 
         // 额外等待一些动画完成
         await page.waitForTimeout(1000);
-
       } catch (timeoutError) {
         logger.warn(`等待渲染完成超时: ${routePath}, 继续使用当前状态`);
 
@@ -151,7 +150,7 @@ export class PuppeteerRenderer {
         const minifiedHtml = await minify(html, this.minifyOptions);
         const originalSize = html.length;
         const minifiedSize = minifiedHtml.length;
-        const compression = ((originalSize - minifiedSize) / originalSize * 100).toFixed(1);
+        const compression = (((originalSize - minifiedSize) / originalSize) * 100).toFixed(1);
 
         logger.info(`  HTML压缩: ${originalSize} → ${minifiedSize} 字符 (减少 ${compression}%)`);
         html = minifiedHtml;
