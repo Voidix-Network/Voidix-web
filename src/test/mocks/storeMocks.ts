@@ -209,17 +209,22 @@ export const mockUsePlayerIgnStore = vi.fn(() => ({
 }));
 
 // WebSocket状态hook mock
-export const mockUseWebSocketStatus = vi.fn(() => ({
+export const mockUseWebSocketV2 = vi.fn(() => ({
   connectionStatus: 'connected' as ConnectionStatus,
-  isConnected: true,
-  isConnecting: false,
-  isDisconnected: false,
+  servers: {},
+  serverTree: null,
+  aggregateStats: { totalPlayers: 0, onlineServers: 0, totalServers: 0 },
+  runtimeInfo: null,
+  proxyStats: null,
+  isMaintenance: false,
+  runningTime: null,
+  totalRunningTime: null,
 }));
 
 // 导出所有hooks的默认mocks
 export const defaultHookMocks = {
   useServerStoreCompat: () => mockServerStoreCompat,
-  useWebSocketStatus: mockUseWebSocketStatus,
+  useWebSocketV2: mockUseWebSocketV2,
   useServerPlayerIgns: mockUseServerPlayerIgns,
   usePlayerIgnStore: mockUsePlayerIgnStore,
 };

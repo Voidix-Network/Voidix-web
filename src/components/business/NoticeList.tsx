@@ -1,4 +1,4 @@
-import { useWebSocketStatus } from '@/hooks/useWebSocket';
+import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
 import { useNoticeStore } from '@/stores';
 import React, { useCallback, useEffect } from 'react';
 import { Pagination } from '../ui/Pagination';
@@ -36,7 +36,7 @@ export const NoticeList: React.FC<NoticeListProps> = ({
     debugWebSocketStatus,
   } = useNoticeStore();
 
-  const { connectionStatus } = useWebSocketStatus();
+  const { connectionStatus } = useWebSocketV2();
 
   // 转换公告数据为数组并按时间降序排序（最新的在前面）
   const noticeList = Object.entries(notices)

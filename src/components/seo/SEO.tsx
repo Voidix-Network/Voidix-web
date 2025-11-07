@@ -56,12 +56,6 @@ const generateSitelinksData = () => {
       },
       {
         '@type': 'SiteNavigationElement',
-        name: '监控面板',
-        description: '服务器性能监控和运行数据统计',
-        url: 'https://www.voidix.net/monitor',
-      },
-      {
-        '@type': 'SiteNavigationElement',
         name: '常见问题',
         description: '新手玩家入门指南和常见问题解答',
         url: 'https://www.voidix.net/faq',
@@ -157,12 +151,6 @@ const generateBasicStructuredData = (pageKey?: string) => {
         '@id': 'https://www.voidix.net/faq',
         name: '常见问题',
         description: '新手玩家指南和FAQ',
-      },
-      {
-        '@type': 'WebPage',
-        '@id': 'https://www.voidix.net/monitor',
-        name: '监控面板',
-        description: '服务器性能监控',
       },
     ],
   };
