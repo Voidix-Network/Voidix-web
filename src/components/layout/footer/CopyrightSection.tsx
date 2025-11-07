@@ -15,13 +15,23 @@ export const CopyrightSection: React.FC = () => {
           本服务器为非商业公益项目，与Mojang Studios无官方关联。
         </p>
       </div>
-      <div className="text-xs text-gray-300 h-4 leading-4 flex-shrink-0">
+      <div className="text-sm text-gray-300 flex-shrink-0 space-y-2 md:text-right">
         <p>
           服务器由{' '}
           <GradientText variant="primary" className="text-xs">
             Voidix Team
           </GradientText>{' '}
           维护
+        </p>
+        <p className="text-xs font-medium">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-399 hover:text-blue-400 transition-colors"
+          >
+            粤ICP备2025491588号-1
+          </a>
         </p>
       </div>
     </div>

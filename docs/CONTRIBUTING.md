@@ -375,7 +375,6 @@ git commit -m "ci: update GitHub Actions workflow"
 所有 PR 都需要通过：
 
 - ✅ **自动化检查**
-
   - 代码格式检查（Prettier）
   - 类型检查（TypeScript）
   - 单元测试（Vitest）

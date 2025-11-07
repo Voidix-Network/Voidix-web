@@ -41,33 +41,33 @@ const checks = [
   {
     name: 'DNS预解析标签',
     pattern: /rel=dns-prefetch|rel="dns-prefetch"/g,
-    description: '提前解析第三方域名'
+    description: '提前解析第三方域名',
   },
   {
     name: '预连接标签',
     pattern: /rel=preconnect|rel="preconnect"/g,
-    description: '提前建立连接'
+    description: '提前建立连接',
   },
   {
     name: '资源预加载标签',
     pattern: /rel=preload(?![a-z])|rel="preload"/g,
-    description: '预加载关键资源'
+    description: '预加载关键资源',
   },
   {
     name: '模块预加载标签',
     pattern: /rel=modulepreload|rel="modulepreload"/g,
-    description: '预加载JS模块'
+    description: '预加载JS模块',
   },
   {
     name: '页面预获取标签',
     pattern: /rel=prefetch|rel="prefetch"/g,
-    description: '预获取可能访问的页面'
+    description: '预获取可能访问的页面',
   },
   {
     name: 'CSS样式表标签',
     pattern: /rel=stylesheet|rel="stylesheet"/g,
-    description: 'CSS样式表引用'
-  }
+    description: 'CSS样式表引用',
+  },
 ];
 
 let totalTags = 0;
@@ -93,7 +93,7 @@ const criticalResources = [
   { name: 'CSS文件', pattern: /\.css/g },
   { name: 'JS文件', pattern: /\.js/g },
   { name: '图片文件', pattern: /logo\.png/g },
-  { name: '第三方脚本', pattern: /(googletagmanager|clarity|bytegoofy)/g }
+  { name: '第三方脚本', pattern: /(googletagmanager|clarity|bytegoofy)/g },
 ];
 
 criticalResources.forEach(resource => {
@@ -104,7 +104,9 @@ criticalResources.forEach(resource => {
 
 // 输出示例预加载标签 (兼容压缩格式)
 console.log('\n📋 示例预加载标签:');
-const preloadMatches = html.match(/(?:rel=preload|rel="preload"|rel=modulepreload|rel="modulepreload")[^>]*>/g);
+const preloadMatches = html.match(
+  /(?:rel=preload|rel="preload"|rel=modulepreload|rel="modulepreload")[^>]*>/g
+);
 if (preloadMatches && preloadMatches.length > 0) {
   preloadMatches.slice(0, 3).forEach((tag, index) => {
     console.log(`   ${index + 1}. <link ${tag}`);

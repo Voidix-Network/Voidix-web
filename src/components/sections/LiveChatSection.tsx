@@ -1,7 +1,7 @@
 import { GradientText } from '@/components';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, TrendingUp, ChevronDown } from 'lucide-react';
-import React, { useEffect, useRef, useState, UIEvent, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDown, MessageCircle, TrendingUp } from 'lucide-react';
+import React, { UIEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * WebSocket消息类型定义
@@ -34,7 +34,7 @@ const ADMIN_UUIDS = [
   '6fee67b8-4e11-469a-95e2-b689145bf8a0',
   '520e26b3-1a35-42ec-ab4f-9c6eeacaa96e',
   'c068d6d5-5104-4e60-9914-9263e55dae52',
-  'd92297fc-ac30-4023-a0ea-bd0deed0e5a2'
+  'd92297fc-ac30-4023-a0ea-bd0deed0e5a2',
 ];
 
 /**
@@ -63,9 +63,9 @@ const ChatMessageItem: React.FC<{ message: ChatMessage }> = ({ message }) => {
 
   const getPlayerNameStyle = () => {
     if (isAdmin) {
-      return "text-sm font-semibold text-red-400";
+      return 'text-sm font-semibold text-red-400';
     }
-    return "text-sm font-semibold text-blue-400";
+    return 'text-sm font-semibold text-blue-400';
   };
 
   return (
@@ -80,14 +80,14 @@ const ChatMessageItem: React.FC<{ message: ChatMessage }> = ({ message }) => {
       }`}
     >
       <div className="flex items-start gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          isAdmin
-            ? 'bg-gradient-to-br from-red-500/20 to-pink-500/20'
-            : 'bg-gradient-to-br from-blue-500/20 to-purple-500/20'
-        }`}>
-          <span className={`text-xs font-bold ${
-            isAdmin ? 'text-red-400' : 'text-blue-400'
-          }`}>
+        <div
+          className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+            isAdmin
+              ? 'bg-gradient-to-br from-red-500/20 to-pink-500/20'
+              : 'bg-gradient-to-br from-blue-500/20 to-purple-500/20'
+          }`}
+        >
+          <span className={`text-xs font-bold ${isAdmin ? 'text-red-400' : 'text-blue-400'}`}>
             {message.playerName.charAt(0).toUpperCase()}
           </span>
         </div>
@@ -95,9 +95,7 @@ const ChatMessageItem: React.FC<{ message: ChatMessage }> = ({ message }) => {
           <div className="flex items-baseline gap-2 mb-1 flex-wrap">
             <span className={getPlayerNameStyle()}>
               {message.playerName}
-              {isAdmin && (
-                <span className="ml-1 text-xs text-red-300">[管理]</span>
-              )}
+              {isAdmin && <span className="ml-1 text-xs text-red-300">[管理]</span>}
             </span>
             {message.server && <span className="text-xs text-gray-500">@{message.server}</span>}
             <span className="text-xs text-gray-500">{formatTimestamp(message.timestamp)}</span>
@@ -165,14 +163,16 @@ export const LiveChatSection: React.FC = () => {
             return;
           }
           setIsConnected(true);
-          ws.send(JSON.stringify({
-            type: 'subscribe_event',
-            action: 'batch_subscribe',
-            event_ids: ['player_chat']
-          }));
+          ws.send(
+            JSON.stringify({
+              type: 'subscribe_event',
+              action: 'batch_subscribe',
+              event_ids: ['player_chat'],
+            })
+          );
         };
 
-        ws.onmessage = (event) => {
+        ws.onmessage = event => {
           if (!isMountedRef.current) return;
 
           try {
@@ -180,10 +180,10 @@ export const LiveChatSection: React.FC = () => {
             if (data.type === 'event_call' && data.event_id === 'player_chat') {
               const chatEvent = data as PlayerChatEvent;
 
-              setMessages((prev) => {
+              setMessages(prev => {
                 // 检查重复消息
                 const isDuplicate = prev.some(
-                  (msg) =>
+                  msg =>
                     msg.playerName === chatEvent.event_data.name &&
                     msg.message === chatEvent.event_data.message &&
                     msg.timestamp === chatEvent.timestamp
@@ -219,7 +219,7 @@ export const LiveChatSection: React.FC = () => {
                 return [...prev, newMessage].slice(-30);
               });
 
-              setMessageCount((prev) => prev + 1);
+              setMessageCount(prev => prev + 1);
             }
           } catch (error) {
             console.error('解析WebSocket消息失败:', error);
@@ -289,7 +289,7 @@ export const LiveChatSection: React.FC = () => {
       >
         <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center">
           {/* 左侧聊天框 */}
-          <div className="md:w-1/2 relative mt-10 md:mt-0 w-full">
+          <div className="md:w-1/2 relative w-full order-2 md:order-1">
             <div className="absolute -top-8 -left-8 w-32 h-32 bg-purple-600 rounded-full filter blur-3xl opacity-20"></div>
             <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-600 rounded-full filter blur-3xl opacity-20"></div>
             <div className="relative bg-[#1a1f2e]/50 border border-[#2a365c] rounded-2xl overflow-hidden backdrop-blur-sm">
@@ -299,8 +299,12 @@ export const LiveChatSection: React.FC = () => {
                   <span className="font-semibold">实时聊天</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
-                  <span className="text-xs text-gray-400">{isConnected ? '已连接' : '连接中...'}</span>
+                  <div
+                    className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}
+                  ></div>
+                  <span className="text-xs text-gray-400">
+                    {isConnected ? '已连接' : '连接中...'}
+                  </span>
                 </div>
               </div>
 
@@ -317,7 +321,7 @@ export const LiveChatSection: React.FC = () => {
                     </div>
                   ) : (
                     <AnimatePresence>
-                      {messages.map((msg) => (
+                      {messages.map(msg => (
                         <ChatMessageItem key={msg.id} message={msg} />
                       ))}
                     </AnimatePresence>
@@ -336,12 +340,12 @@ export const LiveChatSection: React.FC = () => {
                     >
                       <motion.div
                         animate={{
-                          translateY: [0, -2, 0]
+                          translateY: [0, -2, 0],
                         }}
                         transition={{
                           duration: 1,
                           repeat: Infinity,
-                          ease: "easeInOut"
+                          ease: 'easeInOut',
                         }}
                       >
                         <ChevronDown className="w-3 h-3" />
@@ -360,7 +364,7 @@ export const LiveChatSection: React.FC = () => {
             </div>
           </div>
           {/* 右侧内容 */}
-          <div className="md:w-1/2">
+          <div className="md:w-1/2 order-1 md:order-2">
             <div>
               <h2 className="text-3xl font-bold mb-6">
                 感受
@@ -384,7 +388,9 @@ export const LiveChatSection: React.FC = () => {
                     <MessageCircle className="w-4 h-4 text-purple-400" />
                     <div className="text-xs text-gray-400">连接状态</div>
                   </div>
-                  <div className={`text-base font-bold ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+                  <div
+                    className={`text-base font-bold ${isConnected ? 'text-green-400' : 'text-red-400'}`}
+                  >
                     {isConnected ? '在线' : '离线'}
                   </div>
                 </div>
