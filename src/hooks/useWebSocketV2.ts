@@ -101,37 +101,40 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, []);
 
-  const updateServerPlayers = useCallback((serverName: string, player: { name: string; uuid: string }, action: 'add' | 'remove') => {
-    setServers(prev => {
-      const updated = { ...prev };
-      const server = updated[serverName];
+  const updateServerPlayers = useCallback(
+    (serverName: string, player: { name: string; uuid: string }, action: 'add' | 'remove') => {
+      setServers(prev => {
+        const updated = { ...prev };
+        const server = updated[serverName];
 
-      if (!server) return prev;
+        if (!server) return prev;
 
-      const currentPlayers = server.players || [];
-      let newPlayers: Array<{ name: string; uuid: string }>;
-      let newCount: number;
+        const currentPlayers = server.players || [];
+        let newPlayers: Array<{ name: string; uuid: string }>;
+        let newCount: number;
 
-      if (action === 'add') {
-        if (currentPlayers.some(p => p.uuid === player.uuid)) {
-          return prev;
+        if (action === 'add') {
+          if (currentPlayers.some(p => p.uuid === player.uuid)) {
+            return prev;
+          }
+          newPlayers = [...currentPlayers, player];
+          newCount = (server.players_count || 0) + 1;
+        } else {
+          newPlayers = currentPlayers.filter(p => p.uuid !== player.uuid);
+          newCount = Math.max(0, (server.players_count || 0) - 1);
         }
-        newPlayers = [...currentPlayers, player];
-        newCount = (server.players_count || 0) + 1;
-      } else {
-        newPlayers = currentPlayers.filter(p => p.uuid !== player.uuid);
-        newCount = Math.max(0, (server.players_count || 0) - 1);
-      }
 
-      updated[serverName] = {
-        ...server,
-        players: newPlayers,
-        players_count: newCount,
-      };
+        updated[serverName] = {
+          ...server,
+          players: newPlayers,
+          players_count: newCount,
+        };
 
-      return updated;
-    });
-  }, []);
+        return updated;
+      });
+    },
+    []
+  );
 
   const calculateAggregateStats = useCallback((serversData: Record<string, ServerInfo>) => {
     const serverList = Object.values(serversData);
@@ -142,23 +145,26 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setAggregateStats({ totalPlayers, onlineServers, totalServers });
   }, []);
 
-  const handleServerStatusResponse = useCallback((data: any) => {
-    if (data.servers) {
-      const serversMap: Record<string, ServerInfo> = {};
-      data.servers.forEach((server: any) => {
-        serversMap[server.name] = {
-          name: server.name,
-          online: server.online ?? false,
-          players_count: server.players_count ?? 0,
-          players: server.players,
-          ping: server.ping,
-          error: server.error,
-        };
-      });
-      setServers(serversMap);
-      calculateAggregateStats(serversMap);
-    }
-  }, [calculateAggregateStats]);
+  const handleServerStatusResponse = useCallback(
+    (data: any) => {
+      if (data.servers) {
+        const serversMap: Record<string, ServerInfo> = {};
+        data.servers.forEach((server: any) => {
+          serversMap[server.name] = {
+            name: server.name,
+            online: server.online ?? false,
+            players_count: server.players_count ?? 0,
+            players: server.players,
+            ping: server.ping,
+            error: server.error,
+          };
+        });
+        setServers(serversMap);
+        calculateAggregateStats(serversMap);
+      }
+    },
+    [calculateAggregateStats]
+  );
 
   const handleServerTreeResponse = useCallback((data: any) => {
     if (data.data) {
@@ -179,108 +185,117 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, []);
 
-  const handlePlayerEvent = useCallback((eventType: string, data: PlayerEventData) => {
-    const { name, uuid, last_server, new_server } = data;
-    const player = { name, uuid };
+  const handlePlayerEvent = useCallback(
+    (eventType: string, data: PlayerEventData) => {
+      const { name, uuid, last_server, new_server } = data;
+      const player = { name, uuid };
 
-    console.log(`处理事件: ${eventType}`, data);
+      console.log(`处理事件: ${eventType}`, data);
 
-    switch (eventType) {
-      case 'player_join':
-        console.log(`Player ${name} joined the network`);
-        break;
+      switch (eventType) {
+        case 'player_join':
+          console.log(`Player ${name} joined the network`);
+          break;
 
-      case 'player_quit':
-        setServers(prev => {
-          const updated = { ...prev };
-          Object.keys(updated).forEach(serverName => {
-            const server = updated[serverName];
-            const currentPlayers = server.players || [];
-            const playerIndex = currentPlayers.findIndex(p => p.uuid === uuid);
+        case 'player_quit':
+          setServers(prev => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach(serverName => {
+              const server = updated[serverName];
+              const currentPlayers = server.players || [];
+              const playerIndex = currentPlayers.findIndex(p => p.uuid === uuid);
 
-            if (playerIndex !== -1) {
-              updated[serverName] = {
-                ...server,
-                players: currentPlayers.filter(p => p.uuid !== uuid),
-                players_count: Math.max(0, (server.players_count || 0) - 1),
-              };
-            }
+              if (playerIndex !== -1) {
+                updated[serverName] = {
+                  ...server,
+                  players: currentPlayers.filter(p => p.uuid !== uuid),
+                  players_count: Math.max(0, (server.players_count || 0) - 1),
+                };
+              }
+            });
+            return updated;
           });
-          return updated;
-        });
-        break;
-
-      case 'player_switch_server':
-        if (last_server) {
-          updateServerPlayers(last_server, player, 'remove');
-        }
-        if (new_server) {
-          updateServerPlayers(new_server, player, 'add');
-        }
-        break;
-
-      default:
-        console.warn('Unknown player event type:', eventType);
-    }
-
-    setServers(prev => {
-      calculateAggregateStats(prev);
-      return prev;
-    });
-  }, [updateServerPlayers, calculateAggregateStats]);
-
-  const handleEventCall = useCallback((data: any) => {
-    const { event_id, event_data } = data;
-
-    console.log(`收到事件调用: ${event_id}`, event_data);
-
-    switch (event_id) {
-      case 'player_join':
-      case 'player_quit':
-      case 'player_switch_server':
-        handlePlayerEvent(event_id, event_data);
-        break;
-      case 'maintenance_mode':
-        setIsMaintenance(event_data.enabled ?? false);
-        break;
-      default:
-        console.log('Unknown event_id in event_call:', event_id);
-    }
-  }, [handlePlayerEvent]);
-
-  const handleMessage = useCallback((event: MessageEvent) => {
-    try {
-      const message = JSON.parse(event.data);
-      const { type, ...data } = message;
-
-      console.log('收到 WebSocket 消息:', type, data);
-
-      switch (type) {
-        case 'server_status_response':
-          handleServerStatusResponse(data);
           break;
-        case 'get_server_tree_response':
-          handleServerTreeResponse(data);
+
+        case 'player_switch_server':
+          if (last_server) {
+            updateServerPlayers(last_server, player, 'remove');
+          }
+          if (new_server) {
+            updateServerPlayers(new_server, player, 'add');
+          }
           break;
-        case 'meta_info_response':
-          handleMetaInfoResponse(data);
+
+        default:
+          console.warn('Unknown player event type:', eventType);
+      }
+
+      setServers(prev => {
+        calculateAggregateStats(prev);
+        return prev;
+      });
+    },
+    [updateServerPlayers, calculateAggregateStats]
+  );
+
+  const handleEventCall = useCallback(
+    (data: any) => {
+      const { event_id, event_data } = data;
+
+      console.log(`收到事件调用: ${event_id}`, event_data);
+
+      switch (event_id) {
+        case 'player_join':
+        case 'player_quit':
+        case 'player_switch_server':
+          handlePlayerEvent(event_id, event_data);
           break;
-        case 'event_call':
-          handleEventCall(data);
+        case 'maintenance_mode':
+          setIsMaintenance(event_data.enabled ?? false);
           break;
         default:
-          console.log('Unknown message type:', type);
+          console.log('Unknown event_id in event_call:', event_id);
       }
-    } catch (error) {
-      console.error('Failed to parse WebSocket message:', error);
-    }
-  }, [
-    handleServerStatusResponse,
-    handleServerTreeResponse,
-    handleMetaInfoResponse,
-    handlePlayerEvent,
-    handleEventCall
-  ]);
+    },
+    [handlePlayerEvent]
+  );
+
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      try {
+        const message = JSON.parse(event.data);
+        const { type, ...data } = message;
+
+        console.log('收到 WebSocket 消息:', type, data);
+
+        switch (type) {
+          case 'server_status_response':
+            handleServerStatusResponse(data);
+            break;
+          case 'get_server_tree_response':
+            handleServerTreeResponse(data);
+            break;
+          case 'meta_info_response':
+            handleMetaInfoResponse(data);
+            break;
+          case 'event_call':
+            handleEventCall(data);
+            break;
+          default:
+            console.log('Unknown message type:', type);
+        }
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error);
+      }
+    },
+    [
+      handleServerStatusResponse,
+      handleServerTreeResponse,
+      handleMetaInfoResponse,
+      handlePlayerEvent,
+      handleEventCall,
+    ]
+  );
 
   const startMetaUpdate = useCallback(() => {
     if (metaUpdateIntervalRef.current) {
@@ -339,7 +354,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       ws.onmessage = handleMessage;
 
-      ws.onerror = (error) => {
+      ws.onerror = error => {
         console.error('WebSocket error:', error);
         setConnectionStatus('failed');
       };
@@ -393,11 +408,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     totalRunningTime: runtimeInfo?.total_uptime_seconds ?? null,
   };
 
-  return React.createElement(
-    WebSocketContext.Provider,
-    { value },
-    children
-  );
+  return React.createElement(WebSocketContext.Provider, { value }, children);
 };
 
 export const useWebSocketV2 = () => {

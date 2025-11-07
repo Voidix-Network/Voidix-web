@@ -1,8 +1,5 @@
 // filepath: src/pages/StatusPage.tsx
-import {
-  AnimatedSection,
-  BreadcrumbNavigation,
-} from '@/components';
+import { AnimatedSection, BreadcrumbNavigation } from '@/components';
 import { SEO } from '@/components/seo';
 import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
 import { analytics } from '@/services/analytics';
@@ -106,7 +103,13 @@ interface PlayerCardProps {
   index: number;
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ player, isPremium, avatarUrl, fallbackSvg, index }) => {
+const PlayerCard: React.FC<PlayerCardProps> = ({
+  player,
+  isPremium,
+  avatarUrl,
+  fallbackSvg,
+  index,
+}) => {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; show: boolean }>({
     x: 0,
     y: 0,
@@ -140,7 +143,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, isPremium, avatarUrl, f
           src={avatarUrl}
           alt={player.name}
           className="w-4 h-4 rounded-sm"
-          onError={(e) => {
+          onError={e => {
             (e.target as HTMLImageElement).src = fallbackSvg;
           }}
           loading="lazy"
@@ -245,7 +248,8 @@ const ServerCard: React.FC<ServerCardProps> = ({ serverInfo, displayName }) => {
 
                 // 直接使用 Crafatar 获取头像
                 const avatarUrl = `https://crafatar.com/avatars/${player.uuid}?size=32&overlay=true`;
-                const fallbackSvg = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Crect fill="%234a5568" width="16" height="16"/%3E%3C/svg%3E';
+                const fallbackSvg =
+                  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Crect fill="%234a5568" width="16" height="16"/%3E%3C/svg%3E';
 
                 return (
                   <PlayerCard
@@ -281,12 +285,12 @@ interface ServerGroupCardProps {
 }
 
 const ServerGroupCard: React.FC<ServerGroupCardProps> = ({
-                                                           groupInfo,
-                                                           groupStats,
-                                                           isExpanded,
-                                                           onToggle,
-                                                           children,
-                                                         }) => {
+  groupInfo,
+  groupStats,
+  isExpanded,
+  onToggle,
+  children,
+}) => {
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden transition-all duration-300 hover:border-gray-600 hover:shadow-lg hover:shadow-gray-900/30">
       <div
@@ -334,7 +338,7 @@ const ServerGroupCard: React.FC<ServerGroupCardProps> = ({
             <div
               key={index}
               style={{
-                animation: isExpanded ? `slideInLeft 0.4s ease-out ${index * 0.08}s both` : 'none'
+                animation: isExpanded ? `slideInLeft 0.4s ease-out ${index * 0.08}s both` : 'none',
               }}
             >
               {child}
@@ -347,14 +351,8 @@ const ServerGroupCard: React.FC<ServerGroupCardProps> = ({
 };
 
 export const StatusPage: React.FC = () => {
-  const {
-    connectionStatus,
-    servers,
-    serverTree,
-    isMaintenance,
-    runningTime,
-    totalRunningTime,
-  } = useWebSocketV2();
+  const { connectionStatus, servers, serverTree, isMaintenance, runningTime, totalRunningTime } =
+    useWebSocketV2();
 
   const aggregateStats = useMemo(() => {
     const serverList = Object.values(servers);
@@ -403,7 +401,7 @@ export const StatusPage: React.FC = () => {
   }, [servers, aggregateStats]);
 
   // 递归收集服务器并计算统计
-  const collectServersAndStats = (node: any): { servers: any[], stats: any } => {
+  const collectServersAndStats = (node: any): { servers: any[]; stats: any } => {
     const result: any[] = [];
 
     const traverse = (n: any) => {
@@ -425,7 +423,7 @@ export const StatusPage: React.FC = () => {
         totalPlayers,
         onlineServers,
         totalServers: result.length,
-      }
+      },
     };
   };
 

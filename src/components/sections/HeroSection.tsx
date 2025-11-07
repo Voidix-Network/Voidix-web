@@ -8,9 +8,7 @@ import React from 'react';
  * 英雄区域组件 - 适配新版API
  */
 export const HeroSection: React.FC = () => {
-  const {
-    proxyStats
-  } = useWebSocketV2();
+  const { proxyStats } = useWebSocketV2();
   const navigate = useNavigate();
 
   // 获取小游戏群组总人数（从代理统计中获取）
@@ -72,7 +70,7 @@ export const HeroSection: React.FC = () => {
             status="maintenance"
             players={0}
             maintenanceText="状态系统维护"
-            description={"生存服状态查询系统当前正在维护，建议您进入游戏检查生存服状态"}
+            description={'生存服状态查询系统当前正在维护，建议您进入游戏检查生存服状态'}
           />
         </motion.div>
 
@@ -83,7 +81,7 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-8 flex justify-center"
         >
-          <a href={"https://geysermc.org/wiki/geyser/"}>
+          <a href={'https://geysermc.org/wiki/geyser/'}>
             <div className="inline-flex items-center gap-2 bg-[#1a1f2e]/50 border border-gray-700 rounded-full px-4 py-2">
               <svg
                 className="h-5 w-5 text-blue-400"

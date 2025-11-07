@@ -19,14 +19,14 @@ interface ServerStatusCardProps {
  * 服务器状态卡片组件 - 优化维护状态显示
  */
 export const ServerStatusCard: React.FC<ServerStatusCardProps> = ({
-                                                                    type,
-                                                                    address,
-                                                                    status,
-                                                                    players,
-                                                                    className,
-                                                                    maintenanceText,
-                                                                    description,
-                                                                  }) => {
+  type,
+  address,
+  status,
+  players,
+  className,
+  maintenanceText,
+  description,
+}) => {
   const getStatusDotColor = (status: ServerStatus) => {
     switch (status) {
       case 'online':
@@ -75,15 +75,19 @@ export const ServerStatusCard: React.FC<ServerStatusCardProps> = ({
         <div className="font-mono text-lg font-bold mb-2">{address}</div>
       </div>
 
-      <div className="flex justify-between items-end"> {/* 改为 items-end 确保底部对齐 */}
+      <div className="flex justify-between items-end">
+        {' '}
+        {/* 改为 items-end 确保底部对齐 */}
         <div className="text-xs text-gray-300">{getCompatibilityText(type)}</div>
         <div className="flex items-center gap-2">
-          <div className={cn(
-            "text-sm font-semibold",
-            status === 'online' && "text-green-400",
-            status === 'offline' && "text-red-400",
-            status === 'maintenance' && "text-yellow-400"
-          )}>
+          <div
+            className={cn(
+              'text-sm font-semibold',
+              status === 'online' && 'text-green-400',
+              status === 'offline' && 'text-red-400',
+              status === 'maintenance' && 'text-yellow-400'
+            )}
+          >
             {getDisplayStatus()}
           </div>
           {/* 维护状态下显示说明提示图标 */}

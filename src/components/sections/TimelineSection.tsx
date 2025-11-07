@@ -55,10 +55,11 @@ export const TimelineSection: React.FC = () => {
     {
       date: '2025年10月16日',
       title: 'Voidix OmniCore Fast API',
-      description: 'Voidix OmniCore Fast API(简称Voidix OmniCore)上线替换Voidix-Connect，提供公开且强大快速的数据查询API',
+      description:
+        'Voidix OmniCore Fast API(简称Voidix OmniCore)上线替换Voidix-Connect，提供公开且强大快速的数据查询API',
       position: 'right',
       color: 'purple',
-    }
+    },
   ];
 
   return (

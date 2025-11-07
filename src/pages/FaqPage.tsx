@@ -55,12 +55,15 @@ const faqData: FaqItem[] = [
     answer: (
       <span>
         我们欣赏您的这份热情！我们的“开放”理念，意味着我们乐见任何为社群做出卓越贡献、并展现出责任心的成员成为我们的一员。管理团队的加入并非通过简单申请，而是基于您在社群中的长期贡献、专业能力以及与社群理念的契合度。如果您确信自己符合要求，欢迎您通过{' '}
-        <a href="mailto:support@voidix.net" className="text-blue-400 hover:text-blue-300 hover:underline">
+        <a
+          href="mailto:support@voidix.net"
+          className="text-blue-400 hover:text-blue-300 hover:underline"
+        >
           电子邮件
         </a>{' '}
         或现管理成员提交一份正式的申请，阐述您的动机、构想和能为社群带来的价值。我们将认真评估每一份用心的申请。
       </span>
-    )
+    ),
   },
 ];
 

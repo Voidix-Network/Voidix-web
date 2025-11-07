@@ -7,11 +7,7 @@ import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
  * 适配新版API
  */
 export const ServerStatusBar: React.FC = () => {
-  const {
-    connectionStatus,
-    aggregateStats,
-    runtimeInfo
-  } = useWebSocketV2();
+  const { connectionStatus, aggregateStats, runtimeInfo } = useWebSocketV2();
 
   // 获取最后更新时间
   const getLastUpdateTime = () => {
@@ -57,23 +53,23 @@ export const ServerStatusBar: React.FC = () => {
       case 'connected':
         return {
           dot: 'bg-green-400 shadow-lg shadow-green-400/30',
-          text: 'text-green-400'
+          text: 'text-green-400',
         };
       case 'reconnecting':
         return {
           dot: 'bg-yellow-400 shadow-lg shadow-yellow-400/30 animate-pulse',
-          text: 'text-yellow-400'
+          text: 'text-yellow-400',
         };
       case 'failed':
       case 'disconnected':
         return {
           dot: 'bg-red-400 shadow-lg shadow-red-400/30',
-          text: 'text-red-400'
+          text: 'text-red-400',
         };
       default:
         return {
           dot: 'bg-gray-400 shadow-lg shadow-gray-400/30',
-          text: 'text-gray-400'
+          text: 'text-gray-400',
         };
     }
   };
@@ -96,14 +92,10 @@ export const ServerStatusBar: React.FC = () => {
         </div>
         <div className="text-sm text-gray-300 min-w-[120px]">
           在线玩家:{' '}
-          <span className="text-green-400 font-semibold">
-            {aggregateStats?.totalPlayers || 0}
-          </span>
+          <span className="text-green-400 font-semibold">{aggregateStats?.totalPlayers || 0}</span>
         </div>
       </div>
-      <div className="text-sm text-gray-300 min-w-[180px]">
-        最后更新: {getLastUpdateTime()}
-      </div>
+      <div className="text-sm text-gray-300 min-w-[180px]">最后更新: {getLastUpdateTime()}</div>
     </div>
   );
 };

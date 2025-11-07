@@ -113,12 +113,12 @@ interface ServerStatusRowProps {
 }
 
 const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
-                                                           title,
-                                                           status,
-                                                           players,
-                                                           id,
-                                                           isConnectionFailed,
-                                                         }) => {
+  title,
+  status,
+  players,
+  id,
+  isConnectionFailed,
+}) => {
   const getDisplayText = () => {
     if (isConnectionFailed) {
       return '连接失败';
@@ -177,12 +177,7 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
  * 关于我们组件 - 适配新版 API
  */
 export const AboutSection: React.FC = () => {
-  const {
-    connectionStatus,
-    servers,
-    aggregateStats,
-    runtimeInfo
-  } = useWebSocketV2();
+  const { connectionStatus, servers, aggregateStats, runtimeInfo } = useWebSocketV2();
 
   // 检查连接状态
   const isConnectionFailed = connectionStatus !== 'connected';

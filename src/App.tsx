@@ -22,7 +22,9 @@ import { WebSocketProvider } from './hooks/useWebSocketV2';
  */
 function App() {
   return (
-    <WebSocketProvider> {/* 最外层：WebSocket全局状态 */}
+    <WebSocketProvider>
+      {' '}
+      {/* 最外层：WebSocket全局状态 */}
       <SEOProvider>
         {/* 简化的Cookie同意管理 */}
         <CookieConsent />

@@ -275,9 +275,7 @@ const TeamMemberCard: React.FC<TeamMember & { animationDelay?: number }> = props
               <div className="flex items-baseline gap-2">
                 <h3 className="text-lg font-bold">{displayName}</h3>
                 {aka && aka.length > 0 && (
-                  <span className="text-xs text-gray-500 font-normal">
-                    ({aka.join(' / ')})
-                  </span>
+                  <span className="text-xs text-gray-500 font-normal">({aka.join(' / ')})</span>
                 )}
               </div>
               <div className={`${roleColor} text-xs`}>{role}</div>
@@ -624,10 +622,7 @@ export const TeamSection: React.FC = () => {
         '励志于搭建一个环境友好，无需付费，可以和大家欢乐游玩的地方',
         '负责网站后端服务搭建与主要编程开发',
       ],
-      aka: [
-        "Neko110923",
-        "NekoEpisode"
-      ],
+      aka: ['Neko110923', 'NekoEpisode'],
     },
     {
       name: 'CYsonHab',
@@ -646,9 +641,7 @@ export const TeamSection: React.FC = () => {
         '主打"慢工出细活"的理念',
         '负责次要编程开发',
       ],
-      aka: [
-        "cyh"
-      ],
+      aka: ['cyh'],
     },
     {
       name: 'Almost Declaes',
@@ -666,9 +659,7 @@ export const TeamSection: React.FC = () => {
         '提出多个服务器特色玩法方案',
         '善于发现游戏平衡性问题并提供解决方案',
       ],
-      aka: [
-          "Hao_zi-Rat"
-      ],
+      aka: ['Hao_zi-Rat'],
     },
     {
       name: 'ASKLL',
