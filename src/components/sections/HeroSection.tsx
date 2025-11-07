@@ -1,14 +1,23 @@
 import { GradientText, ServerStatusCard } from '@/components';
-import { useServers } from '@/stores';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
+import React from 'react';
 
 /**
- * 英雄区域组件 - 复现原项目的首页主要区域
+ * 英雄区域组件 - 适配新版API
  */
 export const HeroSection: React.FC = () => {
-  const servers = useServers();
+  const {
+    proxyStats
+  } = useWebSocketV2();
   const navigate = useNavigate();
+
+  // 获取小游戏群组总人数（从代理统计中获取）
+  const minigameTotalPlayers = proxyStats?.total_players || 0;
+
+  // 修正状态判断：只要代理服务器在线就显示在线，不管人数
+  const minigameStatus = proxyStats ? 'online' : 'offline';
 
   return (
     <section className="pt-12 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -54,14 +63,16 @@ export const HeroSection: React.FC = () => {
           <ServerStatusCard
             type="MINIGAME"
             address="minigame.voidix.net"
-            status={servers.lobby1?.status || 'offline'}
-            players={servers.lobby1?.players || 0}
+            status={minigameStatus}
+            players={minigameTotalPlayers}
           />
           <ServerStatusCard
             type="SURVIVAL"
             address="survival.voidix.net"
-            status={servers.survival?.status || 'offline'}
-            players={servers.survival?.players || 0}
+            status="maintenance"
+            players={0}
+            maintenanceText="状态系统维护"
+            description={"生存服状态查询系统当前正在维护，建议您进入游戏检查生存服状态"}
           />
         </motion.div>
 
@@ -72,21 +83,23 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-8 flex justify-center"
         >
-          <div className="inline-flex items-center gap-2 bg-[#1a1f2e]/50 border border-gray-700 rounded-full px-4 py-2">
-            <svg
-              className="h-5 w-5 text-blue-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                clipRule="evenodd"
-                d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                fillRule="evenodd"
-              ></path>
-            </svg>
-            <span className="text-sm font-medium">基岩版兼容 | GeyserMC技术实现</span>
-          </div>
+          <a href={"https://geysermc.org/wiki/geyser/"}>
+            <div className="inline-flex items-center gap-2 bg-[#1a1f2e]/50 border border-gray-700 rounded-full px-4 py-2">
+              <svg
+                className="h-5 w-5 text-blue-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clipRule="evenodd"
+                  d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                  fillRule="evenodd"
+                ></path>
+              </svg>
+              <span className="text-sm font-medium">基岩版兼容 | GeyserMC技术实现</span>
+            </div>
+          </a>
         </motion.div>
       </div>
 

@@ -369,7 +369,7 @@ export const LiveChatSection: React.FC = () => {
                 </span>
               </h2>
               <p className="text-gray-400 mb-6">
-                实时查看服务器内玩家的聊天互动，体验Voidix活跃的社区氛围。所有消息都来自正在游戏中的玩家，展现着这个公益服务器的真实面貌。
+                基于Voidix OmniCore Fast API实时查看服务器内玩家的聊天互动，体验Voidix活跃的社区氛围。所有消息都来自正在游戏中的玩家，展现着这个公益服务器的真实面貌。
               </p>
               <div className="hidden sm:grid grid-cols-2 gap-3 mt-6">
                 <div className="px-4 py-3 bg-[#1a1f2e] rounded-lg border border-[#2a365c] hover:bg-[#1f2538]/60 transition-colors duration-200">

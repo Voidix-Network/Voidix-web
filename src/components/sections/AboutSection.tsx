@@ -1,7 +1,7 @@
 import { GradientText } from '@/components';
 import { MINIGAME_KEYS } from '@/constants';
-import { useServerStoreCompat } from '@/stores';
 import { motion } from 'framer-motion';
+import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
 
 /**
  * 智能格式化运行时间显示
@@ -81,6 +81,27 @@ const formatUptimeDisplay = (
 };
 
 /**
+ * 获取服务器状态
+ */
+const getServerStatus = (server: any): 'online' | 'offline' | 'maintenance' => {
+  if (!server) return 'offline';
+
+  // 如果有明确的维护状态字段
+  if (server.maintenance) return 'maintenance';
+
+  // 根据 online 字段判断
+  return server.online ? 'online' : 'offline';
+};
+
+/**
+ * 获取服务器玩家数量
+ */
+const getServerPlayerCount = (server: any): number => {
+  if (!server) return 0;
+  return server.players_count || 0;
+};
+
+/**
  * 服务器状态行组件
  */
 interface ServerStatusRowProps {
@@ -92,12 +113,12 @@ interface ServerStatusRowProps {
 }
 
 const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
-  title,
-  status,
-  players,
-  id,
-  isConnectionFailed,
-}) => {
+                                                           title,
+                                                           status,
+                                                           players,
+                                                           id,
+                                                           isConnectionFailed,
+                                                         }) => {
   const getDisplayText = () => {
     if (isConnectionFailed) {
       return '连接失败';
@@ -153,15 +174,18 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
 };
 
 /**
- * 关于我们组件 - 复现原项目的关于部分
+ * 关于我们组件 - 适配新版 API
  */
 export const AboutSection: React.FC = () => {
-  const { aggregateStats, servers, connectionStatus, runningTime, totalRunningTime } =
-    useServerStoreCompat();
+  const {
+    connectionStatus,
+    servers,
+    aggregateStats,
+    runtimeInfo
+  } = useWebSocketV2();
 
-  // 检查连接状态：基于connectionStatus和服务器数据是否存在
-  const hasServerData = Object.keys(servers).length > 0;
-  const isConnectionFailed = connectionStatus !== 'connected' || !hasServerData;
+  // 检查连接状态
+  const isConnectionFailed = connectionStatus !== 'connected';
 
   // 计算小游戏聚合统计
   const calculateMinigameStats = () => {
@@ -172,8 +196,8 @@ export const AboutSection: React.FC = () => {
     MINIGAME_KEYS.forEach(serverId => {
       const server = servers[serverId];
       if (server) {
-        if (server.status === 'online' && server.isOnline) {
-          totalPlayers += server.players || 0;
+        if (server.online) {
+          totalPlayers += getServerPlayerCount(server);
           onlineCount++;
           hasOnlineServer = true;
         }
@@ -184,10 +208,10 @@ export const AboutSection: React.FC = () => {
     const loginServer = servers.login;
     const lobbyServer = servers.lobby1;
 
-    if (loginServer && loginServer.status === 'online') {
+    if (loginServer && loginServer.online) {
       hasOnlineServer = true;
     }
-    if (lobbyServer && lobbyServer.status === 'online') {
+    if (lobbyServer && lobbyServer.online) {
       hasOnlineServer = true;
     }
 
@@ -199,6 +223,10 @@ export const AboutSection: React.FC = () => {
   };
 
   const minigameStats = calculateMinigameStats();
+
+  // 从 runtimeInfo 获取运行时间，如果没有则使用直接返回的值
+  const runningTime = runtimeInfo?.current_uptime_seconds || 0;
+  const totalRunningTime = runtimeInfo?.total_uptime_seconds || 0;
 
   return (
     <section className="mb-32 2xl:mb-24 scroll-mt-32" id="about">
@@ -229,7 +257,7 @@ export const AboutSection: React.FC = () => {
                   <div
                     className={`text-base font-bold text-center ${isConnectionFailed ? 'text-red-400' : 'text-white'}`}
                   >
-                    {isConnectionFailed ? '连接失败' : `${aggregateStats?.totalPlayers}人`}
+                    {isConnectionFailed ? '连接失败' : `${aggregateStats?.totalPlayers || 0}人`}
                   </div>
                 </div>
                 <div className="px-4 py-3 bg-[#1a1f2e] rounded-lg border border-[#2a365c] hover:bg-[#1f2538]/60 transition-colors duration-200">
@@ -257,7 +285,7 @@ export const AboutSection: React.FC = () => {
                   <div
                     className={`text-base font-bold flex justify-center items-center whitespace-nowrap ${isConnectionFailed ? 'text-red-400' : 'text-white'}`}
                   >
-                    {isConnectionFailed ? '连接失败' : `${aggregateStats?.totalPlayers}人`}
+                    {isConnectionFailed ? '连接失败' : `${aggregateStats?.totalPlayers || 0}人`}
                   </div>
                 </div>
                 <div className="px-3 py-3 bg-[#1a1f2e] rounded-lg border border-[#2a365c]">
@@ -296,8 +324,8 @@ export const AboutSection: React.FC = () => {
                   {/* 小游戏大厅 */}
                   <ServerStatusRow
                     title="小游戏大厅"
-                    status={servers.lobby1?.status || 'offline'}
-                    players={servers.lobby1?.players || 0}
+                    status={getServerStatus(servers.lobby1)}
+                    players={getServerPlayerCount(servers.lobby1)}
                     id="lobby"
                     isConnectionFailed={isConnectionFailed}
                   />
@@ -314,8 +342,8 @@ export const AboutSection: React.FC = () => {
                   {/* 生存服务器 */}
                   <ServerStatusRow
                     title="生存服务器"
-                    status={servers.survival?.status || 'offline'}
-                    players={servers.survival?.players || 0}
+                    status="maintenance"
+                    players={0}
                     id="survival"
                     isConnectionFailed={isConnectionFailed}
                   />

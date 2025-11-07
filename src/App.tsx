@@ -5,6 +5,7 @@ import {
   SEOProvider,
   VoidixSearchConsole,
 } from '@/components/seo';
+import { WebSocketProvider } from './hooks/useWebSocketV2';
 
 /**
  * 主应用组件
@@ -21,22 +22,24 @@ import {
  */
 function App() {
   return (
-    <SEOProvider>
-      {/* 简化的Cookie同意管理 */}
-      <CookieConsent />
+    <WebSocketProvider> {/* 最外层：WebSocket全局状态 */}
+      <SEOProvider>
+        {/* 简化的Cookie同意管理 */}
+        <CookieConsent />
 
-      {/* 搜索引擎抓取脚本 */}
-      <SearchEngineScript />
+        {/* 搜索引擎抓取脚本 */}
+        <SearchEngineScript />
 
-      {/* 搜索引擎验证 */}
-      <VoidixSearchConsole />
+        {/* 搜索引擎验证 */}
+        <VoidixSearchConsole />
 
-      {/* 暂时禁用自动页面预获取，避免阻塞DOMContentLoaded */}
-      {/* <DelayedPrefetch delay={5000} /> */}
+        {/* 暂时禁用自动页面预获取，避免阻塞DOMContentLoaded */}
+        {/* <DelayedPrefetch delay={5000} /> */}
 
-      {/* 主路由组件 */}
-      <OptimizedAppRouter />
-    </SEOProvider>
+        {/* 主路由组件 */}
+        <OptimizedAppRouter />
+      </SEOProvider>
+    </WebSocketProvider>
   );
 }
 
