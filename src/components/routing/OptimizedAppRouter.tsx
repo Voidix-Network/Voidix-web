@@ -1,5 +1,4 @@
 import { Layout } from '@/components';
-import { useWebSocket } from '@/hooks/useWebSocket';
 import '@/styles/page-transitions.css';
 import React, { Suspense, useEffect, useState } from 'react';
 import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
@@ -26,11 +25,6 @@ const BugReportPage = React.lazy(() =>
     default: module.BugReportPage,
   }))
 );
-const MonitorPage = React.lazy(() =>
-  import(/* webpackPreload: false */ '@/pages/MonitorPage').then(module => ({
-    default: module.MonitorPage,
-  }))
-);
 const PrivacyPolicyPage = React.lazy(() =>
   import(/* webpackPreload: false */ '@/pages/PrivacyPolicyPage').then(module => ({
     default: module.PrivacyPolicyPage,
@@ -51,15 +45,9 @@ const RouteAwareFallback: React.FC = () => {
   const currentPath = location.pathname;
 
   // 判断是否为404路由
-  const is404Route = ![
-    '/',
-    '/status',
-    '/faq',
-    '/bug-report',
-    '/monitor',
-    '/privacy',
-    '/not-found',
-  ].includes(currentPath);
+  const is404Route = !['/', '/status', '/faq', '/bug-report', '/privacy', '/not-found'].includes(
+    currentPath
+  );
 
   if (is404Route) {
     // 404页面专用加载状态
@@ -124,15 +112,9 @@ const RouteStateManager: React.FC<{ children: React.ReactNode }> = ({ children }
   // 在路由稳定之前，显示路由感知的稳定化内容
   if (!isRouteStable) {
     // 判断是否为404路由
-    const is404Route = ![
-      '/',
-      '/status',
-      '/faq',
-      '/bug-report',
-      '/monitor',
-      '/privacy',
-      '/not-found',
-    ].includes(currentPath);
+    const is404Route = !['/', '/status', '/faq', '/bug-report', '/privacy', '/not-found'].includes(
+      currentPath
+    );
 
     if (is404Route) {
       return (
@@ -177,7 +159,6 @@ const RouteContent: React.FC = () => {
             <Route path="/status" element={<StatusPage />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/bug-report" element={<BugReportPage />} />
-            <Route path="/monitor" element={<MonitorPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             {/* 静态文件404重定向路径 */}
             <Route path="/not-found" element={<NotFoundPage />} />
@@ -259,11 +240,11 @@ class PageErrorBoundary extends React.Component<React.PropsWithChildren<{}>, Err
 /**
  * 优化的App路由组件
  * 支持代码分割、懒加载、错误边界、路由状态管理
+ *
+ * 注意：WebSocket连接由 App.tsx 中的 WebSocketProvider 管理，
+ * 此处无需再次初始化连接
  */
 export const OptimizedAppRouter: React.FC = () => {
-  // 使用autoConnect选项，避免手动调用connect导致重复连接
-  useWebSocket({ autoConnect: true });
-
   return (
     <Router>
       <Layout>

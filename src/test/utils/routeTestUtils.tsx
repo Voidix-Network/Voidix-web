@@ -4,10 +4,10 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import React from 'react';
-import { vi } from 'vitest';
 import { HelmetProvider } from 'react-helmet-async';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { vi } from 'vitest';
 
 /**
  * 通用的页面组件Mock工厂
@@ -300,7 +300,7 @@ export const setupRoutingMocks = () => {
 
   // Mock WebSocket Hook
   const webSocketMock = createWebSocketMock();
-  vi.doMock('@/hooks/useWebSocket', () => webSocketMock);
+  vi.doMock('@/hooks/useWebSocketV2', () => webSocketMock);
 
   // Mock CSS imports
   vi.doMock('@/styles/page-transitions.css', () => ({}));
@@ -669,7 +669,7 @@ export const setupPageTest = (config: PageTestConfig = {}) => {
 
   if (mockWebSocket) {
     const webSocketMock = createWebSocketMock();
-    vi.doMock('@/hooks/useWebSocket', () => webSocketMock);
+    vi.doMock('@/hooks/useWebSocketV2', () => webSocketMock);
     mocks.webSocket = webSocketMock;
   }
 

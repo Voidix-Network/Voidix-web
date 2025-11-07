@@ -20,30 +20,6 @@ export const WEBSOCKET_CONFIG: WebSocketConfig = {
   connectionTimeout: 5000, // 5秒连接超时
 };
 
-// 多连接WebSocket配置
-export const MULTI_WEBSOCKET_CONFIG = {
-  // 小游戏服务器连接
-  minigames: {
-    url: 'wss://server.voidix.top:10203',
-    name: 'minigames',
-    maxReconnectAttempts: 5,
-    reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
-    disableReconnect: false,
-    SUPPORTED_PROTOCOL_VERSION: 2,
-    connectionTimeout: 5000,
-  },
-  // 生存服务器连接
-  survival: {
-    url: 'wss://server1.voidix.top:10203/',
-    name: 'survival',
-    maxReconnectAttempts: 5,
-    reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
-    disableReconnect: false,
-    SUPPORTED_PROTOCOL_VERSION: 2,
-    connectionTimeout: 5000,
-  },
-} as const;
-
 // 时间常量
 export const TIME_CONSTANTS: TimeConstants = {
   SECONDS_IN_MINUTE: 60,

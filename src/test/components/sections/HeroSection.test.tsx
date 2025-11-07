@@ -13,6 +13,27 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+// Mock useWebSocketV2
+vi.mock('@/hooks/useWebSocketV2', () => ({
+  useWebSocketV2: () => ({
+    connectionStatus: 'connected',
+    servers: {},
+    serverTree: null,
+    aggregateStats: { totalPlayers: 25, onlineServers: 1, totalServers: 1 },
+    runtimeInfo: null,
+    proxyStats: {
+      total_players: 25,
+      max_players: 100,
+      total_servers: 1,
+      servers_with_players: 1,
+      players_on_servers: 25,
+    },
+    isMaintenance: false,
+    runningTime: null,
+    totalRunningTime: null,
+  }),
+}));
+
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
@@ -96,8 +117,8 @@ describe('HeroSection', () => {
     // 验证 SURVIVAL 服务器卡片
     const survivalCard = serverCards.find(card => card.getAttribute('data-type') === 'SURVIVAL');
     expect(survivalCard).toHaveAttribute('data-address', 'survival.voidix.net');
-    expect(survivalCard).toHaveAttribute('data-status', 'online');
-    expect(survivalCard).toHaveAttribute('data-players', '15');
+    expect(survivalCard).toHaveAttribute('data-status', 'maintenance');
+    expect(survivalCard).toHaveAttribute('data-players', '0');
   });
 
   it('应该渲染基岩版兼容提示', () => {
@@ -131,17 +152,8 @@ describe('HeroSection', () => {
   });
 
   it('应该正确处理服务器数据缺失的情况', () => {
-    // 重新mock空的服务器数据
-    const emptyServers = {
-      lobby1: undefined,
-      survival: undefined,
-    };
-
-    // 使用空数据重新mock useServers
-    vi.doMock('@/stores', () => ({
-      useServers: () => emptyServers,
-    }));
-
+    // HeroSection 使用 useWebSocketV2，该 hook 已经被 mock 返回有效数据
+    // 所以即使没有服务器数据，代理统计仍然有效
     renderHeroSection();
 
     const serverCards = screen.getAllByTestId('server-status-card');
@@ -149,7 +161,7 @@ describe('HeroSection', () => {
     // 验证即使没有服务器数据也能正常渲染
     expect(serverCards).toHaveLength(2);
 
-    // 验证默认值
+    // 验证默认值 - 使用 mock 的 proxyStats 数据
     const minigameCard = serverCards[0];
     expect(minigameCard).toHaveAttribute('data-status', 'online'); // 使用mock数据
     expect(minigameCard).toHaveAttribute('data-players', '25');

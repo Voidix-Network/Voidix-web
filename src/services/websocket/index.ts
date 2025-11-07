@@ -16,10 +16,5 @@ export { ReconnectStrategy } from './ReconnectStrategy';
 // 单连接WebSocket组合器（原有）
 export { WebSocketComposer, WebSocketService } from './WebSocketComposer';
 
-// 多连接WebSocket组合器（新增）
-export { MultiConnectionManager, type MultiConnectionConfig } from './MultiConnectionManager';
-export { MultiMessageRouter } from './MultiMessageRouter';
-export { MultiWebSocketComposer, MultiWebSocketService } from './MultiWebSocketComposer';
-
 // 类型定义导出
 export type * from './types';

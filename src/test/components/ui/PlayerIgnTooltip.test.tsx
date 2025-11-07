@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
 import { PlayerIgnTooltip } from '@/components/ui/PlayerIgnTooltip';
 import type { PlayerIgnInfo } from '@/types';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies
 vi.mock('@/stores', () => ({
@@ -11,12 +11,17 @@ vi.mock('@/stores', () => ({
   })),
 }));
 
-vi.mock('@/hooks/useWebSocket', () => ({
-  useWebSocketStatus: vi.fn(() => ({
+vi.mock('@/hooks/useWebSocketV2', () => ({
+  useWebSocketV2: vi.fn(() => ({
     connectionStatus: 'connected',
-    isConnected: true,
-    isConnecting: false,
-    isDisconnected: false,
+    servers: {},
+    serverTree: null,
+    aggregateStats: { totalPlayers: 0, onlineServers: 0, totalServers: 0 },
+    runtimeInfo: null,
+    proxyStats: null,
+    isMaintenance: false,
+    runningTime: null,
+    totalRunningTime: null,
   })),
 }));
 

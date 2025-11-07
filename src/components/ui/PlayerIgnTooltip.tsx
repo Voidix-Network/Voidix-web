@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
+import { usePlayerIgnStore, useServerPlayerIgns } from '@/stores';
+import { Clock, RefreshCw, Users, Wifi, WifiOff } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useServerPlayerIgns, usePlayerIgnStore } from '@/stores';
-import { useWebSocketStatus } from '@/hooks/useWebSocket';
-import { Users, Clock, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 
 /**
  * 玩家IGN悬停提示组件属性接口
@@ -37,7 +37,7 @@ export const PlayerIgnTooltip: React.FC<PlayerIgnTooltipProps> = ({
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const playerIgns = useServerPlayerIgns(serverId);
-  const { connectionStatus } = useWebSocketStatus();
+  const { connectionStatus } = useWebSocketV2();
 
   // 开发环境检测
   const isDev = import.meta.env.DEV;
