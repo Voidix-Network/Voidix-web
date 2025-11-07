@@ -78,7 +78,7 @@ export const ServerStatusCard: React.FC<ServerStatusCardProps> = ({
       <div className="flex justify-between items-end">
         {' '}
         {/* 改为 items-end 确保底部对齐 */}
-        <div className="text-xs text-gray-300">{getCompatibilityText(type)}</div>
+        <div className="mt-2 text-xs text-gray-300">{getCompatibilityText(type)}</div>
         <div className="flex items-center gap-2">
           <div
             className={cn(

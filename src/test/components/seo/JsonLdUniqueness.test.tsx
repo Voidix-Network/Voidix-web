@@ -1,4 +1,5 @@
 import { SEOProvider } from '@/components/seo';
+import { WebSocketProvider } from '@/hooks/useWebSocketV2';
 import { BugReportPage } from '@/pages/BugReportPage';
 import { FaqPage } from '@/pages/FaqPage';
 import { HomePage } from '@/pages/HomePage';
@@ -74,13 +75,15 @@ describe('JSON-LD结构化数据唯一性测试', () => {
    */
   const renderPageWithRouter = (Component: React.ComponentType) => {
     return render(
-      <HelmetProvider context={helmetContext}>
-        <MemoryRouter>
-          <SEOProvider>
-            <Component />
-          </SEOProvider>
-        </MemoryRouter>
-      </HelmetProvider>
+      <WebSocketProvider>
+        <HelmetProvider context={helmetContext}>
+          <MemoryRouter>
+            <SEOProvider>
+              <Component />
+            </SEOProvider>
+          </MemoryRouter>
+        </HelmetProvider>
+      </WebSocketProvider>
     );
   };
 
