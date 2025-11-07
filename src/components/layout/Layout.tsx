@@ -15,9 +15,9 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, className }) => {
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-['Inter']">
-      {/* 跳转到主内容的链接 */}
-      <a href="#main-content" className="skip-to-content">
-        跳转到主内容
+      {/* 跳转到首页主内容的链接 */}
+      <a href="https://www.voidix.net/#main-content" className="skip-to-content">
+        跳转到首页主内容
       </a>
 
       <Navigation />

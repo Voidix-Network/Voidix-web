@@ -27,16 +27,16 @@ describe('Layout', () => {
     expect(screen.getByText('Test Content')).toBeInTheDocument();
   });
 
-  it('应该渲染跳转到主内容的链接', () => {
+  it('应该渲染跳转到首页主内容的链接', () => {
     render(
       <Layout>
         <div>Content</div>
       </Layout>
     );
 
-    const skipLink = screen.getByText('跳转到主内容');
+    const skipLink = screen.getByText('跳转到首页主内容');
     expect(skipLink).toBeInTheDocument();
-    expect(skipLink).toHaveAttribute('href', '#main-content');
+    expect(skipLink).toHaveAttribute('href', 'https://www.voidix.net/#main-content');
     expect(skipLink).toHaveClass('skip-to-content');
   });
 
