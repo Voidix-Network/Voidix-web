@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  generatePipelineSummaryScript,
-  validateBashSyntax,
-  simulateBashExecution,
-  createTestConfig,
-  mockGitHubFormat,
-  type PipelineSummaryConfig,
+    createTestConfig,
+    generatePipelineSummaryScript,
+    mockGitHubFormat,
+    simulateBashExecution,
+    validateBashSyntax,
+    type PipelineSummaryConfig,
 } from '../utils/workflowTestUtils';
 
 describe('GitHub Actions Workflow Tests', () => {
@@ -85,7 +85,7 @@ fi
 
     it('应该检测未闭合的条件括号', () => {
       const invalidScript = `
-if [[ "success" == "success" 
+if [[ "success" == "success"
   echo "Test passed"
 fi
       `.trim();
@@ -127,15 +127,6 @@ fi
       expect(result.output).not.toContain('❌ Quick Checks failed');
     });
 
-    it('应该正确模拟许可证检查失败', () => {
-      const config = createTestConfig.singleFailure('licenseFreshnessCheck');
-      const result = simulateBashExecution(config);
-
-      expect(result.exitCode).toBe(1);
-      expect(result.output).toContain(
-        '❌ License File Check failed - THIRD_PARTY_LICENSES.csv needs update'
-      );
-    });
   });
 
   describe('GitHub Format Function Simulation', () => {
@@ -166,7 +157,6 @@ fi
       expect(config.qualityAnalysis).toBe('success');
       expect(config.testSuite).toBe('success');
       expect(config.securityScan).toBe('success');
-      expect(config.licenseFreshnessCheck).toBe('success');
     });
 
     it('createTestConfig.singleFailure 应该创建单个失败配置', () => {
@@ -176,7 +166,6 @@ fi
       expect(config.quickChecks).toBe('success');
       expect(config.qualityAnalysis).toBe('success');
       expect(config.securityScan).toBe('success');
-      expect(config.licenseFreshnessCheck).toBe('success');
     });
   });
 
@@ -187,7 +176,6 @@ fi
         qualityAnalysis: 'success',
         testSuite: 'success',
         securityScan: 'success',
-        licenseFreshnessCheck: 'success',
       };
 
       const script = generatePipelineSummaryScript(config);

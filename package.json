@@ -25,9 +25,7 @@
     "test:dev": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui",
-    "license:report": "npx license-checker --production --csv > docs/THIRD_PARTY_LICENSES.csv",
-    "license:check": "npx license-checker --production --onlyAllow \"MIT;Apache-2.0;ISC;0BSD;BSD-2-Clause;BSD-3-Clause;BlueOak-1.0.0;MIT-0;CC-BY-4.0;UNLICENSED\" --excludePrivatePackages"
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",

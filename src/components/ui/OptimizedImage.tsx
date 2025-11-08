@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
 import { useInView } from '@/hooks/useInView';
+import React, { useCallback, useState } from 'react';
 
 interface OptimizedImageProps {
   src: string;
@@ -82,11 +82,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
       // 允许的域名白名单
       const allowedDomains = [
-        'voidix.net',
         'www.voidix.net',
-        'cdn.voidix.net',
-        'assets.voidix.net',
-        'static.voidix.net',
       ];
 
       return allowedDomains.includes(hostname);
