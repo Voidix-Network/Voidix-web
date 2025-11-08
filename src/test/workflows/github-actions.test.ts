@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
-    createTestConfig,
-    generatePipelineSummaryScript,
-    mockGitHubFormat,
-    simulateBashExecution,
-    validateBashSyntax,
-    type PipelineSummaryConfig,
+  createTestConfig,
+  generatePipelineSummaryScript,
+  mockGitHubFormat,
+  simulateBashExecution,
+  validateBashSyntax,
+  type PipelineSummaryConfig,
 } from '../utils/workflowTestUtils';
 
 describe('GitHub Actions Workflow Tests', () => {
@@ -125,7 +125,6 @@ fi
       expect(result.output).toContain('❌ Quality Analysis failed');
       expect(result.output).not.toContain('❌ Quick Checks failed');
     });
-
   });
 
   describe('GitHub Format Function Simulation', () => {

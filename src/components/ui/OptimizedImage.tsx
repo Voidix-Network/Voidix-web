@@ -81,9 +81,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       const hostname = urlObj.hostname.toLowerCase();
 
       // 允许的域名白名单
-      const allowedDomains = [
-        'www.voidix.net',
-      ];
+      const allowedDomains = ['www.voidix.net'];
 
       return allowedDomains.includes(hostname);
     } catch (error) {
