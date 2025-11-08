@@ -16,7 +16,6 @@ export interface PipelineSummaryConfig {
   qualityAnalysis: JobResult;
   testSuite: JobResult;
   securityScan: JobResult;
-  licenseFreshnessCheck: JobResult;
 }
 
 /**
@@ -45,7 +44,6 @@ echo "⚡ Quick Checks: {0}"
 echo "📊 Quality Analysis: {1}"
 echo "🧪 Test Suite: {2}"
 echo "🔒 Security Scan: {3}"
-echo "📜 License File Check: {4}"
 echo ""
 
 if [[ "{5}" == "success" && \\
@@ -71,9 +69,6 @@ else
   if [[ "{13}" != "success" ]]; then
     echo "   ❌ Security Scan failed - SECURITY ISSUES DETECTED"
   fi
-  if [[ "{14}" != "success" ]]; then
-    echo "   ❌ License File Check failed - THIRD_PARTY_LICENSES.csv needs update"
-  fi
 
   exit 1
 fi
@@ -87,17 +82,14 @@ echo "📅 Pipeline completed at: $(date)"`;
     config.qualityAnalysis, // {1}
     config.testSuite, // {2}
     config.securityScan, // {3}
-    config.licenseFreshnessCheck, // {4}
-    config.quickChecks, // {5}
-    config.qualityAnalysis, // {6}
-    config.testSuite, // {7}
-    config.securityScan, // {8}
-    config.licenseFreshnessCheck, // {9}
-    config.quickChecks, // {10}
-    config.qualityAnalysis, // {11}
-    config.testSuite, // {12}
-    config.securityScan, // {13}
-    config.licenseFreshnessCheck // {14}
+    config.quickChecks, // {4}
+    config.qualityAnalysis, // {5}
+    config.testSuite, // {6}
+    config.securityScan, // {7}
+    config.quickChecks, // {8}
+    config.qualityAnalysis, // {9}
+    config.testSuite, // {10}
+    config.securityScan // {11}
   );
 }
 
@@ -195,7 +187,6 @@ export function simulateBashExecution(config: PipelineSummaryConfig): {
   output.push(`📊 Quality Analysis: ${config.qualityAnalysis}`);
   output.push(`🧪 Test Suite: ${config.testSuite}`);
   output.push(`🔒 Security Scan: ${config.securityScan}`);
-  output.push(`📜 License File Check: ${config.licenseFreshnessCheck}`);
   output.push('');
 
   if (allSuccess) {
@@ -219,9 +210,6 @@ export function simulateBashExecution(config: PipelineSummaryConfig): {
     if (config.securityScan !== 'success') {
       output.push('   ❌ Security Scan failed - SECURITY ISSUES DETECTED');
     }
-    if (config.licenseFreshnessCheck !== 'success') {
-      output.push('   ❌ License File Check failed - THIRD_PARTY_LICENSES.csv needs update');
-    }
 
     return { output: output.join('\n'), exitCode: 1 };
   }
@@ -236,7 +224,6 @@ export const createTestConfig = {
     qualityAnalysis: 'success',
     testSuite: 'success',
     securityScan: 'success',
-    licenseFreshnessCheck: 'success',
   }),
 
   singleFailure: (failedJob: keyof PipelineSummaryConfig): PipelineSummaryConfig => ({
@@ -244,7 +231,6 @@ export const createTestConfig = {
     qualityAnalysis: 'success',
     testSuite: 'success',
     securityScan: 'success',
-    licenseFreshnessCheck: 'success',
     [failedJob]: 'failure',
   }),
 
@@ -261,6 +247,5 @@ export const createTestConfig = {
     qualityAnalysis: 'failure',
     testSuite: 'failure',
     securityScan: 'failure',
-    licenseFreshnessCheck: 'failure',
   }),
 };

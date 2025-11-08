@@ -497,46 +497,22 @@ jobs:
           echo "💡 可以尝试手动触发完整部署: workflow_dispatch"
           exit 1
 
-  # 部署后验证
-  post-deployment-verification:
-    name: 🔍 部署后验证
+  # 部署总结
+  deployment-summary:
+    name: 📊 部署总结
     runs-on: ubuntu-latest
     needs: [deploy]
     if: success() && needs.deploy.outputs.deployed == 'true'
 
     steps:
-      - name: 🌐 网站可访问性检查
-        run: |
-          echo "🌐 检查网站可访问性..."
-
-          # 基础HTTP检查
-          if curl -f -s --max-time 30 "https://www.voidix.net" > /dev/null; then
-            echo "✅ 网站可正常访问"
-          else
-            echo "⚠️ 网站访问检查失败，但部署可能仍然成功"
-          fi
-
-          # SSL证书检查
-          if curl -f -s --max-time 10 "https://www.voidix.net" | head -1 > /dev/null; then
-            echo "✅ HTTPS正常工作"
-          else
-            echo "⚠️ HTTPS检查异常"
-          fi
-
-      - name: 📊 部署总结
+      - name: 📊 部署完成
         run: |
           echo ""
           echo "================================================="
-          echo "✅ 部署完成总结"
+          echo "✅ 部署完成"
           echo "================================================="
           echo "📅 部署时间: $(date)"
-          echo "🌐 网站地址: https://www.voidix.net"
-          echo "🔄 部署方式: 自动化CICD"
           echo "🎯 使用策略: ${{ needs.deploy.outputs.deploy_strategy || '完整部署' }}"
           echo "📝 策略描述: ${{ needs.deploy.outputs.strategy_description || '标准部署流程' }}"
           echo "✅ 状态: 成功完成"
-          echo "⚡ 效率优化: 根据变更类型自动选择部署方式"
-          echo "🔍 智能检测: HTML文件变化自动识别"
-          echo "🚀 SEO优化: 精准提交变化的URL，节省API限额"
-          echo "💡 技术栈: 智能部署 + 精准URL提交 + 自动化优化"
           echo "================================================="

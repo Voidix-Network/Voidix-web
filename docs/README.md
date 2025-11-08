@@ -258,8 +258,7 @@ voidix-web/
     ├── CONTRIBUTING.md     # 贡献指南
     ├── CODE_OF_CONDUCT.md  # 行为准则
     ├── SECURITY.md         # 安全政策
-    ├── CDN.md              # CDN代理服务文档
-    └── THIRD_PARTY_LICENSES.csv # 第三方许可证报告
+    └── CDN.md              # CDN代理服务文档
 ```
 
 ### 核心目录说明
@@ -347,11 +346,8 @@ npm run prerender:puppeteer
 # 检查预加载标签配置
 npm run check:preload
 
-# 生成第三方许可证报告
-npm run license:report
-
-# 检查许可证合规性
-npm run license:check
+# 查看依赖许可证（按需）
+npx license-checker --summary
 ```
 
 ## 部署文档

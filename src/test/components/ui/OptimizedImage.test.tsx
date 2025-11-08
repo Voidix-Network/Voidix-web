@@ -3,9 +3,9 @@
  * 测试优化图片组件的懒加载、WebP支持、响应式图片、错误处理等功能
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock useInView hook
 const mockUseInView = vi.fn();
@@ -245,7 +245,7 @@ describe('OptimizedImage', () => {
 
     it('应该为voidix.net域名的图片尝试WebP格式', () => {
       render(
-        <OptimizedImage src="https://cdn.voidix.net/image.png" alt="Test image" priority={true} />
+        <OptimizedImage src="https://www.voidix.net/image.png" alt="Test image" priority={true} />
       );
 
       const img = screen.getByRole('img');

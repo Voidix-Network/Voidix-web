@@ -47,22 +47,8 @@
 ### 生成完整许可证报告
 
 ```bash
-# 生成当前依赖的完整许可证信息
-npm run license:report
-
-# 检查许可证兼容性
-npm run license:check
-```
-
-### 添加到 package.json scripts:
-
-```json
-{
-  "scripts": {
-    "license:report": "npx license-checker --production --csv > docs/THIRD_PARTY_LICENSES.csv",
-    "license:check": "npx license-checker --production --onlyAllow \"MIT;Apache-2.0;ISC;0BSD;BSD-2-Clause;BSD-3-Clause\""
-  }
-}
+# 查看依赖许可证（按需）
+npx license-checker --summary
 ```
 
 ## 📊 许可证统计
@@ -101,14 +87,14 @@ npm run license:check
 
 ## 📖 详细信息
 
-- **完整依赖列表**: 运行 `npm run license:report` 生成
+- **完整依赖列表**: 运行 `npx license-checker --summary` 查看
 - **许可证全文**: 查看 `LICENSE_CODE` 和 `LICENSE_CONTENT`
 - **第三方许可证**: 各库的 `node_modules/[包名]/LICENSE` 文件
 
 ---
 
-**最后更新**: 2025年6月15日  
-**依赖数量**: 28个生产依赖  
+**最后更新**: 2025年6月15日
+**依赖数量**: 28个生产依赖
 **合规状态**: ✅ 全部兼容
 
 ---
@@ -165,11 +151,8 @@ This project uses the following open source libraries, grouped by license type:
 ### Generate Complete License Report
 
 ```bash
-# Generate complete license information for current dependencies
-npm run license:report
-
-# Check license compatibility
-npm run license:check
+# View dependency licenses (as needed)
+npx license-checker --summary
 ```
 
 ## 📊 License Statistics
@@ -198,6 +181,6 @@ npm run license:check
 - ❌ AGPL (except project itself)
 - ❌ Commercial proprietary licenses
 
-**Last Updated**: June 15, 2025  
-**Dependency Count**: 28 production dependencies  
+**Last Updated**: June 15, 2025
+**Dependency Count**: 28 production dependencies
 **Compliance Status**: ✅ All compatible
