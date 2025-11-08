@@ -19,7 +19,6 @@ describe('GitHub Actions Workflow Tests', () => {
       expect(script).toContain('echo "📊 Quality Analysis: success"');
       expect(script).toContain('echo "🧪 Test Suite: success"');
       expect(script).toContain('echo "🔒 Security Scan: success"');
-      expect(script).toContain('echo "📜 License File Check: success"');
     });
 
     it('应该正确处理失败状态', () => {

@@ -44,7 +44,6 @@ echo "⚡ Quick Checks: {0}"
 echo "📊 Quality Analysis: {1}"
 echo "🧪 Test Suite: {2}"
 echo "🔒 Security Scan: {3}"
-echo "📜 License File Check: {4}"
 echo ""
 
 if [[ "{5}" == "success" && \\
