@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Voidix官网重构项目 - React + TypeScript + Vite",
+  "description": "Voidix官网 - React + TypeScript + Vite",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && npm run generate:sitemap",

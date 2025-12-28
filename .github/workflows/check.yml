@@ -69,7 +69,7 @@ jobs:
       - name: 📏 Build Verification
         run: |
           echo "📏 Verifying build process..."
-          npm run build:basic
+          npm run build
           echo "📊 Analyzing build output..."
           ls -la dist/
           du -sh dist/
