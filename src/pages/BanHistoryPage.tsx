@@ -695,9 +695,7 @@ const BanHistoryPage: React.FC = () => {
             <p className="text-gray-600 text-xs mt-1">
               注意: 出于隐私保护，IP地址等敏感信息不会显示
             </p>
-            <p className="text-gray-600 text-xs mt-1">
-              由于时区问题，时间显示可能有误差
-            </p>
+            <p className="text-gray-600 text-xs mt-1">由于时区问题，时间显示可能有误差</p>
           </motion.div>
         </div>
       </div>

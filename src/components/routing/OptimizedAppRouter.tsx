@@ -52,9 +52,15 @@ const RouteAwareFallback: React.FC = () => {
   const currentPath = location.pathname;
 
   // 判断是否为404路由
-  const is404Route = !['/', '/status', '/faq', '/bug-report', '/privacy', '/ban-history', '/not-found'].includes(
-    currentPath
-  );
+  const is404Route = ![
+    '/',
+    '/status',
+    '/faq',
+    '/bug-report',
+    '/privacy',
+    '/ban-history',
+    '/not-found',
+  ].includes(currentPath);
 
   if (is404Route) {
     // 404页面专用加载状态
@@ -119,9 +125,15 @@ const RouteStateManager: React.FC<{ children: React.ReactNode }> = ({ children }
   // 在路由稳定之前，显示路由感知的稳定化内容
   if (!isRouteStable) {
     // 判断是否为404路由
-    const is404Route = !['/', '/status', '/faq', '/bug-report', '/privacy', '/ban-history', '/not-found'].includes(
-      currentPath
-    );
+    const is404Route = ![
+      '/',
+      '/status',
+      '/faq',
+      '/bug-report',
+      '/privacy',
+      '/ban-history',
+      '/not-found',
+    ].includes(currentPath);
 
     if (is404Route) {
       return (
