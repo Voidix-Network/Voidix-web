@@ -2,6 +2,8 @@ import { SEO } from '@/components/seo';
 import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
 import { motion } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
+// 添加 BreadcrumbNavigation 导入
+import { BreadcrumbNavigation } from '@/components';
 
 interface BanRecord {
   id: number;
@@ -454,6 +456,9 @@ const BanHistoryPage: React.FC = () => {
 
       <div className="min-h-screen bg-gray-900 py-16">
         <div className="container mx-auto px-4 max-w-6xl">
+          {/* 添加面包屑导航 - 放在标题区域之前 */}
+          <BreadcrumbNavigation className="mb-8" />
+
           {/* 标题区域 - 优化后与 StatusPage 保持一致 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -695,9 +700,7 @@ const BanHistoryPage: React.FC = () => {
             <p className="text-gray-600 text-xs mt-1">
               注意: 出于隐私保护，IP地址等敏感信息不会显示
             </p>
-            <p className="text-gray-600 text-xs mt-1">
-              由于时区问题，时间显示可能有误差
-            </p>
+            <p className="text-gray-600 text-xs mt-1">由于时区问题，时间显示可能有误差</p>
           </motion.div>
         </div>
       </div>
