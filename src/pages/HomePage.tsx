@@ -13,9 +13,8 @@ import { LiveChatSection } from '@/components/sections/LiveChatSection.tsx';
  * 首页组件 - 复现原项目的完整设计
  */
 export const HomePage: React.FC = () => {
-  return (
+ return (
     <>
-      {' '}
       <SEO
         pageKey="home"
         type="website"
