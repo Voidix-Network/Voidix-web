@@ -1,11 +1,11 @@
 import path from 'path';
+import { BUILD_CONFIG } from '../buildConfig.js';
 import { writeFileSafe } from '../utils/fileUtils.js';
 import { createLogger } from '../utils/logger.js';
-import { BUILD_CONFIG } from '../buildConfig.js';
 import {
   createSitemapConfig,
-  validateSitemapConfig,
   generateRobotsContent,
+  validateSitemapConfig,
 } from './SitemapConfig.js';
 
 const logger = createLogger('SitemapGenerator');
@@ -157,27 +157,6 @@ ${urls}
     results.publicRobots = this.generateRobotsFile(BUILD_CONFIG.publicDir);
     logger.success(`Public Robots.txt更新成功: ${results.publicRobots}`);
 
-    // 输出总结
-    this.logGenerationSummary();
-
     return results;
-  }
-
-  /**
-   * 输出生成总结
-   */
-  logGenerationSummary() {
-    logger.separator();
-    logger.complete('Sitemap和Robots.txt生成完成！');
-    logger.info('📊 生成统计:');
-    logger.info(`   - Sitemap URL数量: ${this.config.routes.length}`);
-    logger.info(`   - 基础域名: ${this.config.baseUrl}`);
-    logger.info(`   - 输出路径: dist/sitemap.xml, dist/robots.txt`);
-    logger.separator();
-    logger.info('🔗 下一步操作:');
-    logger.info('   1. 部署网站到生产环境');
-    logger.info('   2. 在Google Search Console中提交sitemap.xml');
-    logger.info('   3. 在百度站长平台中提交sitemap.xml');
-    logger.info('   4. 验证robots.txt是否可访问');
   }
 }

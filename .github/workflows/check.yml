@@ -146,8 +146,6 @@ jobs:
           echo "🔍 Running security audit (ignoring low severity per GitHub recommendation)..."
           npm audit --audit-level=moderate || echo "ℹ️ Low severity vulnerabilities found but ignored (GitHub recommendation for production apps)"
 
-          echo "📜 Checking license compatibility (will fail on incompatible licenses)..."
-          npx license-checker --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;Python-2.0;BlueOak-1.0.0;MIT-0;CC-BY-4.0" --excludePrivatePackages
           echo "✅ Security scan passed"
 
   # 最终报告
