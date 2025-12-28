@@ -220,12 +220,6 @@ const BanHistoryPage: React.FC = () => {
 
     const date = new Date(ms);
 
-    // 验证日期是否有效
-    if (isNaN(date.getTime())) {
-      console.error('Invalid timestamp:', timestamp);
-      return '无效时间';
-    }
-
     // 使用 Asia/Shanghai 时区确保显示正确的北京时间
     return date.toLocaleString('zh-CN', {
       timeZone: 'Asia/Shanghai',
