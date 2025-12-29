@@ -30,6 +30,13 @@ const PrivacyPolicyPage = React.lazy(() =>
     default: module.PrivacyPolicyPage,
   }))
 );
+
+const BanHistoryPage = React.lazy(() =>
+  import(/* webpackPreload: false */ '@/pages/BanHistoryPage').then(module => ({
+    default: module.default,
+  }))
+);
+
 const NotFoundPage = React.lazy(() =>
   import(/* webpackPreload: false */ '@/pages/NotFoundPage').then(module => ({
     default: module.NotFoundPage,
@@ -45,9 +52,15 @@ const RouteAwareFallback: React.FC = () => {
   const currentPath = location.pathname;
 
   // 判断是否为404路由
-  const is404Route = !['/', '/status', '/faq', '/bug-report', '/privacy', '/not-found'].includes(
-    currentPath
-  );
+  const is404Route = ![
+    '/',
+    '/status',
+    '/faq',
+    '/bug-report',
+    '/privacy',
+    '/ban-history',
+    '/not-found',
+  ].includes(currentPath);
 
   if (is404Route) {
     // 404页面专用加载状态
@@ -112,9 +125,15 @@ const RouteStateManager: React.FC<{ children: React.ReactNode }> = ({ children }
   // 在路由稳定之前，显示路由感知的稳定化内容
   if (!isRouteStable) {
     // 判断是否为404路由
-    const is404Route = !['/', '/status', '/faq', '/bug-report', '/privacy', '/not-found'].includes(
-      currentPath
-    );
+    const is404Route = ![
+      '/',
+      '/status',
+      '/faq',
+      '/bug-report',
+      '/privacy',
+      '/ban-history',
+      '/not-found',
+    ].includes(currentPath);
 
     if (is404Route) {
       return (
@@ -160,6 +179,7 @@ const RouteContent: React.FC = () => {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/bug-report" element={<BugReportPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/ban-history" element={<BanHistoryPage />} />
             {/* 静态文件404重定向路径 */}
             <Route path="/not-found" element={<NotFoundPage />} />
             {/* 404页面 - 必须放在最后 */}
