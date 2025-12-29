@@ -13,7 +13,7 @@ interface CookieConsentProps {
  */
 export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) => {
   const { consent, hasMadeChoice } = useCookieConsent();
-  const { shouldRender } = useSSRSafeRender(!hasMadeChoice);
+  const { isMounted } = useSSRSafeRender();
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -21,13 +21,14 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
   const [analyticsConsent, setAnalyticsConsent] = useState(consent.analytics);
 
   useEffect(() => {
-    // 只在客户端且用户从未做出选择时才显示横幅
-    if (shouldRender) {
+    // 只在客户端挂载后且用户从未做出选择时才显示横幅
+    // 这样预渲染时不会渲染横幅，避免闪烁
+    if (isMounted && !hasMadeChoice) {
       setShowBanner(true);
     } else {
       setShowBanner(false);
     }
-  }, [shouldRender]);
+  }, [isMounted, hasMadeChoice]);
 
   // 当全局consent状态更新时（例如，从其他标签页），同步本地设置面板的状态
   useEffect(() => {
@@ -55,7 +56,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ className = '' }) 
   };
 
   // 如果不需要显示横幅，返回null
-  if (!shouldRender || !showBanner) return null;
+  if (!showBanner) return null;
 
   return (
     <>

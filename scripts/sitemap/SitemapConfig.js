@@ -42,6 +42,12 @@ export function createSitemapConfig(baseUrl = SITE_CONFIG.baseUrl, routes = null
       changefreq: 'monthly',
       lastmod: getCurrentDate(),
     },
+    {
+      path: '/ban-history',
+      priority: 0.7,
+      changefreq: 'daily',
+      lastmod: getCurrentDate(),
+    },
   ];
 
   return {
