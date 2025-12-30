@@ -46,7 +46,7 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
     },
     socialTags: {
       qq: '加入官方QQ群获取最新资讯',
-      discord: '加入Discord服务器与国际玩家交流',
+      discord: '加入Discord服务器与玩家交流',
       email: '发送邮件获取技术支持和合作咨询',
     },
   },
@@ -63,24 +63,6 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
       localTerms: [],
     },
     socialTags: {},
-  },
-
-  monitor: {
-    title: '服务器运行时间监控 - 可用性显示 | Voidix',
-    description:
-      'Voidix服务器运行时间与性能监控系统。我们公开展示过去90天的服务可用性、历史运行数据和详细性能指标，让您对服务器的稳定性和健康状态一目了然。',
-    keywords: {
-      primary: ['Voidix', '小游戏服务器监控', '我的世界服务器监控', 'MC服务器监控'],
-      secondary: ['我的世界小游戏服务器', '我的世界生存服务器'],
-      longTail: [],
-      gameTerms: [],
-      localTerms: [],
-    },
-    socialTags: {
-      qq: '加入QQ群实时了解服务器状态',
-      discord: '在Discord获取服务器维护通知',
-      email: '发送邮件获取监控数据支持',
-    },
   },
 
   faq: {
@@ -131,6 +113,24 @@ export const PAGE_KEYWORDS_CONFIG: Record<string, PageKeywords> = {
       localTerms: [],
     },
     socialTags: {},
+  },
+
+  banHistory: {
+    title: '封禁查询 - 玩家处罚记录查询 | Voidix',
+    description:
+      '查询Voidix服务器的玩家封禁记录。输入玩家ID即可查看处罚历史、封禁原因和解封时间，确保游戏环境公平透明。',
+    keywords: {
+      primary: ['Voidix', '封禁查询', '处罚记录', '玩家封禁', 'MC封禁查询'],
+      secondary: ['我的世界服务器封禁', 'Minecraft封禁记录'],
+      longTail: ['查询玩家封禁记录', '服务器处罚查询'],
+      gameTerms: [],
+      localTerms: [],
+    },
+    socialTags: {
+      qq: '对封禁有疑问？加入QQ群申诉',
+      discord: 'Discord提交申诉请求',
+      email: '发送邮件进行封禁申诉',
+    },
   },
 
   terms: {
