@@ -15,7 +15,6 @@ import { LiveChatSection } from '@/components/sections/LiveChatSection.tsx';
 export const HomePage: React.FC = () => {
   return (
     <>
-      {' '}
       <SEO
         pageKey="home"
         type="website"

@@ -129,6 +129,12 @@ export const HeroSection: React.FC = () => {
                 >
                   常见问题解答
                 </button>
+                <button
+                  onClick={() => navigate('/ban-history')}
+                  className="inline-flex items-center justify-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors max-w-36"
+                >
+                  封禁记录查询
+                </button>
               </div>
             </div>
           </div>
