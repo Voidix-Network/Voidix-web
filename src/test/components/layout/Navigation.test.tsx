@@ -128,7 +128,7 @@ describe('Navigation', () => {
     // 点击桌面端的状态页链接（第一个）- 现在是外部链接
     const statusLinks = screen.getAllByText('状态页');
     fireEvent.click(statusLinks[0]);
-    expect(mockLocationSetter).toHaveBeenCalledWith('https://status.voidix.net/');
+    expect(mockLocationSetter).toHaveBeenCalledWith('/status');
 
     // 点击常见问题
     const faqLinks = screen.getAllByText('常见问题');
