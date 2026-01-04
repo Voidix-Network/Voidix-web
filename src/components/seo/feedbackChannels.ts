@@ -7,6 +7,7 @@ export interface FeedbackChannelConfig {
   description: string;
   link: string;
   color: string;
+  isInternal?: boolean; // 是否为内部链接
 }
 
 /**
@@ -36,9 +37,10 @@ export const FEEDBACK_CHANNELS_CONFIG: readonly FeedbackChannelConfig[] = [
   },
   {
     iconName: 'Github',
-    name: 'GitHub Issues',
-    description: '本网站 GitHub Issues 页面',
-    link: 'https://github.com/Voidix-Network/voidix-web/issues',
+    name: 'Issue系统',
+    description: '在我们的Issue系统中提交Bug',
+    link: '/issue',
     color: 'from-gray-500 to-slate-500',
+    isInternal: true,
   },
 ] as const;
