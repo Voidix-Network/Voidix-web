@@ -4,6 +4,9 @@ import { clsx, type ClassValue } from 'clsx';
 // 导出服务器相关工具函数
 export * from './serverUtils';
 
+// 导出HTML解码工具
+export * from './htmlDecoder';
+
 /**
  * 合并CSS类名的工具函数
  */
