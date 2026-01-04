@@ -7,9 +7,7 @@ export { MinecraftAvatar } from './ui/MinecraftAvatar';
 export { OptimizedImage } from './ui/OptimizedImage';
 export { Pagination } from './ui/Pagination';
 export { PlayerIgnTooltip } from './ui/PlayerIgnTooltip';
-export { parseMinecraftText, RichText, SmartText } from './ui/RichText';
-export { StatusBar } from './ui/StatusBar';
-export { StatusIndicator } from './ui/StatusIndicator';
+export { RichText, SmartText, parseMinecraftText } from './ui/RichText';
 export { Tabs } from './ui/Tabs';
 export { VoidixLogo } from './ui/VoidixLogo';
 
@@ -22,7 +20,6 @@ export { NoticeList } from './business/NoticeList';
 export { ServerCard } from './business/ServerCard';
 export { ServerGroupCard } from './business/ServerGroupCard';
 export { ServerStatusCard } from './business/ServerStatusCard';
-export { ServiceItem } from './business/ServiceItem';
 
 // Layout Components
 export { Footer } from './layout/Footer';

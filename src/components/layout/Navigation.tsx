@@ -18,7 +18,7 @@ export const Navigation: React.FC = () => {
   // 导航项目 - 包含Issue系统
   const navigationItems: NavigationItem[] = [
     { href: '/status', label: '状态页', isExternal: true },
-    { href: '/monitor', label: '监控', isExternal: true },
+    { href: 'https://status.voidix.net/', label: '监控', isExternal: true },
     { href: '/ban-history', label: '封禁查询', isExternal: true },
     { href: '/faq', label: '常见问题', isExternal: true },
     { href: '/bug-report', label: 'Bug反馈', isExternal: true },
