@@ -317,10 +317,6 @@ export const IssueDetailPage: React.FC = () => {
   const markdownComponents = {
     // 自定义段落
     p: ({ children }: any) => <p className="mb-2 last:mb-0">{children}</p>,
-    // 自定义粗体
-    strong: ({ children }: any) => <strong className="font-bold text-white">{children}</strong>,
-    // 自定义斜体
-    em: ({ children }: any) => <em className="italic text-blue-300">{children}</em>,
     // 自定义代码
     code: ({ children }: any) => (
       <code className="bg-gray-800 px-1 py-0.5 rounded text-sm font-mono text-pink-300">
@@ -334,15 +330,7 @@ export const IssueDetailPage: React.FC = () => {
       </a>
     ),
     // 自定义列表
-    ul: ({ children }: any) => <ul className="list-disc list-inside mb-2">{children}</ul>,
-    ol: ({ children }: any) => <ol className="list-decimal list-inside mb-2">{children}</ol>,
     li: ({ children }: any) => <li className="ml-4">{children}</li>,
-    // 自定义引用
-    blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-400 my-2">
-        {children}
-      </blockquote>
-    ),
   };
 
   // 权限判断
