@@ -194,11 +194,11 @@ describe('Navigation', () => {
       </BrowserRouter>
     );
 
-    const desktopNavLinks = container.querySelectorAll('.hidden.md\\:flex button');
+    const desktopNavLinks = container.querySelectorAll('.hidden.lg\\:flex button');
     expect(desktopNavLinks[0]).toHaveClass(
       'text-gray-300',
       'hover:text-white',
-      'px-3',
+      'px-2',
       'py-2',
       'rounded-md',
       'text-sm',

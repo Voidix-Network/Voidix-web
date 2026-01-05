@@ -1,4 +1,4 @@
-import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/components';
+import { AnimatedSection, BreadcrumbNavigation } from '@/components';
 import { FAQSchema, SEO } from '@/components/seo';
 import { analytics } from '@/services/analytics';
 import { motion } from 'framer-motion';
@@ -159,9 +159,7 @@ export const FaqPage: React.FC = () => {
 
           <AnimatedSection variant="fadeIn" className="mb-12">
             <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                <GradientText variant="primary">常见问题</GradientText>
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">常见问题</h1>
               <p className="text-xl text-gray-400 max-w-2xl mx-auto">
                 快速解答关于Voidix服务器的常见疑问
               </p>

@@ -1,4 +1,3 @@
-// filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\layout\footer\CopyrightSection.tsx
 import { GradientText } from '@/components';
 
 /**

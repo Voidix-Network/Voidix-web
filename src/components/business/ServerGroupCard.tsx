@@ -1,8 +1,7 @@
-// filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\business\ServerGroupCard.tsx
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { ServerGroupInfo, ServerGroupStats } from '@/constants/serverGroups';
 import { copyToClipboard } from '@/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState } from 'react';
 
 /**
  * 服务器组卡片组件属性接口

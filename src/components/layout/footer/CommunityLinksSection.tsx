@@ -1,5 +1,3 @@
-// filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\layout\footer\CommunityLinksSection.tsx
-
 /**
  * 社区链接部分组件
  * 显示QQ群、Discord、GitHub等社区链接

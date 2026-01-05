@@ -43,6 +43,37 @@ const NotFoundPage = React.lazy(() =>
   }))
 );
 
+// 新增页面
+const LoginPage = React.lazy(() =>
+  import(/* webpackPreload: false */ '@/pages/LoginPage').then(module => ({
+    default: module.LoginPage,
+  }))
+);
+
+const IssuePage = React.lazy(() =>
+  import(/* webpackPreload: false */ '@/pages/IssuePage').then(module => ({
+    default: module.IssuePage,
+  }))
+);
+
+const IssueDetailPage = React.lazy(() =>
+  import(/* webpackPreload: false */ '@/pages/IssueDetailPage').then(module => ({
+    default: module.IssueDetailPage,
+  }))
+);
+
+const IssueFormPage = React.lazy(() =>
+  import(/* webpackPreload: false */ '@/pages/IssueFormPage').then(module => ({
+    default: module.IssueFormPage,
+  }))
+);
+
+const TagManagePage = React.lazy(() =>
+  import(/* webpackPreload: false */ '@/pages/TagManagePage').then(module => ({
+    default: module.TagManagePage,
+  }))
+);
+
 /**
  * 路由感知的加载组件
  * 根据当前路径显示相应的加载内容，避免内容混淆
@@ -59,6 +90,12 @@ const RouteAwareFallback: React.FC = () => {
     '/bug-report',
     '/privacy',
     '/ban-history',
+    '/login',
+    '/issue',
+    '/issue/create',
+    '/issue/edit/:id',
+    '/issue/:id',
+    '/tag-manage',
     '/not-found',
   ].includes(currentPath);
 
@@ -132,6 +169,12 @@ const RouteStateManager: React.FC<{ children: React.ReactNode }> = ({ children }
       '/bug-report',
       '/privacy',
       '/ban-history',
+      '/login',
+      '/issue',
+      '/issue/create',
+      '/issue/edit/:id',
+      '/issue/:id',
+      '/tag-manage',
       '/not-found',
     ].includes(currentPath);
 
@@ -180,6 +223,13 @@ const RouteContent: React.FC = () => {
             <Route path="/bug-report" element={<BugReportPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/ban-history" element={<BanHistoryPage />} />
+            {/* 新增路由 */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/issue" element={<IssuePage />} />
+            <Route path="/issue/create" element={<IssueFormPage />} />
+            <Route path="/issue/edit/:id" element={<IssueFormPage />} />
+            <Route path="/issue/:id" element={<IssueDetailPage />} />
+            <Route path="/tag-manage" element={<TagManagePage />} />
             {/* 静态文件404重定向路径 */}
             <Route path="/not-found" element={<NotFoundPage />} />
             {/* 404页面 - 必须放在最后 */}

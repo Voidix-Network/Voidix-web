@@ -1,4 +1,3 @@
-// filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\layout\Footer.tsx
 import { VoidixLogo } from '@/components';
 import React from 'react';
 import { CommunityLinksSection } from './footer/CommunityLinksSection';

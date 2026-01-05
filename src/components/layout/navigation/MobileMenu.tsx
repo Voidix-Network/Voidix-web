@@ -31,10 +31,10 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, items, onItemCli
         opacity: isOpen ? 1 : 0,
       }}
       transition={{ duration: 0.3, ease: [0.25, 0.8, 0.25, 1] }}
-      className="md:hidden overflow-hidden bg-[#151f38]/95 backdrop-blur-md border-t border-gray-700"
+      className="lg:hidden overflow-hidden bg-[#151f38]/95 backdrop-blur-md border-t border-gray-700"
       id="mobile-menu"
     >
-      <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+      <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 max-h-[70vh] overflow-y-auto">
         {items.map((item, index) => (
           <motion.button
             key={item.href}

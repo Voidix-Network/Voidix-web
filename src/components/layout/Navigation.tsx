@@ -12,13 +12,14 @@ export const Navigation: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  // 导航项目
+  // 导航项目 - 包含Issue系统
   const navigationItems: NavigationItem[] = [
     { href: '/status', label: '状态页', isExternal: true },
-    { href: 'https://status.voidix.net/', label: '监控', isExternal: true },
+    { href: 'https://status.voidix.net', label: '监控', isExternal: true },
     { href: '/ban-history', label: '封禁查询', isExternal: true },
     { href: '/faq', label: '常见问题', isExternal: true },
     { href: '/bug-report', label: 'Bug反馈', isExternal: true },
+    { href: '/issue', label: 'Issue系统', isExternal: true },
   ];
 
   const handleNavClick = (href: string) => {
@@ -29,7 +30,7 @@ export const Navigation: React.FC = () => {
 
   return (
     <nav className="fixed w-full bg-[#151f38]/90 backdrop-blur-md z-50 border-b border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
@@ -39,24 +40,26 @@ export const Navigation: React.FC = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-baseline space-x-8">
+          <div className="hidden lg:flex items-center space-x-3">
             {navigationItems.map(item => (
               <DelayedNavButton
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-gray-300 hover:text-white px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap"
               >
                 {item.label}
               </DelayedNavButton>
             ))}
           </div>
 
-          {/* Mobile Menu Button - 显示快速链接菜单 */}
-          <MobileMenuButton
-            isOpen={isMobileMenuOpen}
-            onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          />
+          {/* Mobile Menu Button */}
+          <div className="flex items-center lg:hidden">
+            <MobileMenuButton
+              isOpen={isMobileMenuOpen}
+              onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+          </div>
         </div>
       </div>
 

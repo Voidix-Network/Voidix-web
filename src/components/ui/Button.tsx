@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
 import { cn } from '@/utils';
+import { motion } from 'framer-motion';
 
 /**
  * 按钮组件变体
@@ -22,9 +22,8 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const variants = {
-    primary:
-      'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700',
+    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    secondary: 'bg-gray-700 text-white hover:bg-gray-600',
     outline: 'border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white',
     ghost: 'text-gray-300 hover:bg-gray-800 hover:text-white',
   };

@@ -1,4 +1,3 @@
-// filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\layout\footer\QuickJoinSection.tsx
 import { useState } from 'react';
 
 /**

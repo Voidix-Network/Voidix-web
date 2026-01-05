@@ -158,3 +158,6 @@ export function isDevelopment(): boolean {
 export function isProduction(): boolean {
   return import.meta.env.PROD as boolean;
 }
+
+// 导出文本处理工具
+export * from './textUtils';

@@ -1,4 +1,3 @@
-// filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\utils\serverUtils.ts
 import type { ServerGroupStats } from '@/constants/serverGroups';
 
 /**

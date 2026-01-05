@@ -19,7 +19,7 @@ export const MobileMenuButton: React.FC<MobileMenuButtonProps> = ({ isOpen, onTo
       onClick={onToggle}
       aria-expanded={isOpen}
       aria-controls="mobile-menu"
-      className="text-gray-300 hover:text-white focus:outline-none p-2 rounded-md md:hidden"
+      className="text-gray-300 hover:text-white focus:outline-none p-2 rounded-md lg:hidden"
     >
       <span className="sr-only">打开主菜单</span>
       <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
