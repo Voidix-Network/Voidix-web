@@ -247,7 +247,7 @@ const ServerCard: React.FC<ServerCardProps> = ({ serverInfo, displayName }) => {
                 })();
 
                 // 直接使用 Crafatar 获取头像
-                const avatarUrl = `https://crafatar.com/avatars/${player.uuid}?size=32&overlay=true`;
+                const avatarUrl = `https://avatars.cloudhaven.gg/avatars/${player.uuid}?size=32&overlay=true`;
                 const fallbackSvg =
                   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Crect fill="%234a5568" width="16" height="16"/%3E%3C/svg%3E';
 
