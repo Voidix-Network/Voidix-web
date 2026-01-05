@@ -887,7 +887,7 @@ export const IssueDetailPage: React.FC = () => {
                         isAuthenticated && user && comment.author_uuid === user.player_uuid;
                       const isIssueAuthor =
                         isAuthenticated && user && issue.author_uuid === user.player_uuid;
-                      const canDeleteComment = isCommentAuthor || isIssueAuthor;
+                      const canDeleteComment = isAdmin || isCommentAuthor || isIssueAuthor;
 
                       return (
                         <motion.div
