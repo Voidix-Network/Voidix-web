@@ -565,12 +565,11 @@ export const IssueDetailPage: React.FC = () => {
                       (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
                     )
                     .map((comment: Comment) => {
-                      const canDeleteComment =
-                        isAuthenticated &&
-                        user &&
-                        (comment.author_uuid === user.player_uuid ||
-                          issue.author_uuid === user.player_uuid ||
-                          user.isAdmin);
+                      const isCommentAuthor =
+                        isAuthenticated && user && comment.author_uuid === user.player_uuid;
+                      const isIssueAuthor =
+                        isAuthenticated && user && issue.author_uuid === user.player_uuid;
+                      const canDeleteComment = isAdmin || isCommentAuthor || isIssueAuthor;
 
                       return (
                         <div key={comment.id} className="bg-gray-800/30 rounded-lg p-4">
