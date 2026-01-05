@@ -87,7 +87,7 @@ export class AuthService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentUser.token}`,
+          Authorization: `Bearer ${currentUser.token}`,
         },
         credentials: 'include',
       });

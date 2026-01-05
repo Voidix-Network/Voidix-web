@@ -1,27 +1,23 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthStore } from '@/stores/authStore';
-import { issueService } from '@/services/issueService';
-import { AnimatedSection, BreadcrumbNavigation, Button, Card, GradientText } from '@/components';
+import { AnimatedSection, BreadcrumbNavigation, Button } from '@/components';
 import { SEO } from '@/components/seo';
-import { Issue, Comment, Tag } from '@/types/api';
+import { issueService } from '@/services/issueService';
+import { useAuthStore } from '@/stores/authStore';
+import { Comment, Issue, Tag } from '@/types/api';
 import {
-  Clock,
-  MessageSquare,
-  Tag as TagIcon,
-  User,
-  Trash2,
-  Edit2,
   ArrowLeft,
-  RefreshCw,
+  Clock,
+  Edit2,
+  MessageSquare,
   Pin,
+  RefreshCw,
+  Send,
+  Trash2,
+  User,
 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useNavigate, useParams } from 'react-router-dom';
 
-/**
- * Issue详情页面组件
- */
 export const IssueDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -33,17 +29,17 @@ export const IssueDetailPage: React.FC = () => {
   const [commentMessage, setCommentMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // 轮询相关状态
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [hasNewData, setHasNewData] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [timeDisplay, setTimeDisplay] = useState('');
 
-  // 置顶优先级编辑状态
   const [showPriorityEditor, setShowPriorityEditor] = useState(false);
   const [editingPriority, setEditingPriority] = useState(5);
 
-  // 页面加载时验证token并获取issue详情
+  // 权限判断 - 放在前面以便其他函数使用
+  const isAdmin = user?.isAdmin || false;
+  const canEdit =
+    isAuthenticated && issue && user && (issue.author_uuid === user.player_uuid || isAdmin);
+  const canChangeStatus = canEdit;
+
   useEffect(() => {
     const init = async () => {
       await validateToken();
@@ -53,28 +49,9 @@ export const IssueDetailPage: React.FC = () => {
       }
     };
     init();
-
-    return () => {
-      stopPolling();
-    };
+    return () => stopPolling();
   }, [validateToken, id]);
 
-  // 实时更新时间显示
-  useEffect(() => {
-    if (!lastUpdate) return;
-
-    const updateTimeDisplay = () => {
-      const display = formatRelativeTime(lastUpdate);
-      setTimeDisplay(display);
-    };
-
-    updateTimeDisplay();
-    const interval = setInterval(updateTimeDisplay, 10000);
-
-    return () => clearInterval(interval);
-  }, [lastUpdate]);
-
-  // 开始轮询
   const startPolling = () => {
     stopPolling();
     intervalRef.current = setInterval(() => {
@@ -82,7 +59,6 @@ export const IssueDetailPage: React.FC = () => {
     }, 60000);
   };
 
-  // 停止轮询
   const stopPolling = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -90,57 +66,24 @@ export const IssueDetailPage: React.FC = () => {
     }
   };
 
-  // 轮询获取issue
   const pollIssue = async () => {
     if (!id) return;
-
     try {
       const response = await issueService.getIssue(id);
-
       if (response.success && response.issue) {
-        const newIssue = response.issue;
-
-        if (issue) {
-          const hasChanges =
-            newIssue.status !== issue.status ||
-            newIssue.title !== issue.title ||
-            newIssue.description !== issue.description ||
-            newIssue.comments.length !== issue.comments.length ||
-            newIssue.tags.length !== issue.tags.length;
-
-          if (hasChanges) {
-            setHasNewData(true);
-            setTimeout(() => {
-              setIssue(newIssue);
-              setLastUpdate(new Date());
-              setHasNewData(false);
-            }, 300);
-          }
-        } else {
-          setIssue(newIssue);
-          setLastUpdate(new Date());
-        }
+        setIssue(response.issue);
       }
     } catch (err) {
       console.error('轮询失败:', err);
     }
   };
 
-  // 手动刷新
-  const handleManualRefresh = async () => {
-    if (!id) return;
-    await loadIssue(id);
-  };
-
-  // 加载issue详情
   const loadIssue = async (issueId: string) => {
     try {
       setError(null);
       const response = await issueService.getIssue(issueId);
-
       if (response.success && response.issue) {
         setIssue(response.issue);
-        setLastUpdate(new Date());
       } else {
         setError(response.error || '获取issue失败');
         navigate('/issue');
@@ -153,7 +96,6 @@ export const IssueDetailPage: React.FC = () => {
     }
   };
 
-  // 添加评论
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentMessage.trim() || !id || !isAuthenticated) return;
@@ -165,7 +107,7 @@ export const IssueDetailPage: React.FC = () => {
         message: commentMessage.trim(),
       });
 
-      if (response.success && response.comment) {
+      if (response.success) {
         await loadIssue(id);
         setCommentMessage('');
       } else {
@@ -178,17 +120,15 @@ export const IssueDetailPage: React.FC = () => {
     }
   };
 
-  // 删除评论
   const handleDeleteComment = async (commentId: string) => {
     if (!id || !isAuthenticated) return;
-    if (!confirm('确定要删除这条评论吗？')) return;
+    if (!confirm('确定删除这条评论？')) return;
 
     try {
       const response = await issueService.deleteComment({
         issue_id: id,
         comment_id: commentId,
       });
-
       if (response.success) {
         await loadIssue(id);
       } else {
@@ -199,66 +139,51 @@ export const IssueDetailPage: React.FC = () => {
     }
   };
 
-  // 删除issue
   const handleDeleteIssue = async () => {
     if (!id || !isAuthenticated || !issue) return;
-    if (!canEdit) {
-      setError('没有权限删除此issue');
+    // 作者或管理员可以删除
+    const canDelete = user && (issue.author_uuid === user.player_uuid || user.isAdmin);
+    if (!canDelete) {
+      setError('没有权限删除');
       return;
     }
-    if (!confirm('确定要删除这个Issue吗？此操作不可恢复。')) return;
+    if (!confirm('确定删除这个Issue？此操作不可恢复。')) return;
 
     try {
       const response = await issueService.deleteIssue({ id });
       if (response.success) {
         navigate('/issue');
       } else {
-        setError(response.error || '删除issue失败');
+        setError(response.error || '删除失败');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '删除issue失败');
+      setError(err instanceof Error ? err.message : '删除失败');
     }
   };
 
-  // 编辑issue
-  const handleEditIssue = () => {
-    if (!id) return;
-    navigate(`/issue/edit/${id}`);
-  };
-
-  // 置顶/取消置顶
   const handlePinToggle = async () => {
-    if (!id || !isAuthenticated || !issue || !isAdmin) return;
+    if (!id || !issue || !isAdmin) return;
 
-    // 如果是置顶操作，显示优先级编辑器
     if (!issue.pinned) {
       setEditingPriority(5);
       setShowPriorityEditor(true);
       return;
     }
 
-    // 取消置顶
     try {
-      const response = await issueService.pinIssue({
-        id,
-        pinned: false,
-        pin_priority: 5,
-      });
-
+      const response = await issueService.pinIssue({ id, pinned: false, pin_priority: 5 });
       if (response.success && response.issue) {
         setIssue(response.issue);
-        setError(null);
       } else {
-        setError(response.error || '置顶操作失败');
+        setError(response.error || '操作失败');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '置顶操作失败');
+      setError(err instanceof Error ? err.message : '操作失败');
     }
   };
 
-  // 确认置顶并设置优先级
   const handleConfirmPin = async () => {
-    if (!id || !isAuthenticated || !issue || !isAdmin) return;
+    if (!id || !issue || !isAdmin) return;
 
     try {
       const response = await issueService.pinIssue({
@@ -266,110 +191,58 @@ export const IssueDetailPage: React.FC = () => {
         pinned: true,
         pin_priority: editingPriority,
       });
-
       if (response.success && response.issue) {
         setIssue(response.issue);
-        setError(null);
         setShowPriorityEditor(false);
       } else {
-        setError(response.error || '置顶操作失败');
+        setError(response.error || '操作失败');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '置顶操作失败');
+      setError(err instanceof Error ? err.message : '操作失败');
     }
   };
 
-  // 更新置顶优先级
-  const handleUpdatePriority = async () => {
-    if (!id || !isAuthenticated || !issue || !isAdmin || !issue.pinned) return;
-
-    try {
-      const response = await issueService.pinIssue({
-        id,
-        pinned: true,
-        pin_priority: editingPriority,
-      });
-
-      if (response.success && response.issue) {
-        setIssue(response.issue);
-        setError(null);
-        setShowPriorityEditor(false);
-      } else {
-        setError(response.error || '更新优先级失败');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '更新优先级失败');
-    }
-  };
-
-  // 修改状态
   const handleStatusChange = async (newStatus: string) => {
-    if (!id || !isAuthenticated || !issue) return;
-    if (!canChangeStatus) {
-      setError('没有权限修改状态');
+    if (!id || !issue) return;
+
+    // 权限检查
+    const canChange = user && (issue.author_uuid === user.player_uuid || user.isAdmin);
+    if (!canChange) {
+      setError('没有权限');
       return;
     }
 
     const currentStatus = issue.status;
-
-    if (!isAdmin) {
-      if (currentStatus === 'closed') {
-        setError('已关闭的issue不能修改');
-        return;
-      }
-      if (newStatus !== 'closed') {
-        setError('作者只能关闭issue，不能修改为其他状态');
-        return;
-      }
+    // 非管理员只能关闭自己的issue
+    if (!isAdmin && (currentStatus === 'closed' || newStatus !== 'closed')) {
+      setError('只能关闭Issue');
+      return;
     }
 
     try {
-      const response = await issueService.updateIssue({
-        id,
-        status: newStatus,
-      });
-
+      const response = await issueService.updateIssue({ id, status: newStatus });
       if (response.success && response.issue) {
         setIssue(response.issue);
-        setError(null);
 
-        // 自动添加状态变更评论（使用Markdown）
-        const statusLabels: Record<string, string> = {
-          open: '开放',
-          in_progress: '进行中',
+        const labels: Record<string, string> = {
+          open: '待处理',
+          in_progress: '处理中',
           resolved: '已解决',
           closed: '已关闭',
         };
-
-        const oldStatus = statusLabels[currentStatus] || currentStatus;
-        const newStatusLabel = statusLabels[newStatus] || newStatus;
-
-        const commentMessage = `将状态从 **"${oldStatus}"** 修改为 **"${newStatusLabel}"**`;
-
-        issueService
-          .addComment({
-            issue_id: id,
-            message: commentMessage,
-          })
-          .then(commentResponse => {
-            if (commentResponse.success) {
-              loadIssue(id);
-            }
-          });
+        await issueService.addComment({
+          issue_id: id,
+          message: `将状态从 **${labels[currentStatus] || currentStatus}** 改为 **${labels[newStatus] || newStatus}**`,
+        });
+        await loadIssue(id);
       } else {
-        setError(response.error || '状态修改失败');
+        setError(response.error || '修改失败');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '状态修改失败');
+      setError(err instanceof Error ? err.message : '修改失败');
     }
   };
 
-  // 返回列表
-  const handleGoBack = () => {
-    navigate('/issue');
-  };
-
-  // 格式化日期
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('zh-CN', {
@@ -381,75 +254,52 @@ export const IssueDetailPage: React.FC = () => {
     });
   };
 
-  // 格式化相对时间
-  const formatRelativeTime = (date: Date | null) => {
-    if (!date) return '';
-    const now = new Date();
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diff < 60) return '刚刚';
-    if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`;
-    return `${Math.floor(diff / 86400)}天前`;
-  };
-
-  // 获取状态颜色
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      open: 'bg-green-500/20 text-green-400 border-green-500/30',
-      in_progress: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      resolved: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      closed: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+  const getStatusStyle = (status: string) => {
+    const styles: Record<string, string> = {
+      open: 'bg-emerald-500/10 text-emerald-400',
+      in_progress: 'bg-blue-500/10 text-blue-400',
+      resolved: 'bg-violet-500/10 text-violet-400',
+      closed: 'bg-gray-500/10 text-gray-400',
     };
-    return colors[status] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    return styles[status] || 'bg-gray-500/10 text-gray-400';
   };
 
-  // Markdown自定义样式
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      open: '待处理',
+      in_progress: '处理中',
+      resolved: '已解决',
+      closed: '已关闭',
+    };
+    return labels[status] || status;
+  };
+
   const markdownComponents = {
-    // 自定义段落
     p: ({ children }: any) => <p className="mb-2 last:mb-0">{children}</p>,
-    // 自定义代码
     code: ({ children }: any) => (
-      <code className="bg-gray-800 px-1 py-0.5 rounded text-sm font-mono text-pink-300">
-        {children}
-      </code>
+      <code className="bg-gray-800 px-1.5 py-0.5 rounded text-sm text-pink-300">{children}</code>
     ),
-    // 自定义链接
     a: ({ href, children }: any) => (
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-400 hover:text-blue-300 underline"
+        className="text-blue-400 hover:underline"
       >
         {children}
       </a>
     ),
-    // 自定义列表
-    li: ({ children }: any) => <li className="ml-4">{children}</li>,
   };
-
-  // 权限判断
-  const canEdit =
-    isAuthenticated && issue && user && (issue.author_uuid === user.player_uuid || user.isAdmin);
-  const canChangeStatus =
-    isAuthenticated && issue && user && (issue.author_uuid === user.player_uuid || user.isAdmin);
-  const isAdmin = user?.isAdmin || false;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
-          <p className="text-gray-400">加载中...</p>
-        </div>
+        <div className="w-8 h-8 border-2 border-gray-700 border-t-gray-400 rounded-full animate-spin" />
       </div>
     );
   }
 
-  if (!issue) {
-    return null;
-  }
+  if (!issue) return null;
 
   return (
     <>
@@ -458,494 +308,302 @@ export const IssueDetailPage: React.FC = () => {
         type="website"
         url={`https://www.voidix.net/issue/${id}`}
         canonicalUrl={`https://www.voidix.net/issue/${id}`}
-        title={`${issue.title} - Issue详情`}
+        title={`${issue.title} - Issue`}
       />
 
       <div className="min-h-screen bg-gray-900">
-        <AnimatedSection className="pt-12 pb-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            {/* 面包屑导航 */}
+        <AnimatedSection className="pt-10 pb-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
             <BreadcrumbNavigation
-              className="mb-8"
+              className="mb-6"
               items={[
                 { label: '首页', href: '/' },
-                { label: 'Issue系统', href: '/issue' },
+                { label: 'Issues', href: '/issue' },
                 { label: '详情', isCurrentPage: true },
               ]}
             />
 
             {/* 顶部操作栏 */}
-            <motion.div
-              className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              {/* 左侧：返回和刷新按钮 */}
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={() => navigate('/issue')}
+                className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                返回
+              </button>
+
               <div className="flex items-center gap-2">
-                <Button onClick={handleGoBack} variant="secondary" size="md">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  返回列表
-                </Button>
+                <button
+                  onClick={() => id && loadIssue(id)}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                  title="刷新"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </button>
 
-                <Button onClick={handleManualRefresh} variant="secondary" size="md">
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  刷新
-                </Button>
-              </div>
+                {isAdmin && (
+                  <button
+                    onClick={handlePinToggle}
+                    className={`p-2 rounded-lg transition-colors ${
+                      issue.pinned
+                        ? 'text-amber-400 bg-amber-500/10'
+                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                    }`}
+                    title={issue.pinned ? '取消置顶' : '置顶'}
+                  >
+                    <Pin className="h-4 w-4" />
+                  </button>
+                )}
 
-              {/* 中间：更新时间 */}
-              <div className="text-xs text-gray-500 flex items-center gap-2">
-                {timeDisplay && (
+                {canEdit && (
                   <>
-                    <span>更新于 {timeDisplay}</span>
-                    {hasNewData && (
-                      <motion.span
-                        className="text-green-400 font-semibold"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ repeat: Infinity, duration: 0.5 }}
-                      >
-                        • 有新内容
-                      </motion.span>
-                    )}
+                    <button
+                      onClick={() => navigate(`/issue/edit/${id}`)}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                      title="编辑"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={handleDeleteIssue}
+                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      title="删除"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </>
                 )}
               </div>
+            </div>
 
-              {/* 右侧：置顶、编辑和删除 */}
-              <motion.div
-                className="flex gap-2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
-                {/* 置顶按钮 - 仅管理员 */}
-                {isAdmin && (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handlePinToggle}
-                      variant={issue.pinned ? 'primary' : 'secondary'}
-                      size="md"
-                      title={issue.pinned ? '取消置顶' : '置顶Issue'}
-                    >
-                      <Pin className="h-4 w-4 mr-2" />
-                      {issue.pinned ? '取消置顶' : '置顶'}
-                    </Button>
-                    {/* 修改优先级按钮 - 仅已置顶时显示 */}
-                    {issue.pinned && (
-                      <Button
-                        onClick={() => {
-                          setEditingPriority(issue.pin_priority || 5);
-                          setShowPriorityEditor(true);
-                        }}
-                        variant="secondary"
-                        size="md"
-                        title="修改置顶优先级"
-                      >
-                        P{issue.pin_priority || 5}
-                      </Button>
-                    )}
-                  </div>
-                )}
-
-                {/* 编辑按钮 - 作者或管理员 */}
-                {canEdit && (
-                  <Button onClick={handleEditIssue} variant="secondary" size="md">
-                    <Edit2 className="h-4 w-4 mr-2" />
-                    编辑
-                  </Button>
-                )}
-
-                {/* 删除按钮 - 作者 */}
-                {canEdit && (
-                  <Button
-                    onClick={handleDeleteIssue}
-                    variant="outline"
-                    size="md"
-                    className="border-red-500/30 text-red-400 hover:bg-red-900/20"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    删除
-                  </Button>
-                )}
-              </motion.div>
-            </motion.div>
-
-            {/* 错误信息 */}
+            {/* 错误提示 */}
             {error && (
-              <motion.div
-                className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-6"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <p className="text-red-300">{error}</p>
-              </motion.div>
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-6 text-sm text-red-400">
+                {error}
+              </div>
             )}
 
-            {/* 置顶优先级编辑器弹窗 */}
-            {showPriorityEditor && isAdmin && (
-              <motion.div
-                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+            {/* 置顶优先级弹窗 */}
+            {showPriorityEditor && (
+              <div
+                className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
                 onClick={() => setShowPriorityEditor(false)}
               >
-                <motion.div
-                  className="bg-gray-800 border border-gray-700 rounded-2xl p-6 max-w-md w-full"
-                  initial={{ scale: 0.9, y: 20 }}
-                  animate={{ scale: 1, y: 0 }}
+                <div
+                  className="bg-gray-800 rounded-xl p-6 w-full max-w-sm"
                   onClick={e => e.stopPropagation()}
                 >
-                  <h3 className="text-xl font-bold text-white mb-4">
-                    {issue?.pinned ? '修改置顶优先级' : '设置置顶优先级'}
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm text-gray-300 mb-2">
-                        优先级 (1-10，数字越大优先级越高)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={editingPriority}
-                        onChange={e =>
-                          setEditingPriority(
-                            Math.min(10, Math.max(1, parseInt(e.target.value) || 1))
-                          )
-                        }
-                        className="w-full px-4 py-2 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                      />
-                      <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-                        <span>最低 (1)</span>
-                        <span>当前: P{editingPriority}</span>
-                        <span>最高 (10)</span>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-900/30 rounded-lg p-3 text-xs text-gray-400">
-                      <p className="mb-1">
-                        <strong className="text-gray-300">优先级说明：</strong>
-                      </p>
-                      <ul className="space-y-1 ml-4 list-disc">
-                        <li>优先级高的Issue会排在前面</li>
-                        <li>相同优先级按创建时间排序</li>
-                        <li>建议重要公告使用 P8-P10</li>
-                      </ul>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={issue?.pinned ? handleUpdatePriority : handleConfirmPin}
-                        variant="primary"
-                        size="md"
-                        className="flex-1"
-                      >
-                        {issue?.pinned ? '更新优先级' : '确认置顶'}
-                      </Button>
-                      <Button
-                        onClick={() => setShowPriorityEditor(false)}
-                        variant="outline"
-                        size="md"
-                        className="px-6"
-                      >
-                        取消
-                      </Button>
-                    </div>
+                  <h3 className="text-lg font-medium text-white mb-4">设置置顶优先级</h3>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={editingPriority}
+                    onChange={e =>
+                      setEditingPriority(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))
+                    }
+                    className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white mb-4"
+                  />
+                  <p className="text-xs text-gray-500 mb-4">1-10，数字越大优先级越高</p>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleConfirmPin}
+                      variant="primary"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      确认
+                    </Button>
+                    <Button
+                      onClick={() => setShowPriorityEditor(false)}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      取消
+                    </Button>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             )}
 
-            {/* Issue 主要内容 */}
-            <AnimatePresence>
-              <motion.div
-                key={issue.id + (lastUpdate?.getTime() || 0)}
-                className="bg-gray-800/50 border border-gray-700 rounded-2xl p-8 mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                {/* 标题和状态 - 改进布局 */}
-                <div className="flex flex-col sm:flex-row sm:items-start gap-3 mb-6 w-full">
-                  <div className="flex-1 min-w-0">
-                    {/* 置顶标签单独一行 */}
-                    {issue.pinned && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/20 text-yellow-400 rounded-md text-xs font-semibold border border-yellow-500/30">
-                          <Pin className="h-3.5 w-3.5" />
-                          置顶
-                          {issue.pin_priority > 0 && (
-                            <span className="ml-1 px-1.5 py-0.5 bg-yellow-500/30 rounded text-[10px]">
-                              P{issue.pin_priority}
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* 标题独立 */}
-                    <motion.h1
-                      className="text-2xl sm:text-3xl font-bold text-white break-words"
-                      animate={{ scale: hasNewData ? [1, 1.02, 1] : 1 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word',
-                      }}
-                    >
-                      {issue.title}
-                    </motion.h1>
-                  </div>
-
-                  {/* 状态标签 */}
-                  <motion.span
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium border ${getStatusColor(issue.status)} flex-shrink-0 self-start`}
-                    animate={{
-                      backgroundColor: hasNewData
-                        ? ['rgba(59,130,246,0.1)', 'rgba(59,130,246,0.3)', 'rgba(59,130,246,0.1)']
-                        : 'transparent',
-                    }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {issue.status === 'open'
-                      ? '开放'
-                      : issue.status === 'in_progress'
-                        ? '进行中'
-                        : issue.status === 'resolved'
-                          ? '已解决'
-                          : issue.status === 'closed'
-                            ? '已关闭'
-                            : issue.status}
-                  </motion.span>
+            {/* Issue 内容 */}
+            <div className="bg-gray-800/40 rounded-xl p-6 mb-6">
+              {/* 头部 */}
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-1 min-w-0">
+                  {issue.pinned && (
+                    <div className="flex items-center gap-1.5 text-amber-400 text-xs mb-2">
+                      <Pin className="h-3 w-3" />
+                      <span>置顶 · P{issue.pin_priority}</span>
+                    </div>
+                  )}
+                  <h1 className="text-xl font-semibold text-white break-words">{issue.title}</h1>
                 </div>
-
-                {/* 作者和时间 */}
-                <div className="flex items-center gap-4 text-sm text-gray-400 mb-6">
-                  <span className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    {issue.author_username}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {formatDate(issue.created_at)}
-                  </span>
-                </div>
-
-                {/* 标签 */}
-                {issue.tags && issue.tags.length > 0 && (
-                  <motion.div
-                    className="flex flex-wrap gap-2 mb-6"
-                    animate={{ x: hasNewData ? [0, 5, 0] : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {issue.tags.map((tag: Tag) => (
-                      <span
-                        key={tag.id}
-                        className="px-2 py-1 rounded text-xs font-medium"
-                        style={{
-                          backgroundColor: `${tag.color}33`,
-                          color: tag.color,
-                          border: `1px solid ${tag.color}66`,
-                        }}
-                      >
-                        <TagIcon className="h-3 w-3 inline mr-1" />
-                        {tag.name}
-                      </span>
-                    ))}
-                  </motion.div>
-                )}
-
-                {/* 描述 - 支持Markdown */}
-                <motion.div
-                  className="bg-gray-900/30 rounded-lg p-6 border border-gray-700/50"
-                  animate={{ opacity: hasNewData ? [0.5, 1, 0.8, 1] : 1 }}
-                  transition={{ duration: 0.5 }}
+                <span
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium flex-shrink-0 ${getStatusStyle(issue.status)}`}
                 >
-                  <div
-                    className="prose prose-invert max-w-none prose-sm"
-                    style={{
-                      wordWrap: 'break-word',
-                      overflowWrap: 'break-word',
-                      wordBreak: 'break-word',
-                    }}
-                  >
-                    <ReactMarkdown components={markdownComponents}>
-                      {issue.description}
-                    </ReactMarkdown>
-                  </div>
-                </motion.div>
+                  {getStatusLabel(issue.status)}
+                </span>
+              </div>
 
-                {/* 状态修改按钮区域 */}
-                {canChangeStatus && (
-                  <motion.div
-                    className="mt-6 pt-6 border-t border-gray-700/50"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    {isAdmin ? (
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-400">管理员操作:</span>
-                        <select
-                          value={issue.status}
-                          onChange={e => handleStatusChange(e.target.value)}
-                          className="px-3 py-2 rounded-md text-sm font-medium border bg-gray-900/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                        >
-                          <option value="open">设为开放</option>
-                          <option value="in_progress">设为进行中</option>
-                          <option value="resolved">设为已解决</option>
-                          <option value="closed">设为已关闭</option>
-                        </select>
-                      </div>
-                    ) : issue.status !== 'closed' ? (
+              {/* 元信息 */}
+              <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                <span className="flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5" />
+                  {issue.author_username}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" />
+                  {formatDate(issue.created_at)}
+                </span>
+              </div>
+
+              {/* 标签 */}
+              {issue.tags && issue.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {issue.tags.map((tag: Tag) => (
+                    <span
+                      key={tag.id}
+                      className="px-2 py-0.5 rounded text-xs font-medium"
+                      style={{ backgroundColor: `${tag.color}15`, color: tag.color }}
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* 描述 */}
+              <div className="prose prose-invert prose-sm max-w-none text-gray-300">
+                <ReactMarkdown components={markdownComponents}>{issue.description}</ReactMarkdown>
+              </div>
+
+              {/* 状态操作 */}
+              {canChangeStatus && (
+                <div className="mt-6 pt-4 border-t border-gray-700/50">
+                  {isAdmin ? (
+                    <select
+                      value={issue.status}
+                      onChange={e => handleStatusChange(e.target.value)}
+                      className="px-3 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white"
+                    >
+                      <option value="open">待处理</option>
+                      <option value="in_progress">处理中</option>
+                      <option value="resolved">已解决</option>
+                      <option value="closed">已关闭</option>
+                    </select>
+                  ) : (
+                    issue.status !== 'closed' && (
                       <Button
                         onClick={() => {
-                          if (
-                            confirm(
-                              '确定要关闭这个Issue吗？\n\n注意：关闭后您将无法再次开启，只有管理员可以重新打开。'
-                            )
-                          ) {
+                          if (confirm('确定关闭？关闭后只有管理员可以重新打开。')) {
                             handleStatusChange('closed');
                           }
                         }}
-                        variant="primary"
-                        size="md"
+                        variant="secondary"
+                        size="sm"
                       >
                         关闭 Issue
                       </Button>
-                    ) : null}
-                  </motion.div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
 
-            {/* 评论区域 */}
-            <motion.div
-              className="space-y-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              {/* 评论标题 */}
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <MessageSquare className="h-6 w-6 text-blue-400" />
-                <GradientText variant="primary">评论 ({issue.comments.length})</GradientText>
+            {/* 评论区 */}
+            <div>
+              <h2 className="flex items-center gap-2 text-lg font-medium text-white mb-4">
+                <MessageSquare className="h-5 w-5 text-gray-500" />
+                评论 ({issue.comments.length})
               </h2>
 
-              {/* 添加评论表单 */}
+              {/* 评论输入 */}
               {isAuthenticated ? (
-                <Card variant="glass" className="p-6">
-                  <form onSubmit={handleAddComment} className="space-y-4">
+                <form onSubmit={handleAddComment} className="mb-6">
+                  <div className="bg-gray-800/40 rounded-xl p-4">
                     <textarea
                       value={commentMessage}
                       onChange={e => setCommentMessage(e.target.value)}
-                      placeholder="写下您的评论（支持Markdown语法）..."
-                      className="w-full min-h-[100px] p-4 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white resize-y"
+                      placeholder="写下你的评论..."
+                      className="w-full bg-transparent text-white placeholder-gray-500 resize-none focus:outline-none min-h-[80px]"
                       disabled={submitting}
-                      required
                     />
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">
-                        支持: **粗体**、*斜体*、`代码`、列表等
-                      </span>
-                      <Button
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-xs text-gray-600">支持 Markdown</span>
+                      <button
                         type="submit"
-                        variant="primary"
-                        size="md"
-                        loading={submitting}
                         disabled={!commentMessage.trim() || submitting}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        发表评论
-                      </Button>
+                        <Send className="h-3.5 w-3.5" />
+                        发送
+                      </button>
                     </div>
-                  </form>
-                </Card>
+                  </div>
+                </form>
               ) : (
-                <Card variant="glass" className="p-6 text-center">
-                  <p className="text-gray-400 mb-4">请先登录以发表评论</p>
-                  <Button onClick={() => navigate('/login')} variant="primary" size="md">
+                <div className="bg-gray-800/40 rounded-xl p-4 text-center mb-6">
+                  <p className="text-gray-500 text-sm mb-2">登录后可以发表评论</p>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
                     登录
-                  </Button>
-                </Card>
+                  </button>
+                </div>
               )}
 
               {/* 评论列表 */}
-              <div className="space-y-4">
-                {issue.comments.length === 0 ? (
-                  <Card variant="glass" className="p-8 text-center">
-                    <p className="text-gray-400">暂无评论，快来发表第一条评论吧！</p>
-                  </Card>
-                ) : (
-                  [...issue.comments]
+              {issue.comments.length === 0 ? (
+                <div className="text-center py-8 text-gray-600 text-sm">暂无评论</div>
+              ) : (
+                <div className="space-y-3">
+                  {[...issue.comments]
                     .sort(
                       (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
                     )
-                    .map((comment: Comment, index) => {
-                      const isCommentAuthor =
-                        isAuthenticated && user && comment.author_uuid === user.player_uuid;
-                      const isIssueAuthor =
-                        isAuthenticated && user && issue.author_uuid === user.player_uuid;
-                      const canDeleteComment = isCommentAuthor || isIssueAuthor;
+                    .map((comment: Comment) => {
+                      const canDeleteComment =
+                        isAuthenticated &&
+                        user &&
+                        (comment.author_uuid === user.player_uuid ||
+                          issue.author_uuid === user.player_uuid ||
+                          user.isAdmin);
 
                       return (
-                        <motion.div
-                          key={comment.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.1 * (index + 1) }}
-                        >
-                          <Card variant="glass" className="p-6">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-3">
-                                  <span className="font-semibold text-white">
-                                    {comment.author_username}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    {formatDate(comment.created_at)}
-                                  </span>
-                                  {isCommentAuthor && (
-                                    <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
-                                      我的评论
-                                    </span>
-                                  )}
-                                </div>
-                                {/* 评论内容 - 支持Markdown */}
-                                <div
-                                  className="prose prose-invert max-w-none prose-sm"
-                                  style={{
-                                    wordWrap: 'break-word',
-                                    overflowWrap: 'break-word',
-                                    wordBreak: 'break-word',
-                                  }}
-                                >
-                                  <ReactMarkdown components={markdownComponents}>
-                                    {comment.message}
-                                  </ReactMarkdown>
-                                </div>
-                              </div>
-
-                              {canDeleteComment && (
-                                <Button
-                                  onClick={() => handleDeleteComment(comment.id)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-400 hover:bg-red-900/20"
-                                  title="删除评论"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
+                        <div key={comment.id} className="bg-gray-800/30 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-300 font-medium">
+                                {comment.author_username}
+                              </span>
+                              <span className="text-gray-600">·</span>
+                              <span className="text-gray-500">
+                                {formatDate(comment.created_at)}
+                              </span>
                             </div>
-                          </Card>
-                        </motion.div>
+                            {canDeleteComment && (
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                className="p-1 text-gray-600 hover:text-red-400 transition-colors"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                          <div className="prose prose-invert prose-sm max-w-none text-gray-400">
+                            <ReactMarkdown components={markdownComponents}>
+                              {comment.message}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
                       );
-                    })
-                )}
-              </div>
-            </motion.div>
+                    })}
+                </div>
+              )}
+            </div>
           </div>
         </AnimatedSection>
       </div>

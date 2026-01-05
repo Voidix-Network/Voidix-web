@@ -1,4 +1,3 @@
-// filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\components\layout\footer\ServerStatusBar.tsx
 import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
 
 /**

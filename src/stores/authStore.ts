@@ -30,7 +30,7 @@ const initialState: AuthState = {
  * 管理用户登录状态、token验证和用户信息
  */
 export const useAuthStore = create<AuthState & AuthActions>()(
-  subscribeWithSelector((set) => ({
+  subscribeWithSelector(set => ({
     ...initialState,
 
     /**
@@ -119,7 +119,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({
             user: null,
             isAuthenticated: false,
-            isLoading: false
+            isLoading: false,
           });
           return;
         }

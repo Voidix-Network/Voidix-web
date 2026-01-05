@@ -1,4 +1,4 @@
-import { AnimatedSection, BreadcrumbNavigation, GradientText } from '@/components';
+import { AnimatedSection, BreadcrumbNavigation } from '@/components';
 import { SEO } from '@/components/seo';
 import { FEEDBACK_CHANNELS_CONFIG } from '@/components/seo/feedbackChannels';
 import { FEEDBACK_REQUIREMENTS_CONFIG } from '@/components/seo/feedbackRequirements';
@@ -82,12 +82,12 @@ export const BugReportPage: React.FC = () => {
             >
               {/* 页面标题 */}
               <motion.h1
-                className="text-3xl font-bold mb-8"
+                className="text-3xl font-bold text-white mb-8"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <GradientText variant="primary">Bug 反馈</GradientText>
+                Bug 反馈
               </motion.h1>
 
               {/* 介绍文字 */}
@@ -145,7 +145,9 @@ export const BugReportPage: React.FC = () => {
                                 {channel.name}
                               </h3>
                               {isInternal ? (
-                                <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded">内部</span>
+                                <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded">
+                                  内部
+                                </span>
                               ) : (
                                 <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-300 transition-colors" />
                               )}

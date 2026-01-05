@@ -86,7 +86,11 @@ export const TagManagePage: React.FC = () => {
       let response;
       if (editingTag) {
         // 更新
-        response = await issueService.updateTag(editingTag.id, formData.name.trim(), formData.color);
+        response = await issueService.updateTag(
+          editingTag.id,
+          formData.name.trim(),
+          formData.color
+        );
       } else {
         // 创建
         response = await issueService.createTag(formData.name.trim(), formData.color);
@@ -143,10 +147,25 @@ export const TagManagePage: React.FC = () => {
 
   // 颜色选择器选项
   const presetColors = [
-    '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
-    '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
-    '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-    '#ec4899', '#f43f5e', '#64748b', '#94a3b8'
+    '#ef4444',
+    '#f97316',
+    '#f59e0b',
+    '#eab308',
+    '#84cc16',
+    '#22c55e',
+    '#10b981',
+    '#14b8a6',
+    '#06b6d4',
+    '#0ea5e9',
+    '#3b82f6',
+    '#6366f1',
+    '#8b5cf6',
+    '#a855f7',
+    '#d946ef',
+    '#ec4899',
+    '#f43f5e',
+    '#64748b',
+    '#94a3b8',
   ];
 
   if (loading && !isInitialized) {
@@ -197,10 +216,7 @@ export const TagManagePage: React.FC = () => {
                 <GradientText variant="primary">标签管理</GradientText>
               </motion.h1>
 
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                 <Button
                   onClick={() => {
                     cancelEdit();
@@ -257,7 +273,7 @@ export const TagManagePage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
                     placeholder="输入标签名称"
                     required
@@ -268,20 +284,18 @@ export const TagManagePage: React.FC = () => {
 
                 {/* 颜色选择 */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-300">
-                    标签颜色
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300">标签颜色</label>
                   <div className="flex items-center gap-4">
                     <input
                       type="color"
                       value={formData.color}
-                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                      onChange={e => setFormData({ ...formData, color: e.target.value })}
                       className="w-12 h-12 rounded cursor-pointer border-2 border-gray-600"
                     />
                     <input
                       type="text"
                       value={formData.color}
-                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                      onChange={e => setFormData({ ...formData, color: e.target.value })}
                       className="flex-1 px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white font-mono"
                       placeholder="#3b82f6"
                       pattern="^#[0-9A-Fa-f]{6}$"
@@ -290,7 +304,7 @@ export const TagManagePage: React.FC = () => {
 
                   {/* 预设颜色 */}
                   <div className="flex flex-wrap gap-2 mt-3">
-                    {presetColors.map((color) => (
+                    {presetColors.map(color => (
                       <button
                         key={color}
                         type="button"
@@ -305,11 +319,7 @@ export const TagManagePage: React.FC = () => {
 
                 {/* 按钮组 */}
                 <div className="flex gap-3">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="md"
-                  >
+                  <Button type="submit" variant="primary" size="md">
                     {editingTag ? (
                       <>
                         <Check className="h-4 w-4 mr-2" />
@@ -324,12 +334,7 @@ export const TagManagePage: React.FC = () => {
                   </Button>
 
                   {editingTag && (
-                    <Button
-                      type="button"
-                      onClick={cancelEdit}
-                      variant="outline"
-                      size="md"
-                    >
+                    <Button type="button" onClick={cancelEdit} variant="outline" size="md">
                       <X className="h-4 w-4 mr-2" />
                       取消编辑
                     </Button>
@@ -345,9 +350,7 @@ export const TagManagePage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h2 className="text-xl font-semibold mb-6">
-                标签列表 ({tags.length})
-              </h2>
+              <h2 className="text-xl font-semibold mb-6">标签列表 ({tags.length})</h2>
 
               {tags.length === 0 ? (
                 <div className="text-center py-12">
@@ -357,7 +360,7 @@ export const TagManagePage: React.FC = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <AnimatePresence>
-                    {tags.map((tag) => (
+                    {tags.map(tag => (
                       <motion.div
                         key={tag.id}
                         initial={{ opacity: 0, y: 20 }}
@@ -376,13 +379,9 @@ export const TagManagePage: React.FC = () => {
                                   className="w-4 h-4 rounded-full"
                                   style={{ backgroundColor: tag.color }}
                                 />
-                                <span className="font-semibold text-white">
-                                  {tag.name}
-                                </span>
+                                <span className="font-semibold text-white">{tag.name}</span>
                               </div>
-                              <p className="text-xs text-gray-500 font-mono">
-                                {tag.color}
-                              </p>
+                              <p className="text-xs text-gray-500 font-mono">{tag.color}</p>
                             </div>
 
                             <div className="flex gap-1">
@@ -421,11 +420,7 @@ export const TagManagePage: React.FC = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <Button
-                onClick={() => navigate('/issue')}
-                variant="secondary"
-                size="md"
-              >
+              <Button onClick={() => navigate('/issue')} variant="secondary" size="md">
                 返回Issue系统
               </Button>
             </motion.div>

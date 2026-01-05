@@ -39,7 +39,7 @@ export class IssueService {
       try {
         const userInfo = JSON.parse(stored);
         if (userInfo && userInfo.token) {
-          return { 'Authorization': `Bearer ${userInfo.token}` };
+          return { Authorization: `Bearer ${userInfo.token}` };
         }
       } catch {}
     }
@@ -51,14 +51,17 @@ export class IssueService {
    */
   async getIssues(page: number = 1, pageSize: number = 20): Promise<GetIssuesResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/issue/get_issues?page=${page}&pageSize=${pageSize}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...this.getAuthHeader(),
-        },
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/issue/get_issues?page=${page}&pageSize=${pageSize}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...this.getAuthHeader(),
+          },
+          credentials: 'include',
+        }
+      );
 
       const data: GetIssuesResponse = await response.json();
 
@@ -286,7 +289,10 @@ export class IssueService {
   /**
    * 创建标签（管理员）
    */
-  async createTag(name: string, color: string): Promise<{ success: boolean; tag?: Tag; error?: string }> {
+  async createTag(
+    name: string,
+    color: string
+  ): Promise<{ success: boolean; tag?: Tag; error?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/tag/create`, {
         method: 'POST',
@@ -316,7 +322,11 @@ export class IssueService {
   /**
    * 更新标签（管理员）
    */
-  async updateTag(id: number, name: string, color: string): Promise<{ success: boolean; tag?: Tag; error?: string }> {
+  async updateTag(
+    id: number,
+    name: string,
+    color: string
+  ): Promise<{ success: boolean; tag?: Tag; error?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/tag/update`, {
         method: 'POST',
@@ -376,7 +386,11 @@ export class IssueService {
   /**
    * 置顶/取消置顶Issue（管理员）
    */
-  async pinIssue(request: { id: string; pinned: boolean; pin_priority?: number }): Promise<{ success: boolean; message?: string; issue?: Issue; error?: string }> {
+  async pinIssue(request: {
+    id: string;
+    pinned: boolean;
+    pin_priority?: number;
+  }): Promise<{ success: boolean; message?: string; issue?: Issue; error?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/issue/pin`, {
         method: 'POST',

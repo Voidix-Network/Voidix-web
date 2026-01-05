@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { LogOut, LogIn } from 'lucide-react';
 
 /**
  * 导航项目接口
@@ -17,25 +16,13 @@ interface MobileMenuProps {
   isOpen: boolean;
   items: NavigationItem[];
   onItemClick: (href: string, isExternal?: boolean) => void;
-  onAuthAction: () => void;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  user: any;
 }
 
 /**
  * 移动端菜单组件
  * 显示移动端的导航菜单项
  */
-export const MobileMenu: React.FC<MobileMenuProps> = ({ 
-  isOpen, 
-  items, 
-  onItemClick,
-  onAuthAction,
-  isLoading,
-  isAuthenticated,
-  user 
-}) => {
+export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, items, onItemClick }) => {
   return (
     <motion.div
       initial={false}
@@ -66,41 +53,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             {item.label}
           </motion.button>
         ))}
-        
-        {/* 认证按钮 - 包含在可滚动区域内 */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{
-            opacity: isOpen ? 1 : 0,
-            x: isOpen ? 0 : -20,
-          }}
-          transition={{
-            delay: isOpen ? items.length * 0.1 : 0,
-            duration: 0.3,
-          }}
-          className="pt-2 mt-2 border-t border-gray-700"
-        >
-          <button
-            onClick={onAuthAction}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md font-medium transition-colors
-                     bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isAuthenticated ? (
-              <>
-                <LogOut className="h-4 w-4" />
-                <span>登出</span>
-                {user && <span className="opacity-80">({user.username})</span>}
-              </>
-            ) : (
-              <>
-                <LogIn className="h-4 w-4" />
-                <span>登录</span>
-              </>
-            )}
-          </button>
-        </motion.div>
       </div>
     </motion.div>
   );

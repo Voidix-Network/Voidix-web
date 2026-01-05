@@ -1,5 +1,3 @@
-// filepath: c:\Users\ASKLL\WebstormProjects\voidix-web\src\constants\serverGroups.ts
-
 import { isLobbyServer } from '@/utils/serverUtils';
 
 /**
