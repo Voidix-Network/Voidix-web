@@ -1,6 +1,6 @@
 import type { LoginResponse, ValidateResponse, LogoutResponse, UserInfo } from '@/types/api';
 
-const API_BASE_URL = 'http://192.168.3.67:5699';
+const API_BASE_URL = 'https://webba.voidix.net:5699';
 
 /**
  * 认证服务 - 处理登录、登出、token验证

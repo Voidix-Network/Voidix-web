@@ -12,9 +12,10 @@ import type {
   DeleteCommentRequest,
   DeleteCommentResponse,
   Tag,
+  Issue,
 } from '@/types/api';
 
-const API_BASE_URL = 'http://192.168.3.67:5699';
+const API_BASE_URL = 'https://webba.voidix.net:5699';
 
 /**
  * Issue服务 - 处理issue相关的API调用
