@@ -7,7 +7,7 @@ import { AnimatedSection, BreadcrumbNavigation, Button, GradientText } from '@/c
 import { SEO } from '@/components/seo';
 import { AlertCircle, CheckCircle, Tag as TagIcon, Plus } from 'lucide-react';
 import { Tag } from '@/types/api';
-import { decodeForMarkdown } from '@/utils/htmlDecoder';
+
 
 /**
  * Issue创建/编辑表单页面
@@ -96,8 +96,8 @@ export const IssueFormPage: React.FC = () => {
         }
 
         setFormData({
-          title: decodeForMarkdown(issue.title),
-          description: decodeForMarkdown(issue.description),
+          title: issue.title,
+          description: issue.description,
           status: issue.status,
         });
 

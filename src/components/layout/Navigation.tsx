@@ -43,7 +43,7 @@ export const Navigation: React.FC = () => {
 
   return (
     <nav className="fixed w-full bg-[#151f38]/90 backdrop-blur-md z-50 border-b border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
@@ -53,13 +53,13 @@ export const Navigation: React.FC = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-baseline space-x-8">
+          <div className="hidden lg:flex items-center space-x-3">
             {navigationItems.map(item => (
               <DelayedNavButton
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-gray-300 hover:text-white px-2 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap"
               >
                 {item.label}
               </DelayedNavButton>
@@ -69,7 +69,7 @@ export const Navigation: React.FC = () => {
             <button
               onClick={handleAuthAction}
               disabled={isLoading}
-              className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors
+              className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap
                        bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700
                        disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -77,7 +77,7 @@ export const Navigation: React.FC = () => {
                 <>
                   <LogOut className="h-4 w-4" />
                   <span>登出</span>
-                  {user && <span className="opacity-80">({user.username})</span>}
+                  {user && <span className="opacity-80 hidden xl:inline">({user.username})</span>}
                 </>
               ) : (
                 <>
@@ -88,15 +88,8 @@ export const Navigation: React.FC = () => {
             </button>
           </div>
 
-          {/* Mobile Menu Button and Auth Status */}
-          <div className="flex items-center gap-3 md:hidden">
-            {/* 移动端登录状态指示器 */}
-            {isAuthenticated && user && (
-              <div className="text-xs text-blue-300 font-medium hidden sm:block">
-                {user.username}
-              </div>
-            )}
-
+          {/* Mobile Menu Button */}
+          <div className="flex items-center lg:hidden">
             <MobileMenuButton
               isOpen={isMobileMenuOpen}
               onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -110,33 +103,11 @@ export const Navigation: React.FC = () => {
         isOpen={isMobileMenuOpen}
         items={navigationItems}
         onItemClick={handleNavClick}
+        onAuthAction={handleAuthAction}
+        isLoading={isLoading}
+        isAuthenticated={isAuthenticated}
+        user={user}
       />
-
-      {/* 移动端额外的认证菜单项 */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-[#151f38]/95 backdrop-blur-md border-t border-gray-700 px-4 py-3">
-          <button
-            onClick={handleAuthAction}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md font-medium transition-colors
-                     bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isAuthenticated ? (
-              <>
-                <LogOut className="h-4 w-4" />
-                <span>登出</span>
-                {user && <span className="opacity-80">({user.username})</span>}
-              </>
-            ) : (
-              <>
-                <LogIn className="h-4 w-4" />
-                <span>登录</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
     </nav>
   );
 };

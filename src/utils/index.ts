@@ -4,8 +4,7 @@ import { clsx, type ClassValue } from 'clsx';
 // 导出服务器相关工具函数
 export * from './serverUtils';
 
-// 导出HTML解码工具
-export * from './htmlDecoder';
+
 
 /**
  * 合并CSS类名的工具函数
@@ -161,3 +160,6 @@ export function isDevelopment(): boolean {
 export function isProduction(): boolean {
   return import.meta.env.PROD as boolean;
 }
+
+// 导出文本处理工具
+export * from './textUtils';

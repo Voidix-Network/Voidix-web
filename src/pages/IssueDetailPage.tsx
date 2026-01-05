@@ -8,7 +8,7 @@ import { SEO } from '@/components/seo';
 import { Issue, Comment, Tag } from '@/types/api';
 import { Clock, MessageSquare, Tag as TagIcon, User, Trash2, Edit2, ArrowLeft, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { decodeForMarkdown, decodeObjectForMarkdown } from '@/utils/htmlDecoder';
+
 
 /**
  * Issue详情页面组件
@@ -85,8 +85,7 @@ export const IssueDetailPage: React.FC = () => {
       const response = await issueService.getIssue(id);
 
       if (response.success && response.issue) {
-        // 解码HTML实体，恢复原始文本供Markdown解析
-        const newIssue = decodeObjectForMarkdown(response.issue);
+        const newIssue = response.issue;
 
         if (issue) {
           const hasChanges =
@@ -127,9 +126,7 @@ export const IssueDetailPage: React.FC = () => {
       const response = await issueService.getIssue(issueId);
 
       if (response.success && response.issue) {
-        // 解码HTML实体，恢复原始文本供Markdown解析
-        const decodedIssue = decodeObjectForMarkdown(response.issue);
-        setIssue(decodedIssue);
+        setIssue(response.issue);
         setLastUpdate(new Date());
       } else {
         setError(response.error || '获取issue失败');
@@ -244,9 +241,7 @@ export const IssueDetailPage: React.FC = () => {
       });
 
       if (response.success && response.issue) {
-        // 解码HTML实体，恢复原始文本供Markdown解析
-        const decodedIssue = decodeObjectForMarkdown(response.issue);
-        setIssue(decodedIssue);
+        setIssue(response.issue);
         setError(null);
 
         // 自动添加状态变更评论（使用Markdown）

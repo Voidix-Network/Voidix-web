@@ -18,7 +18,7 @@ import {
   ChevronRight,
   RefreshCw,
 } from 'lucide-react';
-import { decodeForMarkdown, truncateTitleResponsive, truncateDescriptionResponsive } from '@/utils/htmlDecoder';
+import { truncateTitleResponsive, truncateDescriptionResponsive } from '@/utils/textUtils';
 
 /**
  * Issue页面组件 - 显示所有issues列表
@@ -77,13 +77,7 @@ export const IssuePage: React.FC = () => {
       const response = await issueService.getIssues(currentPage, pageSize);
 
       if (response.success && response.issues) {
-        // 解码HTML实体并处理长文本
-        const decodedIssues = response.issues.map(issue => ({
-          ...issue,
-          title: decodeForMarkdown(issue.title),
-          description: decodeForMarkdown(issue.description),
-        }));
-        setIssues(decodedIssues);
+        setIssues(response.issues);
 
         // 更新分页信息
         if (response.pagination) {
