@@ -14,7 +14,7 @@ import type {
   Tag,
 } from '@/types/api';
 
-const API_BASE_URL = 'https://webba.voidix.net:5699';
+const API_BASE_URL = 'http://192.168.3.67:5699';
 
 /**
  * Issue服务 - 处理issue相关的API调用
@@ -368,6 +368,36 @@ export class IssueService {
       return {
         success: false,
         error: error instanceof Error ? error.message : '删除标签失败',
+      };
+    }
+  }
+
+  /**
+   * 置顶/取消置顶Issue（管理员）
+   */
+  async pinIssue(request: { id: string; pinned: boolean; pin_priority?: number }): Promise<{ success: boolean; message?: string; issue?: Issue; error?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/issue/pin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeader(),
+        },
+        credentials: 'include',
+        body: JSON.stringify(request),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '置顶操作失败');
+      }
+
+      return data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '置顶操作失败',
       };
     }
   }

@@ -6,9 +6,18 @@ import { issueService } from '@/services/issueService';
 import { AnimatedSection, BreadcrumbNavigation, Button, Card, GradientText } from '@/components';
 import { SEO } from '@/components/seo';
 import { Issue, Comment, Tag } from '@/types/api';
-import { Clock, MessageSquare, Tag as TagIcon, User, Trash2, Edit2, ArrowLeft, RefreshCw } from 'lucide-react';
+import {
+  Clock,
+  MessageSquare,
+  Tag as TagIcon,
+  User,
+  Trash2,
+  Edit2,
+  ArrowLeft,
+  RefreshCw,
+  Pin,
+} from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-
 
 /**
  * Issue详情页面组件
@@ -29,6 +38,10 @@ export const IssueDetailPage: React.FC = () => {
   const [hasNewData, setHasNewData] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [timeDisplay, setTimeDisplay] = useState('');
+
+  // 置顶优先级编辑状态
+  const [showPriorityEditor, setShowPriorityEditor] = useState(false);
+  const [editingPriority, setEditingPriority] = useState(5);
 
   // 页面加载时验证token并获取issue详情
   useEffect(() => {
@@ -213,6 +226,82 @@ export const IssueDetailPage: React.FC = () => {
     navigate(`/issue/edit/${id}`);
   };
 
+  // 置顶/取消置顶
+  const handlePinToggle = async () => {
+    if (!id || !isAuthenticated || !issue || !isAdmin) return;
+
+    // 如果是置顶操作，显示优先级编辑器
+    if (!issue.pinned) {
+      setEditingPriority(5);
+      setShowPriorityEditor(true);
+      return;
+    }
+
+    // 取消置顶
+    try {
+      const response = await issueService.pinIssue({
+        id,
+        pinned: false,
+        pin_priority: 5,
+      });
+
+      if (response.success && response.issue) {
+        setIssue(response.issue);
+        setError(null);
+      } else {
+        setError(response.error || '置顶操作失败');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '置顶操作失败');
+    }
+  };
+
+  // 确认置顶并设置优先级
+  const handleConfirmPin = async () => {
+    if (!id || !isAuthenticated || !issue || !isAdmin) return;
+
+    try {
+      const response = await issueService.pinIssue({
+        id,
+        pinned: true,
+        pin_priority: editingPriority,
+      });
+
+      if (response.success && response.issue) {
+        setIssue(response.issue);
+        setError(null);
+        setShowPriorityEditor(false);
+      } else {
+        setError(response.error || '置顶操作失败');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '置顶操作失败');
+    }
+  };
+
+  // 更新置顶优先级
+  const handleUpdatePriority = async () => {
+    if (!id || !isAuthenticated || !issue || !isAdmin || !issue.pinned) return;
+
+    try {
+      const response = await issueService.pinIssue({
+        id,
+        pinned: true,
+        pin_priority: editingPriority,
+      });
+
+      if (response.success && response.issue) {
+        setIssue(response.issue);
+        setError(null);
+        setShowPriorityEditor(false);
+      } else {
+        setError(response.error || '更新优先级失败');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '更新优先级失败');
+    }
+  };
+
   // 修改状态
   const handleStatusChange = async (newStatus: string) => {
     if (!id || !isAuthenticated || !issue) return;
@@ -257,14 +346,16 @@ export const IssueDetailPage: React.FC = () => {
 
         const commentMessage = `将状态从 **"${oldStatus}"** 修改为 **"${newStatusLabel}"**`;
 
-        issueService.addComment({
-          issue_id: id,
-          message: commentMessage,
-        }).then((commentResponse) => {
-          if (commentResponse.success) {
-            loadIssue(id);
-          }
-        });
+        issueService
+          .addComment({
+            issue_id: id,
+            message: commentMessage,
+          })
+          .then(commentResponse => {
+            if (commentResponse.success) {
+              loadIssue(id);
+            }
+          });
       } else {
         setError(response.error || '状态修改失败');
       }
@@ -325,7 +416,12 @@ export const IssueDetailPage: React.FC = () => {
     ),
     // 自定义链接
     a: ({ href, children }: any) => (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-400 hover:text-blue-300 underline"
+      >
         {children}
       </a>
     ),
@@ -334,8 +430,10 @@ export const IssueDetailPage: React.FC = () => {
   };
 
   // 权限判断
-  const canEdit = isAuthenticated && issue && user && (issue.author_uuid === user.player_uuid || user.isAdmin);
-  const canChangeStatus = isAuthenticated && issue && user && (issue.author_uuid === user.player_uuid || user.isAdmin);
+  const canEdit =
+    isAuthenticated && issue && user && (issue.author_uuid === user.player_uuid || user.isAdmin);
+  const canChangeStatus =
+    isAuthenticated && issue && user && (issue.author_uuid === user.player_uuid || user.isAdmin);
   const isAdmin = user?.isAdmin || false;
 
   if (loading) {
@@ -384,20 +482,12 @@ export const IssueDetailPage: React.FC = () => {
             >
               {/* 左侧：返回和刷新按钮 */}
               <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleGoBack}
-                  variant="secondary"
-                  size="md"
-                >
+                <Button onClick={handleGoBack} variant="secondary" size="md">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   返回列表
                 </Button>
 
-                <Button
-                  onClick={handleManualRefresh}
-                  variant="secondary"
-                  size="md"
-                >
+                <Button onClick={handleManualRefresh} variant="secondary" size="md">
                   <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   刷新
                 </Button>
@@ -422,21 +512,51 @@ export const IssueDetailPage: React.FC = () => {
                 )}
               </div>
 
-              {/* 右侧：编辑和删除 */}
-              {canEdit && (
-                <motion.div
-                  className="flex gap-2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                >
-                  <Button
-                    onClick={handleEditIssue}
-                    variant="secondary"
-                    size="md"
-                  >
+              {/* 右侧：置顶、编辑和删除 */}
+              <motion.div
+                className="flex gap-2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                {/* 置顶按钮 - 仅管理员 */}
+                {isAdmin && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handlePinToggle}
+                      variant={issue.pinned ? 'primary' : 'secondary'}
+                      size="md"
+                      title={issue.pinned ? '取消置顶' : '置顶Issue'}
+                    >
+                      <Pin className="h-4 w-4 mr-2" />
+                      {issue.pinned ? '取消置顶' : '置顶'}
+                    </Button>
+                    {/* 修改优先级按钮 - 仅已置顶时显示 */}
+                    {issue.pinned && (
+                      <Button
+                        onClick={() => {
+                          setEditingPriority(issue.pin_priority || 5);
+                          setShowPriorityEditor(true);
+                        }}
+                        variant="secondary"
+                        size="md"
+                        title="修改置顶优先级"
+                      >
+                        P{issue.pin_priority || 5}
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                {/* 编辑按钮 - 作者或管理员 */}
+                {canEdit && (
+                  <Button onClick={handleEditIssue} variant="secondary" size="md">
                     <Edit2 className="h-4 w-4 mr-2" />
                     编辑
                   </Button>
+                )}
+
+                {/* 删除按钮 - 作者 */}
+                {canEdit && (
                   <Button
                     onClick={handleDeleteIssue}
                     variant="outline"
@@ -446,8 +566,8 @@ export const IssueDetailPage: React.FC = () => {
                     <Trash2 className="h-4 w-4 mr-2" />
                     删除
                   </Button>
-                </motion.div>
-              )}
+                )}
+              </motion.div>
             </motion.div>
 
             {/* 错误信息 */}
@@ -461,6 +581,82 @@ export const IssueDetailPage: React.FC = () => {
               </motion.div>
             )}
 
+            {/* 置顶优先级编辑器弹窗 */}
+            {showPriorityEditor && isAdmin && (
+              <motion.div
+                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={() => setShowPriorityEditor(false)}
+              >
+                <motion.div
+                  className="bg-gray-800 border border-gray-700 rounded-2xl p-6 max-w-md w-full"
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <h3 className="text-xl font-bold text-white mb-4">
+                    {issue?.pinned ? '修改置顶优先级' : '设置置顶优先级'}
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-2">
+                        优先级 (1-10，数字越大优先级越高)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={editingPriority}
+                        onChange={e =>
+                          setEditingPriority(
+                            Math.min(10, Math.max(1, parseInt(e.target.value) || 1))
+                          )
+                        }
+                        className="w-full px-4 py-2 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                      />
+                      <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                        <span>最低 (1)</span>
+                        <span>当前: P{editingPriority}</span>
+                        <span>最高 (10)</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-900/30 rounded-lg p-3 text-xs text-gray-400">
+                      <p className="mb-1">
+                        <strong className="text-gray-300">优先级说明：</strong>
+                      </p>
+                      <ul className="space-y-1 ml-4 list-disc">
+                        <li>优先级高的Issue会排在前面</li>
+                        <li>相同优先级按创建时间排序</li>
+                        <li>建议重要公告使用 P8-P10</li>
+                      </ul>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={issue?.pinned ? handleUpdatePriority : handleConfirmPin}
+                        variant="primary"
+                        size="md"
+                        className="flex-1"
+                      >
+                        {issue?.pinned ? '更新优先级' : '确认置顶'}
+                      </Button>
+                      <Button
+                        onClick={() => setShowPriorityEditor(false)}
+                        variant="outline"
+                        size="md"
+                        className="px-6"
+                      >
+                        取消
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
             {/* Issue 主要内容 */}
             <AnimatePresence>
               <motion.div
@@ -471,37 +667,58 @@ export const IssueDetailPage: React.FC = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {/* 标题和状态 - 响应式处理 */}
-                <div className="flex items-start gap-3 mb-6 w-full">
-                  <motion.h1
-                    className="text-2xl sm:text-3xl font-bold text-white flex-1 min-w-0"
-                    animate={{ scale: hasNewData ? [1, 1.02, 1] : 1 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      // 自动换行，允许在任意字符处换行
-                      wordWrap: 'break-word',
-                      overflowWrap: 'break-word',
-                      wordBreak: 'break-word',
-                      // 防止溢出
-                      overflow: 'hidden',
-                      // 响应式字体大小
-                      fontSize: 'clamp(1.25rem, 4vw, 2.25rem)',
-                    }}
-                  >
-                    {issue.title}
-                  </motion.h1>
+                {/* 标题和状态 - 改进布局 */}
+                <div className="flex flex-col sm:flex-row sm:items-start gap-3 mb-6 w-full">
+                  <div className="flex-1 min-w-0">
+                    {/* 置顶标签单独一行 */}
+                    {issue.pinned && (
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/20 text-yellow-400 rounded-md text-xs font-semibold border border-yellow-500/30">
+                          <Pin className="h-3.5 w-3.5" />
+                          置顶
+                          {issue.pin_priority > 0 && (
+                            <span className="ml-1 px-1.5 py-0.5 bg-yellow-500/30 rounded text-[10px]">
+                              P{issue.pin_priority}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    )}
 
+                    {/* 标题独立 */}
+                    <motion.h1
+                      className="text-2xl sm:text-3xl font-bold text-white break-words"
+                      animate={{ scale: hasNewData ? [1, 1.02, 1] : 1 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {issue.title}
+                    </motion.h1>
+                  </div>
+
+                  {/* 状态标签 */}
                   <motion.span
-                    className={`px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm font-medium border ${getStatusColor(issue.status)} flex-shrink-0`}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium border ${getStatusColor(issue.status)} flex-shrink-0 self-start`}
                     animate={{
-                      backgroundColor: hasNewData ? ['rgba(59,130,246,0.1)', 'rgba(59,130,246,0.3)', 'rgba(59,130,246,0.1)'] : 'transparent'
+                      backgroundColor: hasNewData
+                        ? ['rgba(59,130,246,0.1)', 'rgba(59,130,246,0.3)', 'rgba(59,130,246,0.1)']
+                        : 'transparent',
                     }}
                     transition={{ duration: 0.5 }}
                   >
-                    {issue.status === 'open' ? '开放' :
-                     issue.status === 'in_progress' ? '进行中' :
-                     issue.status === 'resolved' ? '已解决' :
-                     issue.status === 'closed' ? '已关闭' : issue.status}
+                    {issue.status === 'open'
+                      ? '开放'
+                      : issue.status === 'in_progress'
+                        ? '进行中'
+                        : issue.status === 'resolved'
+                          ? '已解决'
+                          : issue.status === 'closed'
+                            ? '已关闭'
+                            : issue.status}
                   </motion.span>
                 </div>
 
@@ -547,7 +764,14 @@ export const IssueDetailPage: React.FC = () => {
                   animate={{ opacity: hasNewData ? [0.5, 1, 0.8, 1] : 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="prose prose-invert max-w-none prose-sm" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+                  <div
+                    className="prose prose-invert max-w-none prose-sm"
+                    style={{
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
+                    }}
+                  >
                     <ReactMarkdown components={markdownComponents}>
                       {issue.description}
                     </ReactMarkdown>
@@ -566,7 +790,7 @@ export const IssueDetailPage: React.FC = () => {
                         <span className="text-sm text-gray-400">管理员操作:</span>
                         <select
                           value={issue.status}
-                          onChange={(e) => handleStatusChange(e.target.value)}
+                          onChange={e => handleStatusChange(e.target.value)}
                           className="px-3 py-2 rounded-md text-sm font-medium border bg-gray-900/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
                         >
                           <option value="open">设为开放</option>
@@ -578,7 +802,11 @@ export const IssueDetailPage: React.FC = () => {
                     ) : issue.status !== 'closed' ? (
                       <Button
                         onClick={() => {
-                          if (confirm('确定要关闭这个Issue吗？\n\n注意：关闭后您将无法再次开启，只有管理员可以重新打开。')) {
+                          if (
+                            confirm(
+                              '确定要关闭这个Issue吗？\n\n注意：关闭后您将无法再次开启，只有管理员可以重新打开。'
+                            )
+                          ) {
                             handleStatusChange('closed');
                           }
                         }}
@@ -612,7 +840,7 @@ export const IssueDetailPage: React.FC = () => {
                   <form onSubmit={handleAddComment} className="space-y-4">
                     <textarea
                       value={commentMessage}
-                      onChange={(e) => setCommentMessage(e.target.value)}
+                      onChange={e => setCommentMessage(e.target.value)}
                       placeholder="写下您的评论（支持Markdown语法）..."
                       className="w-full min-h-[100px] p-4 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white resize-y"
                       disabled={submitting}
@@ -637,11 +865,7 @@ export const IssueDetailPage: React.FC = () => {
               ) : (
                 <Card variant="glass" className="p-6 text-center">
                   <p className="text-gray-400 mb-4">请先登录以发表评论</p>
-                  <Button
-                    onClick={() => navigate('/login')}
-                    variant="primary"
-                    size="md"
-                  >
+                  <Button onClick={() => navigate('/login')} variant="primary" size="md">
                     登录
                   </Button>
                 </Card>
@@ -655,10 +879,14 @@ export const IssueDetailPage: React.FC = () => {
                   </Card>
                 ) : (
                   [...issue.comments]
-                    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                    .sort(
+                      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                    )
                     .map((comment: Comment, index) => {
-                      const isCommentAuthor = isAuthenticated && user && comment.author_uuid === user.player_uuid;
-                      const isIssueAuthor = isAuthenticated && user && issue.author_uuid === user.player_uuid;
+                      const isCommentAuthor =
+                        isAuthenticated && user && comment.author_uuid === user.player_uuid;
+                      const isIssueAuthor =
+                        isAuthenticated && user && issue.author_uuid === user.player_uuid;
                       const canDeleteComment = isCommentAuthor || isIssueAuthor;
 
                       return (
@@ -685,7 +913,14 @@ export const IssueDetailPage: React.FC = () => {
                                   )}
                                 </div>
                                 {/* 评论内容 - 支持Markdown */}
-                                <div className="prose prose-invert max-w-none prose-sm" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+                                <div
+                                  className="prose prose-invert max-w-none prose-sm"
+                                  style={{
+                                    wordWrap: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    wordBreak: 'break-word',
+                                  }}
+                                >
                                   <ReactMarkdown components={markdownComponents}>
                                     {comment.message}
                                   </ReactMarkdown>

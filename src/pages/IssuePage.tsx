@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  Pin,
 } from 'lucide-react';
 import { truncateTitleResponsive, truncateDescriptionResponsive } from '@/utils/textUtils';
 
@@ -104,7 +105,8 @@ export const IssuePage: React.FC = () => {
     const matchesStatus = filterStatus === 'all' || issue.status === filterStatus;
 
     // 标签筛选：如果选择了标签，则Issue必须包含至少一个选中的标签
-    const matchesTags = filterTags.length === 0 || 
+    const matchesTags =
+      filterTags.length === 0 ||
       (issue.tags && issue.tags.some(tag => filterTags.includes(tag.id)));
 
     return matchesSearch && matchesStatus && matchesTags;
@@ -172,9 +174,7 @@ export const IssuePage: React.FC = () => {
   // 标签筛选切换
   const toggleTagFilter = (tagId: number) => {
     setFilterTags(prev =>
-      prev.includes(tagId)
-        ? prev.filter(id => id !== tagId)
-        : [...prev, tagId]
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
     );
     setCurrentPage(1);
   };
@@ -237,21 +237,11 @@ export const IssuePage: React.FC = () => {
                   </Button>
                 )}
                 {/* 刷新按钮 */}
-                <Button
-                  onClick={loadIssues}
-                  variant="secondary"
-                  size="lg"
-                  disabled={loading}
-                >
+                <Button onClick={loadIssues} variant="secondary" size="lg" disabled={loading}>
                   <RefreshCw className={`h-5 w-5 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   刷新
                 </Button>
-                <Button
-                  onClick={handleCreateIssue}
-                  variant="primary"
-                  size="lg"
-                  disabled={loading}
-                >
+                <Button onClick={handleCreateIssue} variant="primary" size="lg" disabled={loading}>
                   <Plus className="h-5 w-5 mr-2" />
                   创建 Issue
                 </Button>
@@ -274,7 +264,7 @@ export const IssuePage: React.FC = () => {
                   <input
                     type="text"
                     value={searchTerm}
-                    onChange={(e) => handleSearchChange(e.target.value)}
+                    onChange={e => handleSearchChange(e.target.value)}
                     placeholder="搜索标题、描述或作者..."
                     className="w-full pl-10 pr-3 py-2 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-500"
                   />
@@ -287,7 +277,7 @@ export const IssuePage: React.FC = () => {
                   </div>
                   <select
                     value={filterStatus}
-                    onChange={(e) => {
+                    onChange={e => {
                       setFilterStatus(e.target.value);
                       setCurrentPage(1);
                     }}
@@ -295,11 +285,17 @@ export const IssuePage: React.FC = () => {
                   >
                     {allStatuses.map(status => (
                       <option key={status} value={status}>
-                        {status === 'all' ? '所有状态' :
-                         status === 'open' ? '开放' :
-                         status === 'in_progress' ? '进行中' :
-                         status === 'resolved' ? '已解决' :
-                         status === 'closed' ? '已关闭' : status}
+                        {status === 'all'
+                          ? '所有状态'
+                          : status === 'open'
+                            ? '开放'
+                            : status === 'in_progress'
+                              ? '进行中'
+                              : status === 'resolved'
+                                ? '已解决'
+                                : status === 'closed'
+                                  ? '已关闭'
+                                  : status}
                       </option>
                     ))}
                   </select>
@@ -322,7 +318,7 @@ export const IssuePage: React.FC = () => {
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {allTags.map((tag) => {
+                    {allTags.map(tag => {
                       const isSelected = filterTags.includes(tag.id);
                       return (
                         <button
@@ -366,7 +362,8 @@ export const IssuePage: React.FC = () => {
                   <div>
                     {searchTerm || filterStatus !== 'all' || filterTags.length > 0 ? (
                       <>
-                        筛选结果: <span className="text-white font-semibold">{filteredIssues.length}</span> 个
+                        筛选结果:{' '}
+                        <span className="text-white font-semibold">{filteredIssues.length}</span> 个
                         <span className="text-gray-500 ml-1">(共 {totalItems} 个)</span>
                       </>
                     ) : (
@@ -376,7 +373,8 @@ export const IssuePage: React.FC = () => {
                     )}
                   </div>
                   <div className="hidden sm:block">
-                    第 <span className="text-white font-semibold">{currentPage}</span> / {totalPages} 页
+                    第 <span className="text-white font-semibold">{currentPage}</span> /{' '}
+                    {totalPages} 页
                   </div>
                 </div>
               </div>
@@ -431,17 +429,39 @@ export const IssuePage: React.FC = () => {
                       >
                         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                           {/* 左侧内容 */}
-                          <div className="flex-1">
-                            {/* 标题和状态 */}
+                          <div className="flex-1 min-w-0">
+                            {/* 置顶标签 - 独立显示 */}
+                            {issue.pinned && (
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs font-semibold border border-yellow-500/30">
+                                  <Pin className="h-3 w-3" />
+                                  置顶
+                                  {issue.pin_priority > 0 && (
+                                    <span className="ml-1 px-1 py-0.5 bg-yellow-500/30 rounded text-[10px]">
+                                      P{issue.pin_priority}
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* 标题和状态 - 同一行但分离 */}
                             <div className="flex items-start gap-3 mb-3">
-                              <h3 className="text-xl font-semibold text-white hover:text-blue-300 transition-colors">
+                              <h3 className="text-xl font-semibold text-white hover:text-blue-300 transition-colors flex-1 min-w-0 break-words">
                                 {truncateTitleResponsive(issue.title)}
                               </h3>
-                              <span className={`px-2 py-1 rounded-md text-xs font-medium border ${getStatusColor(issue.status)}`}>
-                                {issue.status === 'open' ? '开放' :
-                                 issue.status === 'in_progress' ? '进行中' :
-                                 issue.status === 'resolved' ? '已解决' :
-                                 issue.status === 'closed' ? '已关闭' : issue.status}
+                              <span
+                                className={`px-2 py-1 rounded-md text-xs font-medium border flex-shrink-0 ${getStatusColor(issue.status)}`}
+                              >
+                                {issue.status === 'open'
+                                  ? '开放'
+                                  : issue.status === 'in_progress'
+                                    ? '进行中'
+                                    : issue.status === 'resolved'
+                                      ? '已解决'
+                                      : issue.status === 'closed'
+                                        ? '已关闭'
+                                        : issue.status}
                               </span>
                             </div>
 
@@ -529,7 +549,7 @@ export const IssuePage: React.FC = () => {
                         page = currentPage - 2 + i;
                       }
                       return page;
-                    }).map((page) => (
+                    }).map(page => (
                       <Button
                         key={page}
                         onClick={() => goToPage(page)}
@@ -553,8 +573,6 @@ export const IssuePage: React.FC = () => {
                 )}
               </>
             )}
-
-
           </div>
         </AnimatedSection>
       </div>

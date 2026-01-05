@@ -8,7 +8,6 @@ import { SEO } from '@/components/seo';
 import { AlertCircle, CheckCircle, Tag as TagIcon, Plus } from 'lucide-react';
 import { Tag } from '@/types/api';
 
-
 /**
  * Issue创建/编辑表单页面
  */
@@ -136,9 +135,7 @@ export const IssueFormPage: React.FC = () => {
   // Tag选择/取消选择
   const toggleTag = (tagId: number) => {
     setSelectedTags(prev =>
-      prev.includes(tagId)
-        ? prev.filter(id => id !== tagId)
-        : [...prev, tagId]
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
     );
   };
 
@@ -222,8 +219,16 @@ export const IssueFormPage: React.FC = () => {
       <SEO
         pageKey={isEditMode ? 'issue-edit' : 'issue-create'}
         type="website"
-        url={isEditMode ? `https://www.voidix.net/issue/edit/${id}` : 'https://www.voidix.net/issue/create'}
-        canonicalUrl={isEditMode ? `https://www.voidix.net/issue/edit/${id}` : 'https://www.voidix.net/issue/create'}
+        url={
+          isEditMode
+            ? `https://www.voidix.net/issue/edit/${id}`
+            : 'https://www.voidix.net/issue/create'
+        }
+        canonicalUrl={
+          isEditMode
+            ? `https://www.voidix.net/issue/edit/${id}`
+            : 'https://www.voidix.net/issue/create'
+        }
         title={isEditMode ? '编辑Issue' : '创建Issue'}
       />
 
@@ -258,15 +263,8 @@ export const IssueFormPage: React.FC = () => {
 
               {/* 管理员标签管理按钮 */}
               {isAdmin && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                >
-                  <Button
-                    onClick={() => navigate('/tag-manage')}
-                    variant="secondary"
-                    size="md"
-                  >
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                  <Button onClick={() => navigate('/tag-manage')} variant="secondary" size="md">
                     <TagIcon className="h-4 w-4 mr-2" />
                     管理标签
                   </Button>
@@ -319,7 +317,7 @@ export const IssueFormPage: React.FC = () => {
                     id="title"
                     type="text"
                     value={formData.title}
-                    onChange={(e) => handleChange('title', e.target.value)}
+                    onChange={e => handleChange('title', e.target.value)}
                     onBlur={() => handleBlur('title')}
                     className={`w-full px-4 py-3 bg-gray-900/50 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
                       touched.title && !isTitleValid
@@ -352,7 +350,7 @@ export const IssueFormPage: React.FC = () => {
                       标签（可选，可多选）
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {allTags.map((tag) => {
+                      {allTags.map(tag => {
                         const isSelected = selectedTags.includes(tag.id);
                         return (
                           <button
@@ -371,7 +369,9 @@ export const IssueFormPage: React.FC = () => {
                               borderStyle: isSelected ? 'solid' : 'dashed',
                             }}
                           >
-                            {isSelected && <Plus className="h-3 w-3 inline mr-1 transform rotate-45" />}
+                            {isSelected && (
+                              <Plus className="h-3 w-3 inline mr-1 transform rotate-45" />
+                            )}
                             {tag.name}
                           </button>
                         );
@@ -398,7 +398,7 @@ export const IssueFormPage: React.FC = () => {
                   <textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => handleChange('description', e.target.value)}
+                    onChange={e => handleChange('description', e.target.value)}
                     onBlur={() => handleBlur('description')}
                     rows={8}
                     className={`w-full px-4 py-3 bg-gray-900/50 border rounded-lg focus:outline-none focus:ring-2 transition-colors resize-y ${
@@ -426,7 +426,7 @@ export const IssueFormPage: React.FC = () => {
                 </motion.div>
 
                 {/* 状态选择（仅编辑模式且有权限时显示） */}
-                {isEditMode && (
+                {isEditMode && isAdmin && (
                   <motion.div
                     className="space-y-2"
                     initial={{ opacity: 0, x: -20 }}
@@ -434,12 +434,12 @@ export const IssueFormPage: React.FC = () => {
                     transition={{ delay: 0.4 }}
                   >
                     <label htmlFor="status" className="block text-sm font-medium text-gray-300">
-                      状态 {isAdmin && <span className="text-purple-400 text-xs">(管理员可修改任意状态)</span>}
+                      状态
                     </label>
                     <select
                       id="status"
                       value={formData.status}
-                      onChange={(e) => handleChange('status', e.target.value)}
+                      onChange={e => handleChange('status', e.target.value)}
                       className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
                       disabled={submitting}
                     >
@@ -448,11 +448,6 @@ export const IssueFormPage: React.FC = () => {
                       <option value="resolved">已解决</option>
                       <option value="closed">已关闭</option>
                     </select>
-                    {!isAdmin && (
-                      <p className="text-yellow-400 text-xs">
-                        注意：作为作者，您只能将状态修改为"已关闭"
-                      </p>
-                    )}
                   </motion.div>
                 )}
 
@@ -471,7 +466,13 @@ export const IssueFormPage: React.FC = () => {
                     disabled={!isFormValid || submitting}
                     className="flex-1"
                   >
-                    {submitting ? (isEditMode ? '更新中...' : '创建中...') : (isEditMode ? '更新 Issue' : '创建 Issue')}
+                    {submitting
+                      ? isEditMode
+                        ? '更新中...'
+                        : '创建中...'
+                      : isEditMode
+                        ? '更新 Issue'
+                        : '创建 Issue'}
                   </Button>
                   <Button
                     type="button"
@@ -492,7 +493,9 @@ export const IssueFormPage: React.FC = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.6 }}
                 >
-                  <p><span className="text-red-400">*</span> 为必填项</p>
+                  <p>
+                    <span className="text-red-400">*</span> 为必填项
+                  </p>
                 </motion.div>
               </form>
             </motion.div>

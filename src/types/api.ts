@@ -55,6 +55,8 @@ export interface Issue {
   author_username: string;
   status: string;
   created_at: string;
+  pinned: boolean;
+  pin_priority: number;
   comments: Comment[];
   tags: Tag[];
 }
@@ -135,6 +137,19 @@ export interface DeleteCommentRequest {
 export interface DeleteCommentResponse {
   success: boolean;
   message?: string;
+  error?: string;
+}
+
+export interface PinIssueRequest {
+  id: string;
+  pinned: boolean;
+  pin_priority?: number;
+}
+
+export interface PinIssueResponse {
+  success: boolean;
+  message?: string;
+  issue?: Issue;
   error?: string;
 }
 
