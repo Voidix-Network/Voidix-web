@@ -10,7 +10,30 @@ const PAGE_KEYWORDS_CONFIG = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
 console.log(`📖 Loaded ${Object.keys(PAGE_KEYWORDS_CONFIG).length} page configs from seoConfig.json`);
 
-function generateHTML(pageKey, config) {
+// 查找Vite构建后的实际入口文件
+function findBuildAssets() {
+  const assetsDir = path.resolve(__dirname, '../dist/assets');
+  if (!fs.existsSync(assetsDir)) {
+    throw new Error('❌ dist/assets directory not found. Please run vite build first!');
+  }
+
+  const files = fs.readdirSync(assetsDir);
+  const jsEntry = files.find(f => f.startsWith('index-') && f.endsWith('.js'));
+  const cssEntry = files.find(f => f.startsWith('index-') && f.endsWith('.css'));
+
+  if (!jsEntry) {
+    throw new Error('❌ Could not find entry JS file in dist/assets/');
+  }
+
+  console.log(`🔍 Found build assets: ${jsEntry}${cssEntry ? ', ' + cssEntry : ''}`);
+
+  return {
+    js: `/assets/${jsEntry}`,
+    css: cssEntry ? `/assets/${cssEntry}` : null
+  };
+}
+
+function generateHTML(pageKey, config, assets) {
   const keywords = Array.isArray(config.keywords) ? config.keywords.join(',') : '';
   const url = `https://www.voidix.net${pageKey === 'home' ? '/' : '/' + pageKey}`;
 
@@ -127,10 +150,13 @@ function generateHTML(pageKey, config) {
   <!-- Preconnect to improve performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+
+  <!-- Vite Build Assets -->
+  ${assets.css ? `<link rel="stylesheet" href="${assets.css}">` : ''}
+  <script type="module" src="${assets.js}"></script>
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>`;
 }
@@ -141,8 +167,11 @@ function generateAllPages() {
     fs.mkdirSync(distDir, { recursive: true });
   }
 
+  // 查找构建后的实际资源文件
+  const assets = findBuildAssets();
+
   Object.entries(PAGE_KEYWORDS_CONFIG).forEach(([pageKey, config]) => {
-    const html = generateHTML(pageKey, config);
+    const html = generateHTML(pageKey, config, assets);
     if (pageKey === 'home') {
       fs.writeFileSync(path.join(distDir, 'index.html'), html);
       console.log('✓ Generated index.html');
@@ -158,6 +187,7 @@ function generateAllPages() {
 
   console.log('\n✅ All static pages generated with full SEO!');
   console.log('📋 Included: Meta tags, Open Graph, Twitter Cards, Structured Data (Organization, Website, WebPage, Breadcrumbs)');
+  console.log(`🚀 Using build assets: ${assets.js}${assets.css ? ', ' + assets.css : ''}`);
 }
 
 generateAllPages();
