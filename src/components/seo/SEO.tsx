@@ -233,6 +233,23 @@ export const SEO: React.FC<SEOProps> = ({
   const { addSchema, removeSchema } = useSchema();
   const { hasConsent } = useCookieConsent();
 
+  // 检查是否已经有静态SEO（从generateStaticPages.js生成）
+  const [hasStaticSEO, setHasStaticSEO] = React.useState(false);
+  const [staticPageKey, setStaticPageKey] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const seoMarker = document.querySelector('meta[name="seo-rendered"]');
+      if (seoMarker) {
+        setHasStaticSEO(true);
+        setStaticPageKey(seoMarker.getAttribute('data-page-key'));
+      }
+    }
+  }, []);
+
+  // 如果静态SEO存在且pageKey匹配，跳过客户端SEO注入（避免重复）
+  const shouldSkipSEO = hasStaticSEO && staticPageKey === pageKey;
+
   // 获取页面配置
   const pageConfig = pageKey ? getPageSEOConfig(pageKey) : null;
 
@@ -283,48 +300,53 @@ export const SEO: React.FC<SEOProps> = ({
 
   return (
     <Helmet>
-      {/* 基础SEO */}
-      <title>{fullTitle}</title>
-      <meta name="description" content={finalDescription} />
-      <meta name="keywords" content={finalKeywords} />
+      {/* 如果静态SEO已存在且pageKey匹配，只注入分析脚本，不重复SEO标签 */}
+      {!shouldSkipSEO && (
+        <>
+          {/* 基础SEO */}
+          <title>{fullTitle}</title>
+          <meta name="description" content={finalDescription} />
+          <meta name="keywords" content={finalKeywords} />
 
-      {/* 中文优化 */}
-      <meta name="language" content="zh-CN" />
-      <meta name="geo.region" content="CN" />
-      <meta name="geo.country" content="China" />
+          {/* 中文优化 */}
+          <meta name="language" content="zh-CN" />
+          <meta name="geo.region" content="CN" />
+          <meta name="geo.country" content="China" />
 
-      {/* Open Graph */}
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={finalDescription} />
-      <meta property="og:image" content={fullImageUrl} />
-      <meta property="og:url" content={url} />
-      <meta property="og:type" content={type} />
-      <meta property="og:site_name" content={DEFAULT_SEO_CONFIG.siteName} />
-      <meta property="og:locale" content="zh_CN" />
+          {/* Open Graph */}
+          <meta property="og:title" content={fullTitle} />
+          <meta property="og:description" content={finalDescription} />
+          <meta property="og:image" content={fullImageUrl} />
+          <meta property="og:url" content={url} />
+          <meta property="og:type" content={type} />
+          <meta property="og:site_name" content={DEFAULT_SEO_CONFIG.siteName} />
+          <meta property="og:locale" content="zh_CN" />
 
-      {/* Twitter Card */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={finalDescription} />
-      <meta name="twitter:image" content={fullImageUrl} />
+          {/* Twitter Card */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={fullTitle} />
+          <meta name="twitter:description" content={finalDescription} />
+          <meta name="twitter:image" content={fullImageUrl} />
 
-      {/* 移动端优化 */}
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
+          {/* 移动端优化 */}
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta name="mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
 
-      {/* Canonical URL */}
-      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+          {/* Canonical URL */}
+          {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
-      {/* 额外的meta标签 */}
-      {additionalMeta.map((meta, index) => (
-        <meta
-          key={index}
-          {...(meta.name ? { name: meta.name } : {})}
-          {...(meta.property ? { property: meta.property } : {})}
-          content={meta.content}
-        />
-      ))}
+          {/* 额外的meta标签 */}
+          {additionalMeta.map((meta, index) => (
+            <meta
+              key={index}
+              {...(meta.name ? { name: meta.name } : {})}
+              {...(meta.property ? { property: meta.property } : {})}
+              content={meta.content}
+            />
+          ))}
+        </>
+      )}
     </Helmet>
   );
 };
