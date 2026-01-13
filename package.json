@@ -6,8 +6,9 @@
   "description": "Voidix官网 - React + TypeScript + Vite",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && npm run generate:sitemap",
+    "build": "tsc && vite build && node scripts/generateStaticPages.js && npm run generate:sitemap",
     "build:prerender": "tsc && vite build && npm run generate:sitemap && npm run prerender:puppeteer",
+    "build:pages": "node scripts/generateStaticPages.js",
     "check:preload": "node scripts/checkPreloadTags.js",
     "prerender:puppeteer": "node scripts/prerenderPuppeteer.js",
     "generate:sitemap": "node scripts/generateSitemap.js",
