@@ -23,6 +23,13 @@ export const IssueFormPage: React.FC = () => {
     status: 'open',
   });
 
+  const [originalData, setOriginalData] = useState({
+    title: '',
+    description: '',
+    status: 'open',
+    tags: [] as number[],
+  });
+
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
@@ -74,15 +81,22 @@ export const IssueFormPage: React.FC = () => {
           return;
         }
 
+        const tagIds = issue.tags && issue.tags.length > 0 ? issue.tags.map(t => t.id) : [];
+
         setFormData({
           title: issue.title,
           description: issue.description,
           status: issue.status,
         });
 
-        if (issue.tags && issue.tags.length > 0) {
-          setSelectedTags(issue.tags.map(t => t.id));
-        }
+        setOriginalData({
+          title: issue.title,
+          description: issue.description,
+          status: issue.status,
+          tags: tagIds,
+        });
+
+        setSelectedTags(tagIds);
       } else {
         setError(response.error || '获取失败');
       }
@@ -108,6 +122,80 @@ export const IssueFormPage: React.FC = () => {
     );
   };
 
+  const truncateText = (text: string, maxLength: number = 13): string => {
+    // 移除所有换行符和多余空格，保持单行显示
+    const singleLine = text.replace(/\s+/g, ' ').trim();
+    if (singleLine.length <= maxLength) return singleLine;
+    return singleLine.substring(0, maxLength) + '...';
+  };
+
+  const getStatusLabel = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      open: '待处理',
+      in_progress: '处理中',
+      resolved: '已解决',
+      closed: '已关闭',
+    };
+    return statusMap[status] || status;
+  };
+
+  const generateChangeMessage = (): string | null => {
+    const changes: string[] = [];
+
+    // 检查标题变化
+    if (formData.title !== originalData.title) {
+      const oldTitle = truncateText(originalData.title);
+      const newTitle = truncateText(formData.title);
+      changes.push(`标题: ${oldTitle} -> ${newTitle}`);
+    }
+
+    // 检查标签变化
+    const addedTags = selectedTags.filter(id => !originalData.tags.includes(id));
+    const removedTags = originalData.tags.filter(id => !selectedTags.includes(id));
+
+    if (addedTags.length > 0 || removedTags.length > 0) {
+      const tagParts: string[] = [];
+
+      if (addedTags.length > 0) {
+        const addedTagNames = addedTags
+          .map(id => allTags.find(t => t.id === id)?.name)
+          .filter(Boolean)
+          .join(', ');
+        tagParts.push(`增加 ${addedTagNames}`);
+      }
+
+      if (removedTags.length > 0) {
+        const removedTagNames = removedTags
+          .map(id => allTags.find(t => t.id === id)?.name)
+          .filter(Boolean)
+          .join(', ');
+        tagParts.push(`删除 ${removedTagNames}`);
+      }
+
+      changes.push(`标签: ${tagParts.join(' | ')}`);
+    }
+
+    // 检查描述变化
+    if (formData.description !== originalData.description) {
+      const oldDesc = truncateText(originalData.description);
+      const newDesc = truncateText(formData.description);
+      changes.push(`内容: ${oldDesc} -> ${newDesc}`);
+    }
+
+    // 检查状态变化
+    if (formData.status !== originalData.status) {
+      const oldStatus = getStatusLabel(originalData.status);
+      const newStatus = getStatusLabel(formData.status);
+      changes.push(`状态: ${oldStatus} -> ${newStatus}`);
+    }
+
+    if (changes.length === 0) {
+      return null;
+    }
+
+    return `修改了Issue:  \n${changes.join('  \n')}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
@@ -126,6 +214,15 @@ export const IssueFormPage: React.FC = () => {
         });
 
         if (response.success) {
+          // 生成变更消息并自动添加评论
+          const changeMessage = generateChangeMessage();
+          if (changeMessage) {
+            await issueService.addComment({
+              issue_id: id,
+              message: changeMessage,
+            });
+          }
+
           navigate(`/issue/${id}`);
         } else {
           setError(response.error || '更新失败');
