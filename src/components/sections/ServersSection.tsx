@@ -103,7 +103,7 @@ export const ServersSection: React.FC = () => {
                       fillRule="evenodd"
                     ></path>
                   </svg>
-                  <span>会检测基岩版玩家的反作弊系统</span>
+                  <span>多种玩法可选择</span>
                 </li>
               </ul>
             </div>
@@ -150,7 +150,7 @@ export const ServersSection: React.FC = () => {
                       fillRule="evenodd"
                     ></path>
                   </svg>
-                  <span>Minecraft最新版本支持</span>
+                  <span>极致的性能</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <svg
