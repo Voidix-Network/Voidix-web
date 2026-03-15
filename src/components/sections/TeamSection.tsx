@@ -689,6 +689,7 @@ export const TeamSection: React.FC = () => {
         '负责Voidix新功能的测试与反馈',
         '提升用户界面友好度与确保功能正确',
       ],
+      aka: ["才羽桃井"]
     },
     {
       name: 'Players',
