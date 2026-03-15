@@ -622,7 +622,7 @@ export const TeamSection: React.FC = () => {
         '励志于搭建一个环境友好，无需付费，可以和大家欢乐游玩的地方',
         '负责网站后端服务搭建与主要编程开发',
       ],
-      aka: ["Neko*"],
+      aka: ['Neko*'],
     },
     {
       name: 'CYAN-H',
@@ -635,11 +635,7 @@ export const TeamSection: React.FC = () => {
       textColor: 'text-indigo-400',
       abbreviation: 'cyh',
       minecraftUsername: 'cyh2',
-      contributions: [
-        '2025-至今: Voidix联合创始人',
-        '现任EternalStar服主',
-        '负责次要编程开发',
-      ],
+      contributions: ['2025-至今: Voidix联合创始人', '现任EternalStar服主', '负责次要编程开发'],
       aka: ['cyh', 'CYsonHab'],
     },
     {
@@ -675,6 +671,23 @@ export const TeamSection: React.FC = () => {
         '2025-至今: 网站设计与开发',
         '负责Voidix网站功能设计',
         '提升用户界面友好度和交互体验',
+      ],
+    },
+    {
+      name: 'Momoi123',
+      displayName: 'Momoi123',
+      role: '测试组成员',
+      roleColor: 'text-blue-400',
+      description: '测试Voidix的各项新功能以确保正确',
+      gradientFrom: 'from-blue-900/40',
+      gradientTo: 'to-indigo-900/70',
+      textColor: 'text-blue-400',
+      abbreviation: 'Momoi',
+      minecraftUsername: 'Momoi123',
+      contributions: [
+        '2026-至今: 功能与玩法测试',
+        '负责Voidix新功能的测试与反馈',
+        '提升用户界面友好度与确保功能正确',
       ],
     },
     {
