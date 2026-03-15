@@ -81,19 +81,6 @@ const formatUptimeDisplay = (
 };
 
 /**
- * 获取服务器状态
- */
-const getServerStatus = (server: any): 'online' | 'offline' | 'maintenance' => {
-  if (!server) return 'offline';
-
-  // 如果有明确的维护状态字段
-  if (server.maintenance) return 'maintenance';
-
-  // 根据 online 字段判断
-  return server.online ? 'online' : 'offline';
-};
-
-/**
  * 获取服务器玩家数量
  */
 const getServerPlayerCount = (server: any): number => {
@@ -102,14 +89,69 @@ const getServerPlayerCount = (server: any): number => {
 };
 
 /**
- * 服务器状态行组件
+ * 获取多个大厅的聚合状态（排除带 legacy 的大厅）
+ * 返回状态和总在线人数
+ */
+const getLobbiesAggregatedStatus = (servers: any): {
+  status: 'online' | 'offline' | 'partial';
+  totalPlayers: number;
+  onlineCount: number;
+  totalCount: number;
+} => {
+  // 找出所有以 lobby 开头且不包含 legacy 的服务器
+  const lobbyServers = Object.entries(servers)
+    .filter(([key]) => key.startsWith('lobby') && !key.toLowerCase().includes('legacy'))
+    .map(([_, server]) => server);
+
+  if (lobbyServers.length === 0) {
+    return {
+      status: 'offline',
+      totalPlayers: 0,
+      onlineCount: 0,
+      totalCount: 0,
+    };
+  }
+
+  let onlineCount = 0;
+  let totalPlayers = 0;
+
+  lobbyServers.forEach(server => {
+    // @ts-ignore
+    if (server && server.online) {
+      onlineCount++;
+      totalPlayers += getServerPlayerCount(server);
+    }
+  });
+
+  // 判断聚合状态
+  let status: 'online' | 'offline' | 'partial';
+  if (onlineCount === 0) {
+    status = 'offline';
+  } else if (onlineCount === lobbyServers.length) {
+    status = 'online';
+  } else {
+    status = 'partial';
+  }
+
+  return {
+    status,
+    totalPlayers,
+    onlineCount,
+    totalCount: lobbyServers.length,
+  };
+};
+
+/**
+ * 服务器状态行组件 - 增强版支持部分在线状态
  */
 interface ServerStatusRowProps {
   title: string;
-  status: 'online' | 'offline' | 'maintenance';
+  status: 'online' | 'offline' | 'maintenance' | 'partial';
   players: number;
   id: string;
   isConnectionFailed?: boolean;
+  onlineCount?: number;
+  totalCount?: number;
 }
 
 const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
@@ -117,7 +159,7 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
   status,
   players,
   id,
-  isConnectionFailed,
+  isConnectionFailed
 }) => {
   const getDisplayText = () => {
     if (isConnectionFailed) {
@@ -129,6 +171,7 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
     if (status === 'offline') {
       return '离线';
     }
+    // 部分在线或全部在线都显示总在线人数
     return `${players} 在线`;
   };
 
@@ -139,7 +182,10 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
     if (status === 'maintenance') {
       return 'bg-yellow-500 animate-pulse';
     }
-    return 'bg-green-500';
+    if (status === 'partial') {
+      return 'bg-yellow-500'; // 部分在线显示黄灯
+    }
+    return 'bg-green-500'; // 全部在线显示绿灯
   };
 
   const getTextColor = () => {
@@ -149,6 +195,7 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
     if (status === 'maintenance') {
       return 'text-yellow-400';
     }
+    // 全部在线和部分在线都使用蓝色文字
     return 'text-blue-400';
   };
 
@@ -182,6 +229,9 @@ export const AboutSection: React.FC = () => {
   // 检查连接状态
   const isConnectionFailed = connectionStatus !== 'connected';
 
+  // 获取大厅聚合状态
+  const lobbiesStatus = getLobbiesAggregatedStatus(servers);
+
   // 计算小游戏聚合统计
   const calculateMinigameStats = () => {
     let totalPlayers = 0;
@@ -199,19 +249,15 @@ export const AboutSection: React.FC = () => {
       }
     });
 
-    // 检查登录服务器和大厅
+    // 检查登录服务器
     const loginServer = servers.login;
-    const lobbyServer = servers.lobby1;
-
     if (loginServer && loginServer.online) {
-      hasOnlineServer = true;
-    }
-    if (lobbyServer && lobbyServer.online) {
       hasOnlineServer = true;
     }
 
     return {
       totalPlayers,
+      onlineCount,
       status: (hasOnlineServer ? 'online' : 'offline') as 'online' | 'offline' | 'maintenance',
       isOnline: hasOnlineServer,
     };
@@ -219,7 +265,7 @@ export const AboutSection: React.FC = () => {
 
   const minigameStats = calculateMinigameStats();
 
-  // 从 runtimeInfo 获取运行时间，如果没有则使用直接返回的值
+  // 从 runtimeInfo 获取运行时间
   const runningTime = runtimeInfo?.current_uptime_seconds || 0;
   const totalRunningTime = runtimeInfo?.total_uptime_seconds || 0;
 
@@ -316,11 +362,13 @@ export const AboutSection: React.FC = () => {
               <div className="relative bg-[#1a1f2e]/50 border border-[#2a365c] rounded-2xl p-6 md:p-8 backdrop-blur-sm">
                 <h3 className="text-xl font-bold mb-5 text-center md:text-left">服务器状态</h3>
                 <div className="space-y-4">
-                  {/* 小游戏大厅 */}
+                  {/* 小游戏大厅 - 使用聚合状态 */}
                   <ServerStatusRow
                     title="小游戏大厅"
-                    status={getServerStatus(servers.lobby1)}
-                    players={getServerPlayerCount(servers.lobby1)}
+                    status={lobbiesStatus.status}
+                    players={lobbiesStatus.totalPlayers}
+                    onlineCount={lobbiesStatus.onlineCount}
+                    totalCount={lobbiesStatus.totalCount}
                     id="lobby"
                     isConnectionFailed={isConnectionFailed}
                   />
