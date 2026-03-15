@@ -622,11 +622,11 @@ export const TeamSection: React.FC = () => {
         '励志于搭建一个环境友好，无需付费，可以和大家欢乐游玩的地方',
         '负责网站后端服务搭建与主要编程开发',
       ],
-      aka: ['Neko110923', 'NekoEpisode'],
+      aka: ["Neko*"],
     },
     {
-      name: 'CYsonHab',
-      displayName: 'CYsonHab',
+      name: 'CYAN-H',
+      displayName: 'CYAN-H',
       role: '核心开发者',
       roleColor: 'text-indigo-400',
       description: '项目联合创始人，主导插件开发与服务器维护等，也参与部分服务器架构搭建',
@@ -638,10 +638,9 @@ export const TeamSection: React.FC = () => {
       contributions: [
         '2025-至今: Voidix联合创始人',
         '现任EternalStar服主',
-        '主打"慢工出细活"的理念',
         '负责次要编程开发',
       ],
-      aka: ['cyh'],
+      aka: ['cyh', 'CYsonHab'],
     },
     {
       name: 'Almost Declaes',
