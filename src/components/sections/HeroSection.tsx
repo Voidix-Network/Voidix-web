@@ -48,7 +48,8 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-6 text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto"
         >
-          由开发者NekoSora和CYsonHab创建，继承VBPIXEL和EternalStar精神的公益小游戏服务器
+          <p>由开发者NekoSora和CYAN-H创建</p>
+          <p>继承VBPIXEL和EternalStar精神的公益小游戏服务器</p>
         </motion.p>
 
         {/* 服务器状态卡片 */}
@@ -84,18 +85,18 @@ export const HeroSection: React.FC = () => {
           <a href={'https://geysermc.org/wiki/geyser/'}>
             <div className="inline-flex items-center gap-2 bg-[#1a1f2e]/50 border border-gray-700 rounded-full px-4 py-2">
               <svg
-                className="h-5 w-5 text-blue-400"
+                className="h-5 w-5 text-green-500"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   clipRule="evenodd"
-                  d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                   fillRule="evenodd"
                 ></path>
               </svg>
-              <span className="text-sm font-medium">基岩版兼容 | GeyserMC技术实现</span>
+              <span className="text-sm font-medium">基岩版玩家兼容性</span>
             </div>
           </a>
         </motion.div>

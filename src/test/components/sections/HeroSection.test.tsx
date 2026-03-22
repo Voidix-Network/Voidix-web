@@ -98,7 +98,7 @@ describe('HeroSection', () => {
     expect(screen.getByTestId('gradient-text')).toHaveAttribute('data-variant', 'primary');
 
     // 验证副标题
-    expect(screen.getByText(/由开发者NekoSora和CYsonHab创建/)).toBeInTheDocument();
+    expect(screen.getByText(/由开发者NekoSora和CYAN-H创建/)).toBeInTheDocument();
   });
 
   it('应该渲染服务器状态卡片', () => {
@@ -124,7 +124,7 @@ describe('HeroSection', () => {
   it('应该渲染基岩版兼容提示', () => {
     renderHeroSection();
 
-    expect(screen.getByText('基岩版兼容 | GeyserMC技术实现')).toBeInTheDocument();
+    expect(screen.getByText('基岩版玩家兼容性')).toBeInTheDocument();
   });
 
   it('应该渲染背景展示区域的内容', () => {
@@ -240,6 +240,6 @@ describe('HeroSection', () => {
 
     const svgIcon = container.querySelector('svg');
     expect(svgIcon).toBeInTheDocument();
-    expect(svgIcon).toHaveClass('h-5', 'w-5', 'text-blue-400');
+    expect(svgIcon).toHaveClass('h-5', 'w-5', 'text-green-500');
   });
 });

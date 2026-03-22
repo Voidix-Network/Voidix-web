@@ -25,7 +25,7 @@ describe('ServerStatusCard', () => {
       expect(screen.getByText('minigame.voidix.net')).toBeInTheDocument();
 
       // 验证兼容性文本
-      expect(screen.getByText('兼容 1.16.5-1.21.1')).toBeInTheDocument();
+      expect(screen.getByText('兼容 1.20-1.21.11')).toBeInTheDocument();
     });
 
     it('应该渲染SURVIVAL类型的服务器卡片', () => {
@@ -147,7 +147,7 @@ describe('ServerStatusCard', () => {
         <ServerStatusCard type="MINIGAME" address="test.voidix.net" status="online" players={5} />
       );
 
-      const compatibilityElement = screen.getByText('兼容 1.16.5-1.21.1');
+      const compatibilityElement = screen.getByText('兼容 1.20-1.21.11');
       expect(compatibilityElement).toHaveClass('mt-2', 'text-xs', 'text-gray-300');
     });
 
@@ -161,7 +161,7 @@ describe('ServerStatusCard', () => {
         />
       );
 
-      expect(screen.getByText('兼容 1.7.2-latest')).toBeInTheDocument();
+      expect(screen.getByText('兼容 1.7.2-最新')).toBeInTheDocument();
     });
 
     it('应该为MINIGAME服务器显示正确的兼容版本', () => {
@@ -174,7 +174,7 @@ describe('ServerStatusCard', () => {
         />
       );
 
-      expect(screen.getByText('兼容 1.16.5-1.21.1')).toBeInTheDocument();
+      expect(screen.getByText('兼容 1.20-1.21.11')).toBeInTheDocument();
     });
   });
 
