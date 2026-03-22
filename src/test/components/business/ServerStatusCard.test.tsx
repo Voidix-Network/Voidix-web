@@ -161,7 +161,7 @@ describe('ServerStatusCard', () => {
         />
       );
 
-      expect(screen.getByText('兼容 1.7.2-latest')).toBeInTheDocument();
+      expect(screen.getByText('兼容 1.7.2-最新')).toBeInTheDocument();
     });
 
     it('应该为MINIGAME服务器显示正确的兼容版本', () => {
