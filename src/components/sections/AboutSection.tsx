@@ -92,7 +92,9 @@ const getServerPlayerCount = (server: any): number => {
  * 获取多个大厅的聚合状态（排除带 legacy 的大厅）
  * 返回状态和总在线人数
  */
-const getLobbiesAggregatedStatus = (servers: any): {
+const getLobbiesAggregatedStatus = (
+  servers: any
+): {
   status: 'online' | 'offline' | 'partial';
   totalPlayers: number;
   onlineCount: number;
@@ -159,7 +161,7 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
   status,
   players,
   id,
-  isConnectionFailed
+  isConnectionFailed,
 }) => {
   const getDisplayText = () => {
     if (isConnectionFailed) {
