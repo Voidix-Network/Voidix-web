@@ -154,7 +154,7 @@ export const LiveChatSection: React.FC = () => {
       if (!isMountedRef.current) return;
 
       try {
-        const ws = new WebSocket('wss://api.voidix.top:10203');
+        const ws = new WebSocket('wss://api.voidix.net:10203');
         wsRef.current = ws;
 
         ws.onopen = () => {
