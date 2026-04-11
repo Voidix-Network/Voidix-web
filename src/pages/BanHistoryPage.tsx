@@ -100,7 +100,7 @@ const BanHistoryPage: React.FC = () => {
     setError(null);
 
     try {
-      const ws = new WebSocket('wss://api.voidix.top:10203');
+      const ws = new WebSocket('wss://api.voidix.net:10203');
 
       const timeout = setTimeout(() => {
         ws.close();

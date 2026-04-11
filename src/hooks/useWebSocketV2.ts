@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 
-const WS_URL = 'wss://api.voidix.top:10203';
+const WS_URL = 'wss://api.voidix.net:10203';
 const RECONNECT_DELAY = 3000;
 const META_UPDATE_INTERVAL = 30000;
 
