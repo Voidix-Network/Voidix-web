@@ -246,8 +246,8 @@ const ServerCard: React.FC<ServerCardProps> = ({ serverInfo, displayName }) => {
                   return versionChar === '4';
                 })();
 
-                // 直接使用 Crafatar 获取头像
-                const avatarUrl = `https://avatars.cloudhaven.gg/avatars/${player.uuid}?size=32&overlay=true`;
+                // 使用 Minotar 获取头像，找不到时自动 fallback 到 Steve
+                const avatarUrl = `https://minotar.net/avatar/${player.uuid}`;
                 const fallbackSvg =
                   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Crect fill="%234a5568" width="16" height="16"/%3E%3C/svg%3E';
 
