@@ -5,7 +5,7 @@ import {
   SEOProvider,
   VoidixSearchConsole,
 } from '@/components/seo';
-import { WebSocketProvider } from './hooks/useWebSocket';
+import { WebSocketProvider } from '@/hooks';
 
 /**
  * 主应用组件

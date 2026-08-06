@@ -3,6 +3,9 @@ import type { ServerConfig, StatusClasses, StatusTexts, TimeConstants } from '@/
 // 导出服务器分组配置
 export * from './serverGroups';
 
+// 小游戏服务器支持版本
+export const MINIGAME_VERSION = '26.1-26.1.2';
+
 // 时间常量
 export const TIME_CONSTANTS: TimeConstants = {
   SECONDS_IN_MINUTE: 60,

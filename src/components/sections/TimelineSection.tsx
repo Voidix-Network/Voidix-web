@@ -52,14 +52,6 @@ export const TimelineSection: React.FC = () => {
       position: 'left',
       color: 'indigo',
     },
-    {
-      date: '2025年10月16日',
-      title: 'Voidix OmniCore Fast API',
-      description:
-        'Voidix OmniCore Fast API(简称Voidix OmniCore)上线替换Voidix-Connect，提供公开且强大快速的数据查询API',
-      position: 'right',
-      color: 'purple',
-    },
   ];
 
   return (
@@ -94,10 +86,14 @@ export const TimelineSection: React.FC = () => {
         </div>
 
         <div className="relative max-w-4xl mx-auto">
+          {/* 顶端横条 */}
+          <div className="absolute top-0 left-5 w-8 h-0.5 bg-gray-700 transform -translate-x-1/2 md:left-1/2"></div>
+          {/* 底部横条 */}
+          <div className="absolute bottom-0 left-5 w-8 h-0.5 bg-gray-700 transform -translate-x-1/2 md:left-1/2"></div>
           {/* 垂直时间线 */}
           <div className="absolute top-0 bottom-0 w-0.5 bg-gray-700 left-5 transform -translate-x-1/2 md:left-1/2"></div>
 
-          <div className="space-y-8">
+          <div className="space-y-8 pt-6">
             {timelineEvents.map((event, index) => (
               <motion.div
                 key={index}

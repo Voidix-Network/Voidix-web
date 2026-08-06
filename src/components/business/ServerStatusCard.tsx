@@ -1,3 +1,4 @@
+import { MINIGAME_VERSION } from '@/constants';
 import { ServerStatus } from '@/types';
 import { cn } from '@/utils';
 
@@ -43,7 +44,7 @@ export const ServerStatusCard: React.FC<ServerStatusCardProps> = ({
   const getCompatibilityText = (type: 'MINIGAME' | 'SURVIVAL') => {
     switch (type) {
       case 'MINIGAME':
-        return '兼容 1.20-1.21.11';
+        return `兼容 ${MINIGAME_VERSION}`;
       case 'SURVIVAL':
         return '兼容 1.7.2-最新';
       default:

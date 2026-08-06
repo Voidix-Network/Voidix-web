@@ -1,4 +1,5 @@
 import { ServerStatusCard } from '@/components/business/ServerStatusCard';
+import { MINIGAME_VERSION } from '@/constants';
 import type { ServerStatus } from '@/types';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
@@ -25,7 +26,7 @@ describe('ServerStatusCard', () => {
       expect(screen.getByText('minigame.voidix.net')).toBeInTheDocument();
 
       // 验证兼容性文本
-      expect(screen.getByText('兼容 1.20-1.21.11')).toBeInTheDocument();
+      expect(screen.getByText(`兼容 ${MINIGAME_VERSION}`)).toBeInTheDocument();
     });
 
     it('应该渲染SURVIVAL类型的服务器卡片', () => {
@@ -174,7 +175,7 @@ describe('ServerStatusCard', () => {
         />
       );
 
-      expect(screen.getByText('兼容 1.20-1.21.11')).toBeInTheDocument();
+      expect(screen.getByText(`兼容 ${MINIGAME_VERSION}`)).toBeInTheDocument();
     });
   });
 

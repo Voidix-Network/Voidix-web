@@ -48,7 +48,7 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-6 text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto"
         >
-          <p>由开发者NekoSora和CYAN-H创建</p>
+          <p>由开发者NekoSora和CYAN-HEX创建</p>
           <p>继承VBPIXEL和EternalStar精神的公益小游戏服务器</p>
         </motion.div>
 

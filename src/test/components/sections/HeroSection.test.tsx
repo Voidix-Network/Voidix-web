@@ -97,7 +97,7 @@ describe('HeroSection', () => {
     expect(screen.getByTestId('gradient-text')).toHaveAttribute('data-variant', 'primary');
 
     // 验证副标题
-    expect(screen.getByText(/由开发者NekoSora和CYAN-H创建/)).toBeInTheDocument();
+    expect(screen.getByText(/由开发者NekoSora和CYAN-HEX创建/)).toBeInTheDocument();
   });
 
   it('应该渲染服务器状态卡片', () => {

@@ -198,6 +198,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         calcAggregate(prev);
         return prev;
       });
+      setProxyStats(prev =>
+        prev
+          ? {
+              ...prev,
+              total_players: playersRef.current.length,
+              players_on_servers: playersRef.current.filter(p => p.server !== null).length,
+            }
+          : prev
+      );
     },
     [calcAggregate]
   );

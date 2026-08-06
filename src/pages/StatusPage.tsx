@@ -1,5 +1,5 @@
 // filepath: src/pages/StatusPage.tsx
-import { AnimatedSection, BreadcrumbNavigation } from '@/components';
+import { BreadcrumbNavigation } from '@/components';
 import { SEO } from '@/components/seo';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { analytics } from '@/services/analytics';
@@ -512,7 +512,7 @@ export const StatusPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             {connectionStatus === 'connected' && Object.keys(servers).length > 0 ? (
               <>
                 <StatCard
@@ -530,39 +530,21 @@ export const StatusPage: React.FC = () => {
                   value={formatRunningTime(totalRunningTime || 0)}
                   subtitle="自启动以来"
                 />
+                <StatCard
+                  title="当前运行时间"
+                  value={formatRunningTime(runningTime || 0)}
+                  subtitle="本次持续运行"
+                />
               </>
             ) : (
               <>
                 <StatCardSkeleton />
                 <StatCardSkeleton />
                 <StatCardSkeleton />
+                <StatCardSkeleton />
               </>
             )}
           </div>
-
-          <AnimatedSection className="mb-12">
-            <div className="bg-gradient-to-r from-blue-800 to-purple-800 border border-blue-500 rounded-lg p-6 shadow-lg">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4 text-blue-900"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-blue-100 font-bold text-lg">📢 公告系统维护中</h3>
-              </div>
-              <p className="text-blue-100">公告系统正在升级维护，敬请期待新版本！</p>
-            </div>
-          </AnimatedSection>
 
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-white mb-6">服务器详情</h2>
@@ -619,37 +601,10 @@ export const StatusPage: React.FC = () => {
             )}
           </div>
 
-          {runningTime !== null && (
-            <div className="mt-12 text-center">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg border border-gray-600 p-6 inline-block shadow-lg">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <svg
-                    className="w-5 h-5 text-green-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <h3 className="text-gray-400 text-sm font-medium">当前运行时间</h3>
-                </div>
-                <p className="text-green-400 text-2xl font-mono font-bold">
-                  {formatRunningTime(runningTime)}
-                </p>
-                <p className="text-gray-500 text-xs mt-1">自启动以来持续运行</p>
-              </div>
-            </div>
-          )}
-
           <div className="mt-16 text-center border-t border-gray-700 pt-8">
             <div className="space-y-4">
               <p className="text-gray-500 text-xs">
-                © 2025 Voidix Network. 实时服务器状态监控系统
+                © 2026 Voidix Network. 实时服务器状态监控系统
               </p>
             </div>
           </div>
