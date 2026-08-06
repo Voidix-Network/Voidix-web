@@ -19,6 +19,7 @@ interface ServerInfo {
   players_count: number;
   players?: Array<{ name: string; uuid: string }>;
   version?: { name: string; protocol: number; max: number };
+  extra?: { status?: string; [key: string]: any };
 }
 
 interface ServerTreeNode {
@@ -26,6 +27,7 @@ interface ServerTreeNode {
   name: string;
   type: 'root' | 'category' | 'server';
   children?: ServerTreeNode[];
+  extra?: { status?: string; [key: string]: any };
 }
 
 interface AggregateStats {
@@ -73,12 +75,26 @@ function collectServerIds(tree: any[]): string[] {
   return ids;
 }
 
+function collectServerExtras(tree: any[]): Record<string, any> {
+  const extras: Record<string, any> = {};
+  const walk = (node: any) => {
+    if (node.type === 'SERVER' && node.extra) {
+      extras[node.id] = node.extra;
+    } else if (node.type === 'CATEGORY' && node.children) {
+      node.children.forEach(walk);
+    }
+  };
+  tree.forEach(walk);
+  return extras;
+}
+
 function normalizeTree(rawTree: any[]): ServerTreeNode {
   const walk = (node: any): ServerTreeNode => ({
     id: node.id,
     name: node.friendlyName,
     type: node.type === 'CATEGORY' ? 'category' : 'server',
     children: node.children ? node.children.map(walk) : undefined,
+    extra: node.extra || undefined,
   });
   return {
     id: 'root',
@@ -220,6 +236,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ]);
 
       const ids = collectServerIds(treeResult);
+      const extras = collectServerExtras(treeResult);
       serverIdsRef.current = ids;
 
       const statusAllResult = await sendRequest('server.status_all', {});
@@ -246,6 +263,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             online: status.online ?? false,
             players_count: status.players?.online ?? 0,
             players: serverPlayers,
+            extra: extras[id],
             version: status.version
               ? {
                   name: status.version.name,
@@ -260,6 +278,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             online: false,
             players_count: 0,
             players: [],
+            extra: extras[id],
           };
         }
       }

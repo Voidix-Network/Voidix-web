@@ -187,7 +187,8 @@ interface ServerCardProps {
 
 const ServerCard: React.FC<ServerCardProps> = ({ serverInfo, displayName }) => {
   const [showPlayers, setShowPlayers] = useState(false);
-  const isOnline = serverInfo.online ?? false;
+  const isImplementing = serverInfo.extra?.status === 'implementing';
+  const isOnline = !isImplementing && (serverInfo.online ?? false);
   const players = serverInfo.players || [];
   const playersCount = serverInfo.players_count || 0;
 
@@ -198,21 +199,25 @@ const ServerCard: React.FC<ServerCardProps> = ({ serverInfo, displayName }) => {
           <div className="flex items-center space-x-3">
             <div
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                isOnline
-                  ? 'bg-green-500 animate-pulse shadow-lg shadow-green-500/50'
-                  : 'bg-red-500 shadow-lg shadow-red-500/50'
+                isImplementing
+                  ? 'bg-yellow-500 shadow-lg shadow-yellow-500/50'
+                  : isOnline
+                    ? 'bg-green-500 animate-pulse shadow-lg shadow-green-500/50'
+                    : 'bg-red-500 shadow-lg shadow-red-500/50'
               }`}
             />
             <div>
               <h3 className="text-white font-semibold">{displayName}</h3>
               <p className="text-gray-400 text-sm">
-                {isOnline ? '在线' : '离线'}
+                {isImplementing ? '施工中' : isOnline ? '在线' : '离线'}
                 {serverInfo.ping?.version && ` • ${serverInfo.ping.version}`}
               </p>
             </div>
           </div>
           <div className="text-right">
-            {isOnline && <p className="text-white font-semibold">{playersCount} 玩家</p>}
+            {isOnline && !isImplementing && (
+              <p className="text-white font-semibold">{playersCount} 玩家</p>
+            )}
             {isOnline && players.length > 0 && (
               <button
                 onClick={() => setShowPlayers(!showPlayers)}
