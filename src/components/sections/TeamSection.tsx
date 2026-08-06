@@ -578,7 +578,7 @@ const PlayerCovenant: React.FC = () => {
                 <div className="flex-1">
                   <h5 className="font-bold text-amber-300 mb-2">重要提醒</h5>
                   <p className="text-amber-100/80 text-sm leading-relaxed">
-                    违反公约可能导致警告、暂时封禁或永久封禁。所有管理决定都经过团队讨论并记录在案。如果您对处罚有异议，可以通过正式渠道申诉。
+                    违反服务器规则可能导致警告、暂时封禁或永久封禁。如果您对处罚有异议，可以通过渠道进行申诉。
                   </p>
                 </div>
               </div>
@@ -625,8 +625,8 @@ export const TeamSection: React.FC = () => {
       aka: ['Neko*'],
     },
     {
-      name: 'CYAN-H',
-      displayName: 'CYAN-H',
+      name: 'CYAN-HEX',
+      displayName: 'CYAN-HEX',
       role: '核心开发者',
       roleColor: 'text-indigo-400',
       description: '项目联合创始人，主导插件开发与服务器维护等，也参与部分服务器架构搭建',

@@ -1,4 +1,5 @@
 import { GradientText } from '@/components';
+import { MINIGAME_VERSION } from '@/constants';
 import { motion } from 'framer-motion';
 import { Mountain, Trophy } from 'lucide-react';
 
@@ -73,7 +74,7 @@ export const ServersSection: React.FC = () => {
                       fillRule="evenodd"
                     ></path>
                   </svg>
-                  <span>支持 1.20-1.21.11</span>
+                  <span>支持 {MINIGAME_VERSION}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <svg

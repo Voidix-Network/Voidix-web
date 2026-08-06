@@ -16,7 +16,6 @@ vi.mock('@/pages/StatusPage', () => ({
       connectionStatus: 'disconnected',
       servers: {},
       aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-      isMaintenance: false,
       runningTime: 0,
       totalRunningTime: 3600,
     };
@@ -51,14 +50,6 @@ vi.mock('@/pages/StatusPage', () => ({
         {/* 页面标题 */}
         <h1 className="text-4xl font-bold text-white mb-4">服务器状态</h1>
         <p className="text-gray-400 text-lg">实时查看 Voidix 网络的服务器状态和统计信息</p>
-
-        {/* 维护模式警告 */}
-        {mockStatus.isMaintenance && (
-          <div data-testid="maintenance-warning">
-            <p>系统维护中，请稍后再试</p>
-            <p>访问 www.voidix.net 获取更多信息</p>
-          </div>
-        )}
 
         {/* 连接状态指示器 */}
         <div data-testid="connection-status">
@@ -130,13 +121,15 @@ vi.mock('@/components/seo', () => ({
 
 // Mock WebSocket Hook
 vi.mock('@/hooks/useWebSocket', () => ({
-  useWebSocketStatus: () => {
+  useWebSocket: () => {
     return (
       (globalThis as any).__statusPageMockStatus || {
         connectionStatus: 'disconnected',
         servers: {},
-        aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: false,
+        serverTree: null,
+        aggregateStats: { totalPlayers: 0, onlineServers: 0, totalServers: 0 },
+        runtimeInfo: null,
+        proxyStats: null,
         runningTime: 0,
         totalRunningTime: 3600,
       }
@@ -175,7 +168,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
       connectionStatus: 'disconnected',
       servers: {},
       aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-      isMaintenance: false,
       runningTime: 0,
       totalRunningTime: 3600,
     });
@@ -195,7 +187,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: {},
         aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -221,7 +212,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: {},
         aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -239,7 +229,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: {},
         aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: true,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -256,7 +245,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: {},
         aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -277,7 +265,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
           'test-server-2': { players: 5, status: 'online' },
         },
         aggregateStats: { totalPlayers: 15, onlineServers: 2 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 7200,
       });
@@ -299,7 +286,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'disconnected',
         servers: {},
         aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 0,
       });
@@ -315,7 +301,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'failed',
         servers: {},
         aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 0,
       });
@@ -336,7 +321,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
           'test-server-2': { players: 5, status: 'online' },
         },
         aggregateStats: { totalPlayers: 15, onlineServers: 2 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -353,7 +337,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: {},
         aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -371,7 +354,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: { 'test-server': { players: 10, status: 'online' } },
         aggregateStats: { totalPlayers: 10, onlineServers: 1 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -389,7 +371,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: { 'test-server': { players: 10, status: 'online' } },
         aggregateStats: { totalPlayers: 10, onlineServers: 1 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -410,7 +391,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connecting',
         servers: {},
         aggregateStats: { totalPlayers: 0, onlineServers: 0 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 0,
       });
@@ -421,7 +401,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: { 'test-server': { players: 5, status: 'online' } },
         aggregateStats: { totalPlayers: 5, onlineServers: 1 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 1800,
       });
@@ -439,7 +418,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: null, // 意外的null值
         aggregateStats: undefined, // 意外的undefined值
-        isMaintenance: false,
         runningTime: NaN, // 意外的NaN值
         totalRunningTime: 3600,
       });
@@ -462,7 +440,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
           'another-new-server': { players: 15, status: 'maintenance', type: 'experimental' },
         },
         aggregateStats: { totalPlayers: 35, onlineServers: 1 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });
@@ -477,7 +454,6 @@ describe('StatusPage - 向后兼容性优化版本', () => {
         connectionStatus: 'connected',
         servers: { 'test-server': { players: 10, status: 'online' } },
         aggregateStats: { totalPlayers: 10, onlineServers: 1 },
-        isMaintenance: false,
         runningTime: 0,
         totalRunningTime: 3600,
       });

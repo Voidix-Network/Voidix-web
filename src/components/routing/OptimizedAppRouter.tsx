@@ -31,12 +31,6 @@ const PrivacyPolicyPage = React.lazy(() =>
   }))
 );
 
-const BanHistoryPage = React.lazy(() =>
-  import(/* webpackPreload: false */ '@/pages/BanHistoryPage').then(module => ({
-    default: module.default,
-  }))
-);
-
 const NotFoundPage = React.lazy(() =>
   import(/* webpackPreload: false */ '@/pages/NotFoundPage').then(module => ({
     default: module.NotFoundPage,
@@ -89,7 +83,6 @@ const RouteAwareFallback: React.FC = () => {
     '/faq',
     '/bug-report',
     '/privacy',
-    '/ban-history',
     '/login',
     '/issue',
     '/issue/create',
@@ -168,7 +161,6 @@ const RouteStateManager: React.FC<{ children: React.ReactNode }> = ({ children }
       '/faq',
       '/bug-report',
       '/privacy',
-      '/ban-history',
       '/login',
       '/issue',
       '/issue/create',
@@ -222,7 +214,6 @@ const RouteContent: React.FC = () => {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/bug-report" element={<BugReportPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/ban-history" element={<BanHistoryPage />} />
             {/* 新增路由 */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/issue" element={<IssuePage />} />

@@ -300,7 +300,7 @@ export const setupRoutingMocks = () => {
 
   // Mock WebSocket Hook
   const webSocketMock = createWebSocketMock();
-  vi.doMock('@/hooks/useWebSocketV2', () => webSocketMock);
+  vi.doMock('@/hooks/useWebSocket', () => webSocketMock);
 
   // Mock CSS imports
   vi.doMock('@/styles/page-transitions.css', () => ({}));
@@ -669,7 +669,7 @@ export const setupPageTest = (config: PageTestConfig = {}) => {
 
   if (mockWebSocket) {
     const webSocketMock = createWebSocketMock();
-    vi.doMock('@/hooks/useWebSocketV2', () => webSocketMock);
+    vi.doMock('@/hooks/useWebSocket', () => webSocketMock);
     mocks.webSocket = webSocketMock;
   }
 

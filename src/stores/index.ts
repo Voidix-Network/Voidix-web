@@ -6,7 +6,6 @@
 // 导出所有子store
 export * from './aggregatedStore';
 export * from './connectionStore';
-export { useNoticeStore } from './noticeStore';
 export * from './playerIgnStore';
 export * from './playerTrackingStore';
 export * from './serverDataStore';

@@ -224,44 +224,7 @@ export const mockUseWebSocketV2 = vi.fn(() => ({
 // 导出所有hooks的默认mocks
 export const defaultHookMocks = {
   useServerStoreCompat: () => mockServerStoreCompat,
-  useWebSocketV2: mockUseWebSocketV2,
+  useWebSocket: mockUseWebSocketV2,
   useServerPlayerIgns: mockUseServerPlayerIgns,
   usePlayerIgnStore: mockUsePlayerIgnStore,
 };
-
-// NoticeStore Mock
-export const createMockNoticeStore = (overrides: any = {}) => {
-  const defaultState = {
-    notices: {},
-    isLoading: false,
-    error: null,
-    lastFetchTime: Date.now(),
-    currentPage: 1,
-    hasMore: true,
-    totalPages: 1,
-    pageSize: 5,
-  };
-
-  const state = { ...defaultState, ...overrides };
-
-  return {
-    ...state,
-    setNotices: vi.fn(),
-    addNotice: vi.fn(),
-    removeNotice: vi.fn(),
-    setLoading: vi.fn(),
-    setError: vi.fn(),
-    updatePage: vi.fn(),
-    setHasMore: vi.fn(),
-    reset: vi.fn(),
-    requestNotices: vi.fn(),
-    handleNoticeResponse: vi.fn(),
-    goToPage: vi.fn(),
-    nextPage: vi.fn(),
-    prevPage: vi.fn(),
-    refreshCurrentPage: vi.fn(),
-    debugWebSocketStatus: vi.fn(),
-  };
-};
-
-export const mockNoticeStore = createMockNoticeStore();

@@ -1,7 +1,6 @@
 import type {
   AggregateStats,
   ConnectionStatus,
-  Notice,
   PlayerIgnInfo,
   ServerData,
   ServerInfo,
@@ -106,57 +105,12 @@ export interface UptimeActions {
 }
 
 /**
- * 公告系统相关类型
+ * 公告系统相关类型 - 已移除（新协议不支持公告系统）
  */
-export interface NoticeState {
-  notices: Record<string, Notice>;
-  isLoading: boolean;
-  error: string | null;
-  lastFetchTime: number | null;
-  currentPage: number;
-  hasMore: boolean;
-  totalPages: number;
-  pageSize: number;
-  totalCount?: number; // 从full消息中获取的总公告数
-}
-
-export interface NoticeActions {
-  setNotices: (notices: Record<string, Notice>) => void;
-  addNotice: (id: string, notice: Notice) => void;
-  removeNotice: (id: string) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  updatePage: (page: number) => void;
-  setHasMore: (hasMore: boolean) => void;
-  setTotalCount: (totalCount: number) => void; // 新增：设置总公告数
-  reset: () => void;
-  requestNotices: (page?: number, counts?: number) => void;
-  handleNoticeResponse: (
-    notices: Record<string, Notice>,
-    requestedPage: number,
-    pageSize: number,
-    noticeTotalCount?: number
-  ) => void;
-  goToPage: (page: number) => void;
-  nextPage: () => void;
-  prevPage: () => void;
-  refreshCurrentPage: () => void;
-  smartUpdateNotices: (newNotices: Record<string, Notice>) => void;
-  requestNoticesEnhanced: (page?: number, counts?: number) => void;
-  debugWebSocketStatus: () => any;
-}
 
 /**
- * 全量更新数据类型
+ * 全量更新数据类型 - 已移除（新协议采用客户端聚合建模）
  */
-export interface FullUpdateData {
-  servers: Record<string, ServerData>;
-  players: { online: string; currentPlayers: Record<string, any> };
-  runningTime?: number | string;
-  totalRunningTime?: number | string;
-  isMaintenance: boolean;
-  maintenanceStartTime: string | null;
-}
 
 /**
  * Store 依赖注入类型
@@ -167,5 +121,4 @@ export interface StoreContext {
   playerTrackingStore: PlayerTrackingState & PlayerTrackingActions;
   playerIgnStore: PlayerIgnState & PlayerIgnActions;
   uptimeStore: UptimeState & UptimeActions;
-  noticeStore: NoticeState & NoticeActions;
 }

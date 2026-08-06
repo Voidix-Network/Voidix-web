@@ -8,9 +8,6 @@ import React from 'react';
 // 浏览器API Mock
 export * from './browserAPIs';
 
-// WebSocket Mock
-export * from './webSocketMocks';
-
 // SEO组件Mock
 export const SEOMocks = {
   SEO: ({ title, description, keywords, additionalMeta, pageKey }: any) =>

@@ -1,4 +1,4 @@
-import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { usePlayerIgnStore, useServerPlayerIgns } from '@/stores';
 import { Clock, RefreshCw, Users, Wifi, WifiOff } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -37,7 +37,7 @@ export const PlayerIgnTooltip: React.FC<PlayerIgnTooltipProps> = ({
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const playerIgns = useServerPlayerIgns(serverId);
-  const { connectionStatus } = useWebSocketV2();
+  const { connectionStatus } = useWebSocket();
 
   // 开发环境检测
   const isDev = import.meta.env.DEV;

@@ -27,10 +27,6 @@ vi.mock('@/components/sections/TimelineSection', () => ({
 vi.mock('@/components/sections/TeamSection', () => ({
   TeamSection: () => <div data-testid="team-section">Team Section</div>,
 }));
-vi.mock('@/components/sections/LiveChatSection.tsx', () => ({
-  LiveChatSection: () => <div data-testid="live-chat-section">Live Chat Section</div>,
-}));
-
 // Mock SEO组件
 vi.mock('@/components/seo', () => ({
   SEO: ({ pageKey, type, canonicalUrl }: any) => (

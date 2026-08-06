@@ -1,4 +1,5 @@
 import { AnimatedSection, BreadcrumbNavigation } from '@/components';
+import { MINIGAME_VERSION } from '@/constants';
 import { FAQSchema, SEO } from '@/components/seo';
 import { analytics } from '@/services/analytics';
 import { motion } from 'framer-motion';
@@ -34,7 +35,7 @@ const faqData: FaqItem[] = [
     id: 3,
     question: '服务器支持哪些Minecraft版本？',
     answer:
-      '我们的小游戏服务器支持1.20-1.21.11(信息更新可能滞后)的Java版，生存服务器则使用最新的Java版，但也支持1.7.2-最新版。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
+      `我们的小游戏服务器支持${MINIGAME_VERSION}(信息更新可能滞后)的Java版，生存服务器则使用最新的Java版，但也支持1.7.2-最新版。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。`,
   },
   {
     id: 4,
@@ -82,7 +83,7 @@ const faqSchemaData = [
   {
     question: '服务器支持哪些Minecraft版本？',
     answer:
-      '我们的小游戏服务器支持1.20-1.21.11的Java版，生存服务器则使用最新的Java版，但也支持1.7.2-latest。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。',
+      `我们的小游戏服务器支持${MINIGAME_VERSION}的Java版，生存服务器则使用最新的Java版，但也支持1.7.2-latest。同时，通过GeyserMC技术，基岩版玩家也可以连接到我们的服务器，基岩版一般支持最新版，过旧的基岩版可能不会被支持。`,
   },
   {
     question: '如果我遇到了Bug或者有建议，应该怎么办？',

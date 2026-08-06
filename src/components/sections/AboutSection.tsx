@@ -1,7 +1,7 @@
 import { GradientText } from '@/components';
 import { MINIGAME_KEYS } from '@/constants';
 import { motion } from 'framer-motion';
-import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 /**
  * 智能格式化运行时间显示
@@ -89,61 +89,6 @@ const getServerPlayerCount = (server: any): number => {
 };
 
 /**
- * 获取多个大厅的聚合状态（排除带 legacy 的大厅）
- * 返回状态和总在线人数
- */
-const getLobbiesAggregatedStatus = (
-  servers: any
-): {
-  status: 'online' | 'offline' | 'partial';
-  totalPlayers: number;
-  onlineCount: number;
-  totalCount: number;
-} => {
-  // 找出所有以 lobby 开头且不包含 legacy 的服务器
-  const lobbyServers = Object.entries(servers)
-    .filter(([key]) => key.startsWith('lobby') && !key.toLowerCase().includes('legacy'))
-    .map(([_, server]) => server);
-
-  if (lobbyServers.length === 0) {
-    return {
-      status: 'offline',
-      totalPlayers: 0,
-      onlineCount: 0,
-      totalCount: 0,
-    };
-  }
-
-  let onlineCount = 0;
-  let totalPlayers = 0;
-
-  lobbyServers.forEach(server => {
-    // @ts-ignore
-    if (server && server.online) {
-      onlineCount++;
-      totalPlayers += getServerPlayerCount(server);
-    }
-  });
-
-  // 判断聚合状态
-  let status: 'online' | 'offline' | 'partial';
-  if (onlineCount === 0) {
-    status = 'offline';
-  } else if (onlineCount === lobbyServers.length) {
-    status = 'online';
-  } else {
-    status = 'partial';
-  }
-
-  return {
-    status,
-    totalPlayers,
-    onlineCount,
-    totalCount: lobbyServers.length,
-  };
-};
-
-/**
  * 服务器状态行组件 - 增强版支持部分在线状态
  */
 interface ServerStatusRowProps {
@@ -226,13 +171,10 @@ const ServerStatusRow: React.FC<ServerStatusRowProps> = ({
  * 关于我们组件 - 适配新版 API
  */
 export const AboutSection: React.FC = () => {
-  const { connectionStatus, servers, aggregateStats, runtimeInfo } = useWebSocketV2();
+  const { connectionStatus, servers, aggregateStats, runtimeInfo } = useWebSocket();
 
   // 检查连接状态
   const isConnectionFailed = connectionStatus !== 'connected';
-
-  // 获取大厅聚合状态
-  const lobbiesStatus = getLobbiesAggregatedStatus(servers);
 
   // 计算小游戏聚合统计
   const calculateMinigameStats = () => {
@@ -364,17 +306,6 @@ export const AboutSection: React.FC = () => {
               <div className="relative bg-[#1a1f2e]/50 border border-[#2a365c] rounded-2xl p-6 md:p-8 backdrop-blur-sm">
                 <h3 className="text-xl font-bold mb-5 text-center md:text-left">服务器状态</h3>
                 <div className="space-y-4">
-                  {/* 小游戏大厅 - 使用聚合状态 */}
-                  <ServerStatusRow
-                    title="小游戏大厅"
-                    status={lobbiesStatus.status}
-                    players={lobbiesStatus.totalPlayers}
-                    onlineCount={lobbiesStatus.onlineCount}
-                    totalCount={lobbiesStatus.totalCount}
-                    id="lobby"
-                    isConnectionFailed={isConnectionFailed}
-                  />
-
                   {/* 小游戏服务器 */}
                   <ServerStatusRow
                     title="小游戏服务器"
