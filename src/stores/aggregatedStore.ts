@@ -1,11 +1,9 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { useConnectionStore } from './connectionStore';
-import { useNoticeStore } from './noticeStore';
 import { usePlayerIgnStore } from './playerIgnStore';
 import { usePlayerTrackingStore } from './playerTrackingStore';
 import { useServerDataStore } from './serverDataStore';
-import type { FullUpdateData } from './types';
 import { useUptimeStore } from './uptimeStore';
 
 /**
@@ -18,7 +16,7 @@ interface AggregatedStoreState {
 
 interface AggregatedStoreActions {
   // 完整状态更新（原serverStore的handleFullUpdate）
-  handleFullUpdate: (data: FullUpdateData) => void;
+  handleFullUpdate: (data: any) => void;
 
   // 处理当前玩家数据
   handleCurrentPlayersData: (currentPlayers: Record<string, any>) => void;
@@ -53,7 +51,7 @@ export const useAggregatedStore = create<AggregatedStoreState & AggregatedStoreA
      * 协调所有子store的数据更新
      * @param data - 完整更新数据
      */
-    handleFullUpdate: (data: FullUpdateData) => {
+    handleFullUpdate: (data: any) => {
       const serverDataStore = useServerDataStore.getState();
       const uptimeStore = useUptimeStore.getState();
       const connectionStore = useConnectionStore.getState();
@@ -347,7 +345,6 @@ export const useAggregatedStore = create<AggregatedStoreState & AggregatedStoreA
       const serverDataStore = useServerDataStore.getState();
       const uptimeStore = useUptimeStore.getState();
       const connectionStore = useConnectionStore.getState();
-      const noticeStore = useNoticeStore.getState();
       const playerIgnStore = usePlayerIgnStore.getState();
       const playerTrackingStore = usePlayerTrackingStore.getState();
 
@@ -357,7 +354,6 @@ export const useAggregatedStore = create<AggregatedStoreState & AggregatedStoreA
       // 重置各个子store
       serverDataStore.reset();
       uptimeStore.reset();
-      noticeStore.reset();
       playerIgnStore.reset();
       playerTrackingStore.reset();
 

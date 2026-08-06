@@ -1,5 +1,5 @@
 import { SEOProvider } from '@/components/seo';
-import { WebSocketProvider } from '@/hooks/useWebSocketV2';
+import { WebSocketProvider } from '@/hooks/useWebSocket';
 import { BugReportPage } from '@/pages/BugReportPage';
 import { FaqPage } from '@/pages/FaqPage';
 import { HomePage } from '@/pages/HomePage';

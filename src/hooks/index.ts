@@ -2,4 +2,4 @@ export * from './useCookieConsent';
 export * from './useInView';
 export * from './useSchema';
 export * from './useSSR';
-export * from './useWebSocketV2';
+export * from './useWebSocket';

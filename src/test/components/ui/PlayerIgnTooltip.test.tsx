@@ -11,15 +11,14 @@ vi.mock('@/stores', () => ({
   })),
 }));
 
-vi.mock('@/hooks/useWebSocketV2', () => ({
-  useWebSocketV2: vi.fn(() => ({
+vi.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: vi.fn(() => ({
     connectionStatus: 'connected',
     servers: {},
     serverTree: null,
     aggregateStats: { totalPlayers: 0, onlineServers: 0, totalServers: 0 },
     runtimeInfo: null,
     proxyStats: null,
-    isMaintenance: false,
     runningTime: null,
     totalRunningTime: null,
   })),

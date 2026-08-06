@@ -5,7 +5,7 @@
 
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
-import { initializeBrowserMocks, initializeWebSocketMocks } from './mocks';
+import { initializeBrowserMocks } from './mocks';
 
 // 为 framer-motion 添加 PointerEvent mock，修复测试环境兼容性
 global.PointerEvent = class PointerEvent extends Event {
@@ -74,6 +74,5 @@ Object.defineProperty(window, 'location', {
 
 // 初始化所有必要的Mock对象
 initializeBrowserMocks();
-initializeWebSocketMocks();
 
 console.log('✅ 测试环境初始化完成 - window.location已设置为生产URL');

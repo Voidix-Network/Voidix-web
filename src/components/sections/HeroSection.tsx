@@ -1,14 +1,14 @@
 import { GradientText, ServerStatusCard } from '@/components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import React from 'react';
 
 /**
  * 英雄区域组件 - 适配新版API
  */
 export const HeroSection: React.FC = () => {
-  const { proxyStats } = useWebSocketV2();
+  const { proxyStats } = useWebSocket();
   const navigate = useNavigate();
 
   // 获取小游戏群组总人数（从代理统计中获取）
@@ -42,7 +42,7 @@ export const HeroSection: React.FC = () => {
         </motion.h1>
 
         {/* 副标题 */}
-        <motion.p
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -50,7 +50,7 @@ export const HeroSection: React.FC = () => {
         >
           <p>由开发者NekoSora和CYAN-H创建</p>
           <p>继承VBPIXEL和EternalStar精神的公益小游戏服务器</p>
-        </motion.p>
+        </motion.div>
 
         {/* 服务器状态卡片 */}
         <motion.div
@@ -129,12 +129,6 @@ export const HeroSection: React.FC = () => {
                   className="inline-flex items-center justify-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors max-w-36"
                 >
                   常见问题解答
-                </button>
-                <button
-                  onClick={() => navigate('/ban-history')}
-                  className="inline-flex items-center justify-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors max-w-36"
-                >
-                  封禁记录查询
                 </button>
               </div>
             </div>

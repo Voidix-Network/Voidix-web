@@ -13,9 +13,9 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock useWebSocketV2
-vi.mock('@/hooks/useWebSocketV2', () => ({
-  useWebSocketV2: () => ({
+// Mock useWebSocket
+vi.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
     connectionStatus: 'connected',
     servers: {},
     serverTree: null,
@@ -28,7 +28,6 @@ vi.mock('@/hooks/useWebSocketV2', () => ({
       servers_with_players: 1,
       players_on_servers: 25,
     },
-    isMaintenance: false,
     runningTime: null,
     totalRunningTime: null,
   }),
@@ -152,7 +151,7 @@ describe('HeroSection', () => {
   });
 
   it('应该正确处理服务器数据缺失的情况', () => {
-    // HeroSection 使用 useWebSocketV2，该 hook 已经被 mock 返回有效数据
+    // HeroSection 使用 useWebSocket，该 hook 已经被 mock 返回有效数据
     // 所以即使没有服务器数据，代理统计仍然有效
     renderHeroSection();
 

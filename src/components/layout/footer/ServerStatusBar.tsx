@@ -1,4 +1,4 @@
-import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 /**
  * 服务器状态栏组件
@@ -6,7 +6,7 @@ import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
  * 适配新版API
  */
 export const ServerStatusBar: React.FC = () => {
-  const { connectionStatus, aggregateStats, runtimeInfo } = useWebSocketV2();
+  const { connectionStatus, aggregateStats, runtimeInfo } = useWebSocket();
 
   // 获取最后更新时间
   const getLastUpdateTime = () => {

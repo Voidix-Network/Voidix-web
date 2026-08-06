@@ -1,7 +1,7 @@
 // filepath: src/pages/StatusPage.tsx
 import { AnimatedSection, BreadcrumbNavigation } from '@/components';
 import { SEO } from '@/components/seo';
-import { useWebSocketV2 } from '@/hooks/useWebSocketV2';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { analytics } from '@/services/analytics';
 import { formatRunningTime } from '@/utils';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -212,7 +212,7 @@ const ServerCard: React.FC<ServerCardProps> = ({ serverInfo, displayName }) => {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-white font-semibold">{playersCount} 玩家</p>
+            {isOnline && <p className="text-white font-semibold">{playersCount} 玩家</p>}
             {isOnline && players.length > 0 && (
               <button
                 onClick={() => setShowPlayers(!showPlayers)}
@@ -351,8 +351,7 @@ const ServerGroupCard: React.FC<ServerGroupCardProps> = ({
 };
 
 export const StatusPage: React.FC = () => {
-  const { connectionStatus, servers, serverTree, isMaintenance, runningTime, totalRunningTime } =
-    useWebSocketV2();
+  const { connectionStatus, servers, serverTree, runningTime, totalRunningTime } = useWebSocket();
 
   const aggregateStats = useMemo(() => {
     const serverList = Object.values(servers);
@@ -512,33 +511,6 @@ export const StatusPage: React.FC = () => {
               </span>
             </div>
           </div>
-
-          {isMaintenance && (
-            <div className="bg-gradient-to-r from-yellow-800 to-orange-800 border border-yellow-500 rounded-lg p-6 mb-8 shadow-lg">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-pulse">
-                  <svg
-                    className="w-4 h-4 text-yellow-900"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-yellow-100 font-bold text-lg">🚧 服务器维护中</h3>
-              </div>
-              <p className="text-yellow-100 mb-2">服务器正在进行维护，部分功能可能暂时不可用。</p>
-              <p className="text-yellow-200 text-sm">
-                💡 请访问官网 www.voidix.net 获取最新信息，或加群 186438621 联系管理员
-              </p>
-            </div>
-          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {connectionStatus === 'connected' && Object.keys(servers).length > 0 ? (

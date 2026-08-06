@@ -1,24 +1,7 @@
-import type {
-  ServerConfig,
-  StatusClasses,
-  StatusTexts,
-  TimeConstants,
-  WebSocketConfig,
-} from '@/types';
+import type { ServerConfig, StatusClasses, StatusTexts, TimeConstants } from '@/types';
 
 // 导出服务器分组配置
 export * from './serverGroups';
-
-// WebSocket配置常量
-export const WEBSOCKET_CONFIG: WebSocketConfig = {
-  url: 'wss://server.voidix.top:10203',
-  maxReconnectAttempts: 5,
-  reconnectIntervals: [1000, 2000, 5000, 10000, 30000],
-  disableReconnect: false,
-  // 协议版本 - 必须与后端匹配
-  SUPPORTED_PROTOCOL_VERSION: 2,
-  connectionTimeout: 5000, // 5秒连接超时
-};
 
 // 时间常量
 export const TIME_CONSTANTS: TimeConstants = {
