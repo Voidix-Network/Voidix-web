@@ -1,4 +1,3 @@
-/* Static Astro counterpart of the React Issue page component classes. */
 @reference "tailwindcss/index.css";
 @config '../../tailwind.config.cjs';
 

@@ -105,11 +105,6 @@ export const timeline = [
   ['2025年7月1日', 'Voidix正式启航', 'Voidix正式启航，开启全新的Minecraft服务器篇章。'],
 ] as const;
 
-/*
- * Privacy copy mirrors the data actually handled by the site. Keep this list
- * explicit so adding a new analytics or account feature requires updating the
- * policy in the same change.
- */
 export const privacySections = [
   [
     '我们收集的信息',

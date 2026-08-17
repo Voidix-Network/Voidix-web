@@ -44,6 +44,24 @@
           <div class="mt-2 text-xs text-gray-300">兼容 26.1-26.1.2</div>
           <div class="flex items-center gap-2">
             <div class="text-sm font-semibold text-red-400" data-minigame-status>0 在线</div>
+            <div class="relative inline-block" hidden data-minigame-status-note>
+              <div class="group relative inline-block">
+                <div
+                  class="flex h-4 w-4 cursor-help items-center justify-center rounded-md border border-yellow-500/40 bg-yellow-500/20 transition-all duration-200 hover:border-yellow-500/60 hover:bg-yellow-500/30"
+                >
+                  <span class="text-xs font-bold text-yellow-400">?</span>
+                </div>
+                <div
+                  class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-max max-w-[200px] -translate-x-1/2 whitespace-normal rounded-lg border border-gray-600 bg-gray-800/90 px-3 py-2 text-left text-xs text-gray-200 opacity-0 shadow-lg backdrop-blur-sm transition-all duration-200 group-hover:pointer-events-auto group-hover:opacity-100"
+                >
+                  实时状态查询服务仅在中国大陆网络提供，建议您进入游戏检查服务器状态
+                  <div
+                    class="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-800/90"
+                  >
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

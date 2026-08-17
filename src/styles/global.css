@@ -161,7 +161,6 @@
   }
 }
 
-/* Astro-only interaction helpers; the visual values come from the source styles. */
 [data-mobile-menu][hidden] {
   display: none;
 }
@@ -170,7 +169,6 @@
   display: none !important;
 }
 
-/* Keep the Astro header and footer behaviour aligned with their React components. */
 [data-mobile-menu] {
   max-height: 0;
   opacity: 0;
@@ -276,7 +274,6 @@
   animation-delay: 160ms;
 }
 
-/* The React team cards cross-fade and scale their two faces; preserve that state model in Astro. */
 [data-team-card] {
   transition:
     border-color 300ms,
@@ -367,7 +364,6 @@
   color: rgb(74 222 128);
 }
 
-/* Source-equivalent replacement for AnimatedSection and the Framer Motion entry variants. */
 @media (prefers-reduced-motion: no-preference) {
   [data-motion] {
     opacity: 0;
@@ -393,5 +389,3 @@
     transition: none;
   }
 }
-
-/* Home sections retain the original React component's visual layers. */
