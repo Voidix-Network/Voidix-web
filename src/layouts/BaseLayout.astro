@@ -1,0 +1,320 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site, type Meta } from '../data/site';
+
+interface Props {
+  meta: Meta;
+  path?: string;
+  schema?: Record<string, unknown>[];
+}
+const { meta, path = '/', schema = [] } = Astro.props;
+const canonicalPath = path === '/' ? '/' : `${path.replace(/\/$/, '')}/`;
+const canonical = new URL(canonicalPath, site.url).href;
+const ga = 'G-SPQQPKW4VN';
+const clarity = 'y3j7ln85s3';
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Voidix Minecraft Server',
+  alternateName: 'Voidix',
+  url: site.url,
+  logo: `${site.url}/logo.png`,
+  description: site.description,
+  foundingDate: '2025',
+  email: 'support@voidix.net',
+  founder: [
+    { '@type': 'Person', name: 'NekoSora', jobTitle: '核心开发者' },
+    { '@type': 'Person', name: 'CYsonHab', jobTitle: '核心开发者' },
+  ],
+  areaServed: { '@type': 'Country', name: 'China' },
+};
+const webPage = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: meta.title,
+  description: meta.description,
+  url: canonical,
+  inLanguage: 'zh-CN',
+  isPartOf: { '@type': 'WebSite', url: site.url },
+};
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#151f38" />
+    <meta name="color-scheme" content="dark" />
+    <title>{meta.title}</title>
+    <meta name="description" content={meta.description} />
+    <meta
+      name="robots"
+      content={meta.noindex
+        ? 'noindex,nofollow'
+        : 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'}
+    />
+    <meta name="author" content="Voidix Minecraft Server Team" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.ico" sizes="any" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /><link
+      rel="manifest"
+      href="/site.webmanifest"
+    />
+    <meta property="og:type" content={meta.type || 'website'} /><meta property="og:url" content={canonical} /><meta
+      property="og:title"
+      content={meta.title}
+    /><meta property="og:description" content={meta.description} /><meta
+      property="og:image"
+      content={`${site.url}/logo.png`}
+    /><meta property="og:site_name" content="Voidix - 专业Minecraft服务器" /><meta
+      property="og:locale"
+      content="zh_CN"
+    />
+    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content={meta.title} /><meta
+      name="twitter:description"
+      content={meta.description}
+    /><meta name="twitter:image" content={`${site.url}/logo.png`} />
+    {
+      [organization, webPage, ...schema].map((item) => (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(item)} />
+      ))
+    }
+  </head>
+  <body data-ga={ga} data-clarity={clarity}>
+    <div class="min-h-screen bg-[#0f172a] font-['Inter'] text-white">
+      <a class="skip-to-content" href="#main-content">跳转到首页主内容</a>
+      <Header currentPath={path} />
+      <main id="main-content" class="pt-16"><slot /></main>
+      <Footer />
+    </div>
+    <aside
+      class="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-700 bg-gray-900 p-4 transition-opacity duration-300"
+      data-consent-banner
+      hidden
+      aria-live="polite"
+    >
+      <div class="mx-auto flex max-w-6xl flex-col items-start gap-4 md:flex-row md:items-center">
+        <div class="flex-1">
+          <h2 class="mb-2 font-medium text-white">🍪 Cookie设置</h2><p class="text-sm text-gray-300">
+            我们使用Cookie来改善您的浏览体验，提供个性化内容和分析网站流量。您可以选择接受所有Cookie或自定义设置。<a
+              href="/privacy/"
+              class="ml-1 text-purple-400 underline hover:text-purple-300">了解更多</a
+            >
+          </p>
+        </div><div class="flex flex-col gap-2 sm:flex-row">
+          <button
+            class="rounded-lg border border-gray-600 px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800"
+            data-consent-settings>自定义设置</button
+          ><button
+            class="rounded-lg border border-gray-600 px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800"
+            data-consent="deny">拒绝非必要</button
+          ><button
+            class="rounded-lg bg-purple-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
+            data-consent="allow">接受所有</button
+          >
+        </div>
+      </div>
+    </aside>
+    <section
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      data-consent-settings-dialog
+      hidden
+      aria-modal="true"
+      aria-labelledby="consent-settings-title"
+      role="dialog"
+    >
+      <div class="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-xl bg-gray-900 p-6">
+        <h2 id="consent-settings-title" class="mb-4 text-xl font-bold text-white">Cookie设置</h2><div
+          class="mb-6 space-y-4"
+        >
+          <div class="flex items-center justify-between rounded-lg bg-gray-800 p-3">
+            <div>
+              <h3 class="font-medium text-white">必要Cookie</h3><p class="text-sm text-gray-400">
+                网站基本功能所需，始终启用。
+              </p>
+            </div><span class="flex h-6 w-10 items-center rounded-full bg-purple-600 px-1"
+              ><i class="ml-auto h-4 w-4 rounded-full bg-white"></i></span
+            >
+          </div><div class="flex items-center justify-between rounded-lg bg-gray-800 p-3">
+            <div>
+              <h3 class="font-medium text-white">分析Cookie</h3><p class="text-sm text-gray-400">
+                帮助我们了解网站使用情况。
+              </p>
+            </div><label class="relative inline-flex cursor-pointer items-center"
+              ><input type="checkbox" class="peer sr-only" data-analytics-toggle /><span
+                class="h-6 w-10 rounded-full bg-gray-600 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-purple-600 peer-checked:after:translate-x-full"
+              ></span></label
+            >
+          </div>
+        </div><div class="flex gap-3">
+          <button
+            class="flex-1 rounded-lg border border-gray-600 px-4 py-2 text-gray-300 transition-colors hover:bg-gray-800"
+            data-consent-settings-cancel>取消</button
+          ><button
+            class="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
+            data-consent-settings-save>保存设置</button
+          >
+        </div>
+      </div>
+    </section>
+    <script is:inline>
+      const brandArt = `
+ __     __    _     _ _
+ \\ \\   / /__ (_) __| (_)_  __
+  \\ \\ / / _ \\| |/ _\` | \\ \\/ /
+   \\ V / (_) | | (_| | |>  <
+    \\_/ \\___/|_|\\__,_|_/_/\\_\\
+`;
+      const brandStyles = [
+        'font-family: "Courier New", Courier, monospace',
+        'font-weight: bold',
+        'font-size: 10px',
+        'line-height: 0.8',
+        'background: linear-gradient(90deg, rgb(106, 147, 255), rgb(115, 103, 240))',
+        'color: transparent',
+        '-webkit-background-clip: text',
+        'background-clip: text',
+        'padding: 2px',
+      ].join(';');
+      const brandMessage = '如果你不是开发者，请不要在此粘贴任何代码';
+      const brandMessageStyles = ['font-family: sans-serif', 'font-size: 25px', 'color: #a5b4fc'].join(';');
+      console.log(`%c${brandArt}`, brandStyles);
+      console.log(`%c${brandMessage}`, brandMessageStyles);
+
+      (() => {
+        const key = 'voidix-analytics-consent';
+        const banner = document.querySelector('[data-consent-banner]');
+        const dialog = document.querySelector('[data-consent-settings-dialog]');
+        const analyticsToggle = document.querySelector('[data-analytics-toggle]');
+        const ga = document.body.dataset.ga;
+        const clarity = document.body.dataset.clarity;
+        const analyticsCookieName =
+          /^(?:_ga(?:_|$)|_gid$|_gat(?:_|$)|_gcl_au$|_clck$|_clsk$|CLID$|ANONCHK$|MR$|MUID$|SM$)/;
+        const motionTargets = [...document.querySelectorAll('[data-motion]')];
+        if (motionTargets.length) {
+          const reveal = (node) => {
+            node.dataset.motionVisible = 'true';
+          };
+          if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window))
+            motionTargets.forEach(reveal);
+          else {
+            const observer = new IntersectionObserver(
+              (entries, currentObserver) =>
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting && entry.target instanceof HTMLElement) {
+                    reveal(entry.target);
+                    currentObserver.unobserve(entry.target);
+                  }
+                }),
+              { threshold: 0.3, rootMargin: '-50px' },
+            );
+            motionTargets.forEach((node) => observer.observe(node));
+          }
+        }
+        const syncConsentStatus = () => {
+          const allowed = localStorage.getItem(key) === 'true';
+          document.querySelectorAll('[data-cookie-status]').forEach((node) => {
+            node.textContent = allowed ? '已同意' : '未同意';
+            node.classList.toggle('allowed', allowed);
+          });
+        };
+        const updateGoogleConsent = (allowed) => {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push(['consent', 'update', { analytics_storage: allowed ? 'granted' : 'denied' }]);
+        };
+        const clearAnalyticsCookies = () => {
+          const cookieNames = document.cookie
+            .split(';')
+            .map((cookie) => cookie.trim().split('=')[0])
+            .filter((name) => analyticsCookieName.test(name));
+          const hostnameParts = location.hostname.split('.');
+          const domains = hostnameParts
+            .map((_, index) => hostnameParts.slice(index).join('.'))
+            .filter((domain) => domain.includes('.'));
+          cookieNames.forEach((name) => {
+            ['', ...domains.flatMap((domain) => [`; domain=${domain}`, `; domain=.${domain}`])].forEach((domain) => {
+              document.cookie = `${name}=; Max-Age=0; path=/${domain}; SameSite=Lax`;
+            });
+          });
+        };
+        const disableAnalytics = () => {
+          updateGoogleConsent(false);
+          if (typeof window.clarity === 'function') window.clarity('consent', false);
+          document.querySelectorAll('script[data-ga], script[data-clarity]').forEach((script) => script.remove());
+          clearAnalyticsCookies();
+        };
+        const loadAnalytics = () => {
+          updateGoogleConsent(true);
+          if (ga && !document.querySelector('script[data-ga]')) {
+            const g = document.createElement('script');
+            g.async = true;
+            g.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga)}`;
+            g.dataset.ga = ga;
+            document.head.append(g);
+            window.dataLayer.push(['js', new Date()], ['config', ga, { anonymize_ip: true }]);
+          }
+          if (clarity && !document.querySelector('script[data-clarity]')) {
+            window.clarity =
+              window.clarity ||
+              function () {
+                (window.clarity.q = window.clarity.q || []).push(arguments);
+              };
+            const c = document.createElement('script');
+            c.async = true;
+            c.src = `https://www.clarity.ms/tag/${encodeURIComponent(clarity)}`;
+            c.dataset.clarity = clarity;
+            document.head.append(c);
+          }
+        };
+        const saveAnalyticsConsent = (allowed) => {
+          localStorage.setItem(key, String(allowed));
+          if (allowed) loadAnalytics();
+          else disableAnalytics();
+          if (banner) banner.hidden = true;
+          if (dialog) dialog.hidden = true;
+          syncConsentStatus();
+        };
+        const value = localStorage.getItem(key);
+        if (value === 'true') loadAnalytics();
+        else if (value === 'false') disableAnalytics();
+        else if (banner) banner.hidden = false;
+        syncConsentStatus();
+        document.addEventListener('click', (event) => {
+          const el = event.target.closest('[data-consent]');
+          if (el) saveAnalyticsConsent(el.dataset.consent === 'allow');
+          if (event.target.closest('[data-consent-settings]')) {
+            if (analyticsToggle) analyticsToggle.checked = localStorage.getItem(key) === 'true';
+            if (dialog) dialog.hidden = false;
+          }
+          if (event.target.closest('[data-consent-settings-cancel]')) {
+            if (dialog) dialog.hidden = true;
+          }
+          if (event.target.closest('[data-consent-settings-save]'))
+            saveAnalyticsConsent(analyticsToggle?.checked === true);
+          if (event.target.closest('[data-reset-consent]')) {
+            localStorage.removeItem(key);
+            disableAnalytics();
+            if (banner) banner.hidden = false;
+            syncConsentStatus();
+            window.alert('您的Cookie设置已被重置。请在页面底部的横幅中重新进行选择。');
+          }
+          const copy = event.target.closest('[data-copy]');
+          if (copy && navigator.clipboard) {
+            const text = copy.dataset.copy;
+            navigator.clipboard.writeText(text);
+            copy.textContent = `${text} (已复制)`;
+            copy.classList.remove('text-gray-300');
+            copy.classList.add('text-green-400');
+            setTimeout(() => {
+              copy.textContent = text;
+              copy.classList.remove('text-green-400');
+              copy.classList.add('text-gray-300');
+            }, 2000);
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

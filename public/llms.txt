@@ -1,2 +1,18 @@
-User-agent: *
-Allow: /
+# Voidix
+
+> A free, non-commercial Minecraft server community in China.
+
+Voidix provides minigame and survival servers. Java and Bedrock players can connect to the network.
+
+## Official pages
+
+- https://www.voidix.net/ - Server overview and connection guide
+- https://www.voidix.net/status/ - Current server status
+- https://www.voidix.net/faq/ - Frequently asked questions
+- https://www.voidix.net/bug-report/ - Feedback channels
+- https://www.voidix.net/privacy/ - Privacy policy
+
+## Server addresses
+
+- Minigame: `minigame.voidix.net`
+- Survival: `survival.voidix.net`

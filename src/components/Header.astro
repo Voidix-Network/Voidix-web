@@ -1,0 +1,87 @@
+---
+import { navigation } from '../data/site';
+---
+
+<nav class="fixed z-50 w-full border-b border-gray-700 bg-[#151f38]/90 backdrop-blur-md">
+  <div class="mx-auto max-w-7xl px-3 sm:px-4">
+    <div class="flex h-16 items-center justify-between">
+      <div class="flex items-center">
+        <button class="focus:outline-none" data-nav-target="/">
+          <span class="gradient-text text-2xl font-bold font-sans">Voidix</span>
+        </button>
+      </div>
+
+      <div class="hidden items-center space-x-3 lg:flex">
+        {
+          navigation.map((item) => (
+            <button
+              class="whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-gray-300 transition-colors hover:text-white"
+              data-nav-target={item.href}
+            >
+              {item.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="flex items-center lg:hidden">
+        <button
+          class="rounded-md p-2 text-gray-300 hover:text-white focus:outline-none lg:hidden"
+          data-mobile-menu-button
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span class="sr-only">打开主菜单</span>
+          <svg
+            class="h-6 w-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            data-mobile-menu-icon><path data-mobile-menu-icon-path d="M4 6h16M4 12h16M4 18h16"></path></svg
+          >
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="overflow-hidden border-t border-gray-700 bg-[#151f38]/95 backdrop-blur-md lg:hidden"
+    id="mobile-menu"
+    data-mobile-menu
+  >
+    <div class="max-h-[70vh] space-y-1 overflow-y-auto px-2 pb-3 pt-2 sm:px-3">
+      {
+        navigation.map((item) => (
+          <button
+            class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-gray-300 transition-colors hover:text-white"
+            data-nav-target={item.href}
+          >
+            {item.label}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+</nav>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-mobile-menu-button]');
+  const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');
+  button?.addEventListener('click', () => {
+    if (!menu) return;
+    const open = !menu.hasAttribute('data-open');
+    menu.toggleAttribute('data-open', open);
+    const icon = button.querySelector<SVGElement>('[data-mobile-menu-icon]');
+    const path = button.querySelector<SVGPathElement>('[data-mobile-menu-icon-path]');
+    if (icon) icon.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
+    if (path) path.setAttribute('d', open ? 'M18 6 6 18M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16');
+    button.setAttribute('aria-expanded', String(open));
+  });
+  document.querySelectorAll<HTMLButtonElement>('[data-nav-target]').forEach((target) =>
+    target.addEventListener('click', () => {
+      if (menu) menu.removeAttribute('data-open');
+      window.location.href = target.dataset.navTarget || '/';
+    }),
+  );
+</script>

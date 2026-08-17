@@ -27,9 +27,7 @@
 
 ### 🧪 测试验证
 
-- [ ] 已通过现有测试 (`npm run test`)
-- [ ] 已添加新测试（如需要）
-- [ ] 测试覆盖率符合要求 (`npm run test:coverage`)
+- [ ] 已通过 Astro 检查 (`npm run check`)
 - [ ] 已在多个浏览器测试
 - [ ] 已测试移动端响应式
 - [ ] 已测试无障碍性功能
@@ -38,19 +36,15 @@
 
 #### 基础检查
 
-- [ ] 代码格式化和TS类型检查通过 (`npm run lint`)
-- [ ] 修复格式化 (`npm run style`)(如适用)
+- [ ] 模板和类型检查通过 (`npm run check`)
 
 #### 构建和测试（可选）
 
-- [ ] 单元测试通过 (`npm run test`)
-- [ ] 构建成功 (`npm run build` - 包含TS编译、Vite构建、sitemap生成、预渲染)
+- [ ] 构建成功 (`npm run build`)
 - [ ] 预览构建正常 (`npm run preview`)
 
 #### 依赖和许可证（如有依赖更改）
 
-- [ ] 许可证检查通过 (`npm run license:check`)
-- [ ] 更新第三方许可证文件 (`npm run license:report`)(如适用)
 - [ ] 新依赖安全检查通过 (`npm audit`)
 
 #### 其他检查

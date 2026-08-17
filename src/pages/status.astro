@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import RealtimeLoader from '../components/RealtimeLoader.astro';
+import { metadata } from '../data/site';
+---
+
+<BaseLayout meta={metadata.status} path="/status">
+  <section class="min-h-screen bg-gray-900 py-16" data-realtime>
+    <div class="container mx-auto max-w-6xl px-4">
+      <Breadcrumb current="服务器状态" class="mb-8" />
+
+      <header class="mb-12 text-center">
+        <h1 class="mb-4 text-4xl font-bold text-white">服务器状态</h1>
+        <p class="text-lg text-gray-300">实时查看 Voidix 网络的服务器状态和统计信息</p>
+        <div class="mt-6 flex items-center justify-center space-x-2">
+          <i class="h-2 w-2 rounded-full bg-gray-400" data-connection-dot></i>
+          <span class="text-sm text-gray-400" data-connection-text>连接中...</span>
+        </div>
+      </header>
+
+      <div class="mb-12 grid grid-cols-1 gap-6 md:grid-cols-4" data-stat-cards>
+        <article class="rounded-lg border border-gray-700 bg-gray-800 p-6 transition-colors hover:border-gray-600">
+          <div class="animate-pulse" data-stat-skeleton>
+            <div class="mb-2 h-4 w-20 rounded bg-gray-600"></div><div class="h-8 w-16 rounded bg-gray-600"></div>
+          </div><div hidden data-stat-content>
+            <h2 class="mb-2 text-sm font-medium text-gray-400">总在线玩家</h2><p
+              class="text-2xl font-bold text-white"
+              data-stat-total-players
+            >
+              —
+            </p><p class="mt-1 text-sm text-gray-500">跨所有服务器</p>
+          </div>
+        </article>
+        <article class="rounded-lg border border-gray-700 bg-gray-800 p-6 transition-colors hover:border-gray-600">
+          <div class="animate-pulse" data-stat-skeleton>
+            <div class="mb-2 h-4 w-20 rounded bg-gray-600"></div><div class="h-8 w-16 rounded bg-gray-600"></div>
+          </div><div hidden data-stat-content>
+            <h2 class="mb-2 text-sm font-medium text-gray-400">在线服务器</h2><p
+              class="text-2xl font-bold text-white"
+              data-stat-online-servers
+            >
+              —
+            </p><p class="mt-1 text-sm text-gray-500">正常运行中</p>
+          </div>
+        </article>
+        <article class="rounded-lg border border-gray-700 bg-gray-800 p-6 transition-colors hover:border-gray-600">
+          <div class="animate-pulse" data-stat-skeleton>
+            <div class="mb-2 h-4 w-20 rounded bg-gray-600"></div><div class="h-8 w-16 rounded bg-gray-600"></div>
+          </div><div hidden data-stat-content>
+            <h2 class="mb-2 text-sm font-medium text-gray-400">总运行时间</h2><p
+              class="text-2xl font-bold text-white"
+              data-stat-total-uptime
+            >
+              —
+            </p><p class="mt-1 text-sm text-gray-500">自启动以来</p>
+          </div>
+        </article>
+        <article class="rounded-lg border border-gray-700 bg-gray-800 p-6 transition-colors hover:border-gray-600">
+          <div class="animate-pulse" data-stat-skeleton>
+            <div class="mb-2 h-4 w-20 rounded bg-gray-600"></div><div class="h-8 w-16 rounded bg-gray-600"></div>
+          </div><div hidden data-stat-content>
+            <h2 class="mb-2 text-sm font-medium text-gray-400">当前运行时间</h2><p
+              class="text-2xl font-bold text-white"
+              data-stat-current-uptime
+            >
+              —
+            </p><p class="mt-1 text-sm text-gray-500">本次持续运行</p>
+          </div>
+        </article>
+      </div>
+
+      <section class="space-y-4">
+        <h2 class="mb-6 text-2xl font-bold text-white">服务器详情</h2>
+        <div class="space-y-4" data-server-groups>
+          {
+            [1, 2, 3].map(() => (
+              <article class="overflow-hidden rounded-lg border border-gray-700 bg-gray-800 animate-pulse">
+                <div class="p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <div class="h-3 w-3 rounded-full bg-gray-600" />
+                      <div>
+                        <>
+                          <div class="mb-2 h-4 w-32 rounded bg-gray-600" />
+                          <div class="h-3 w-24 rounded bg-gray-700" />
+                        </>
+                      </div>
+                    </div>
+                    <div>
+                      <>
+                        <div class="mb-2 h-4 w-20 rounded bg-gray-600" />
+                        <div class="h-3 w-12 rounded bg-gray-700" />
+                      </>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <footer class="mt-16 border-t border-gray-700 pt-8 text-center text-xs text-gray-500">
+        © 2026 Voidix Network. 实时服务器状态监控系统
+      </footer>
+    </div>
+  </section>
+  <RealtimeLoader />
+</BaseLayout>

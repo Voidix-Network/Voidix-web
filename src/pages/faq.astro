@@ -1,0 +1,105 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { faq, metadata } from '../data/site';
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map(([question, answer]) => ({
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer },
+    })),
+  },
+];
+---
+
+<BaseLayout meta={metadata.faq} path="/faq" schema={schema}>
+  <section class="min-h-screen bg-gray-900 pb-16 pt-12">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <Breadcrumb current="常见问题" class="mb-8" /><header class="mb-12 text-center" data-motion="fade">
+        <h1 class="mb-4 text-4xl font-bold text-white md:text-5xl">常见问题</h1><p
+          class="mx-auto max-w-2xl text-xl text-gray-400"
+        >
+          快速解答关于Voidix服务器的常见疑问
+        </p>
+      </header><div class="space-y-4">
+        {
+          faq.map(([question, answer], index) => (
+            <article
+              class="cursor-pointer rounded-lg border border-gray-700/50 bg-gray-800/30 p-6 backdrop-blur-sm transition-colors hover:bg-gray-800/50"
+              data-motion="fade"
+              style={`--motion-delay: ${index * 100}ms`}
+            >
+              <div class="flex items-start">
+                <>
+                  <span class="mr-4 mt-1 inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-blue-500/30 bg-blue-600/20 text-sm font-medium text-blue-300">
+                    {index + 1}
+                  </span>
+                  <div class="flex-1">
+                    <h2 class="mb-3 text-lg font-semibold text-white">{question}</h2>
+                    {index === 0 ? (
+                      <p class="leading-relaxed text-gray-300">
+                        请参考我们首页的{' '}
+                        <a class="text-blue-400 hover:text-blue-300 hover:underline" href="/#versions">
+                          Java版和基岩版连接指南
+                        </a>
+                        。通常您只需要在游戏的多人游戏菜单中添加我们的服务器地址即可。
+                      </p>
+                    ) : index === 3 ? (
+                      <p class="leading-relaxed text-gray-300">
+                        您可以通过我们的{' '}
+                        <a class="text-blue-400 hover:text-blue-300 hover:underline" href="/bug-report/">
+                          Bug反馈页面
+                        </a>{' '}
+                        提交问题，或者在我们的QQ群/Discord社群中向管理员反馈。
+                      </p>
+                    ) : index === 4 ? (
+                      <p class="leading-relaxed text-gray-300">
+                        我们欣赏您的这份热情！我们的“开放”理念，意味着我们乐见任何为社群做出卓越贡献、并展现出责任心的成员成为我们的一员。管理团队的加入并非通过简单申请，而是基于您在社群中的长期贡献、专业能力以及与社群理念的契合度。如果您确信自己符合要求，欢迎您通过{' '}
+                        <a class="text-blue-400 hover:text-blue-300 hover:underline" href="mailto:support@voidix.net">
+                          电子邮件
+                        </a>{' '}
+                        或现管理成员提交一份正式的申请，阐述您的动机、构想和能为社群带来的价值。我们将认真评估每一份用心的申请。
+                      </p>
+                    ) : (
+                      <p class="leading-relaxed text-gray-300">{answer}</p>
+                    )}
+                  </div>
+                </>
+              </div>
+            </article>
+          ))
+        }
+      </div><aside
+        class="mt-12 rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-600/10 to-purple-600/10 p-8"
+        data-motion="fade"
+        style="--motion-delay: 400ms"
+      >
+        <h2 class="mb-4 text-2xl font-bold text-white">还有其他问题？</h2><p class="mb-6 text-gray-300">
+          如果您的问题没有在上面找到答案，欢迎通过以下方式联系我们：
+        </p><div class="flex flex-col gap-4 sm:flex-row">
+          <a
+            class="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+            href="https://qm.qq.com/cgi-bin/qm/qr?k=aMRoacVuxcGVSzEwfjb49oN4CWCv6yHj&jump_from=webapi&authKey=hw0EhRKGDGN1vmHD4AfK2yJCzPzSA+AXGJOEcugZpsA7KfK9GhNXpe9GNWCjCcmr"
+            target="_blank"
+            rel="noopener noreferrer">加入QQ群</a
+          ><a
+            class="inline-flex items-center rounded-lg bg-indigo-600 px-6 py-3 font-medium text-white transition-colors hover:bg-indigo-700"
+            href="https://discord.gg/fUMyfhuQ5b"
+            target="_blank"
+            rel="noopener noreferrer">加入Discord</a
+          >
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+<script>
+  document
+    .querySelectorAll<HTMLElement>('section.min-h-screen > div > div.space-y-4 > article')
+    .forEach((node, index) => {
+      node.style.setProperty('--motion-delay', `${200 + index * 100}ms`);
+    });
+</script>
