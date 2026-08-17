@@ -43,8 +43,9 @@ async function getRealtimeAccess(): Promise<RealtimeAccess> {
 }
 
 type ConnectionContentState = 'connected' | 'failed' | 'restricted';
+type ConnectionContent = { state: ConnectionContentState; message: string };
 
-function setConnectionDependentContent(contentState: ConnectionContentState) {
+function setConnectionDependentContent({ state: contentState, message }: ConnectionContent) {
   const connected = contentState === 'connected';
   all<HTMLElement>('[data-total-players], [data-current-uptime], [data-total-uptime]').forEach((node) => {
     node.classList.toggle('text-red-400', contentState === 'failed');
@@ -53,7 +54,6 @@ function setConnectionDependentContent(contentState: ConnectionContentState) {
   });
   if (!connected) {
     const restricted = contentState === 'restricted';
-    const message = restricted ? '状态系统维护' : '连接失败';
     write('[data-total-players]', message);
     write('[data-current-uptime]', message);
     write('[data-total-uptime]', message);
@@ -94,9 +94,9 @@ function setFooterLoading(loading: boolean) {
 const state = (
   text: string,
   kind: 'online' | 'warn' | 'bad' | 'neutral' | 'info' = 'neutral',
-  contentState: ConnectionContentState = kind === 'online' ? 'connected' : 'failed',
+  content: ConnectionContent = { state: kind === 'online' ? 'connected' : 'failed', message: text },
 ) => {
-  setConnectionDependentContent(contentState);
+  setConnectionDependentContent(content);
   write('[data-connection-text]', text);
   all<HTMLElement>('[data-connection-dot]').forEach(
     (dot) => (dot.className = `h-2 w-2 ${dotClass(kind === 'info' ? 'neutral' : kind)}`),
@@ -388,11 +388,11 @@ if (root) {
       connect();
       return;
     }
-    const message = access === 'outside-mainland' ? '状态系统维护' : '您处于中国大陆境外，无法访问状态服务';
+    const message = access === 'outside-mainland' ? '你貌似不在中国大陆境内' : '实时状态服务暂不可用';
     state(
       message,
       access === 'outside-mainland' ? 'warn' : 'info',
-      access === 'outside-mainland' ? 'restricted' : 'failed',
+      { state: access === 'outside-mainland' ? 'restricted' : 'failed', message },
     );
     console.info(`[Voidix realtime] 未发起状态服务连接：${message}。`);
   });
