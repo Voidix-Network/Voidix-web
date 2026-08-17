@@ -713,9 +713,7 @@ document.addEventListener('click', async (event) => {
   if (logout) {
     try {
       await request('/auth/logout', { method: 'POST' });
-    } catch {
-      /* local sign out still succeeds */
-    }
+    } catch {}
     setUser(null);
     location.assign('/issue/');
   }

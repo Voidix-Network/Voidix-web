@@ -27,28 +27,60 @@ const pending = new Map<string, { resolve: (value: any) => void; reject: () => v
 const all = <T extends Element>(selector: string) => [...document.querySelectorAll<T>(selector)];
 const write = (selector: string, value: string) =>
   all<HTMLElement>(selector).forEach((node) => (node.textContent = value));
-function setConnectionDependentContent(connected: boolean) {
+
+type RealtimeAccess = 'allowed' | 'outside-mainland' | 'unavailable';
+
+async function getRealtimeAccess(): Promise<RealtimeAccess> {
+  try {
+    const response = await fetch('/api/realtime-access', { cache: 'no-store' });
+    if (!response.ok) return 'unavailable';
+    const access = (await response.json()) as { allowed?: unknown; reason?: unknown };
+    if (access.allowed === true) return 'allowed';
+    return access.reason === 'outside-mainland' ? 'outside-mainland' : 'unavailable';
+  } catch {
+    return 'unavailable';
+  }
+}
+
+type ConnectionContentState = 'connected' | 'failed' | 'restricted';
+
+function setConnectionDependentContent(contentState: ConnectionContentState) {
+  const connected = contentState === 'connected';
   all<HTMLElement>('[data-total-players], [data-current-uptime], [data-total-uptime]').forEach((node) => {
-    node.classList.toggle('text-red-400', !connected);
+    node.classList.toggle('text-red-400', contentState === 'failed');
+    node.classList.toggle('text-yellow-400', contentState === 'restricted');
     node.classList.toggle('text-white', connected);
   });
   if (!connected) {
-    write('[data-total-players]', '连接失败');
-    write('[data-current-uptime]', '连接失败');
-    write('[data-total-uptime]', '连接失败');
-    write('[data-minigame-summary]', '连接失败');
+    const restricted = contentState === 'restricted';
+    const message = restricted ? '状态系统维护' : '连接失败';
+    write('[data-total-players]', message);
+    write('[data-current-uptime]', message);
+    write('[data-total-uptime]', message);
+    write('[data-minigame-summary]', message);
     all<HTMLElement>('[data-minigame-summary]').forEach((node) => {
-      node.className =
-        'min-w-[70px] flex-shrink-0 whitespace-nowrap text-right font-mono text-sm font-semibold text-red-400 md:text-base';
+      node.className = `min-w-[70px] flex-shrink-0 whitespace-nowrap text-right font-mono text-sm font-semibold ${restricted ? 'text-yellow-400' : 'text-red-400'} md:text-base`;
     });
     all<HTMLElement>('[data-minigame-about-dot]').forEach(
-      (node) => (node.className = 'h-4 w-4 flex-shrink-0 rounded-full bg-red-500'),
+      (node) =>
+        (node.className = `h-4 w-4 flex-shrink-0 rounded-full ${restricted ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'}`),
     );
-    all<HTMLElement>('[data-survival-summary]').forEach((node) => {
-      node.textContent = '连接失败';
-      node.className =
-        'min-w-[70px] flex-shrink-0 whitespace-nowrap text-right font-mono text-sm font-semibold text-red-400 md:text-base';
+    all<HTMLElement>('[data-minigame-hero-dot]').forEach(
+      (node) => (node.className = `h-3 w-3 rounded-full ${restricted ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'}`),
+    );
+    all<HTMLElement>('[data-minigame-status]').forEach((node) => {
+      node.textContent = message;
+      node.className = `text-sm font-semibold ${restricted ? 'text-yellow-400' : 'text-red-400'}`;
     });
+    all<HTMLElement>('[data-minigame-status-note]').forEach((node) => (node.hidden = !restricted));
+    all<HTMLElement>('[data-survival-summary]').forEach((node) => {
+      node.textContent = message;
+      node.className = `min-w-[70px] flex-shrink-0 whitespace-nowrap text-right font-mono text-sm font-semibold ${restricted ? 'text-yellow-400' : 'text-red-400'} md:text-base`;
+    });
+    document.querySelectorAll<HTMLElement>('[data-stat-skeleton]').forEach((node) => (node.hidden = true));
+    document.querySelectorAll<HTMLElement>('[data-stat-content]').forEach((node) => (node.hidden = false));
+  } else {
+    all<HTMLElement>('[data-minigame-status-note]').forEach((node) => (node.hidden = true));
   }
 }
 const dotClass = (kind: 'online' | 'warn' | 'bad' | 'neutral') =>
@@ -59,12 +91,18 @@ function setFooterLoading(loading: boolean) {
   all<HTMLElement>('[data-footer-skeleton]').forEach((node) => (node.style.display = loading ? 'flex' : 'none'));
   all<HTMLElement>('[data-footer-content]').forEach((node) => (node.style.display = loading ? 'none' : 'flex'));
 }
-const state = (text: string, kind: 'online' | 'warn' | 'bad' | 'neutral' = 'neutral') => {
-  setConnectionDependentContent(kind === 'online');
+const state = (
+  text: string,
+  kind: 'online' | 'warn' | 'bad' | 'neutral' | 'info' = 'neutral',
+  contentState: ConnectionContentState = kind === 'online' ? 'connected' : 'failed',
+) => {
+  setConnectionDependentContent(contentState);
   write('[data-connection-text]', text);
-  all<HTMLElement>('[data-connection-dot]').forEach((dot) => (dot.className = `h-2 w-2 ${dotClass(kind)}`));
+  all<HTMLElement>('[data-connection-dot]').forEach(
+    (dot) => (dot.className = `h-2 w-2 ${dotClass(kind === 'info' ? 'neutral' : kind)}`),
+  );
   const footerDot = document.querySelector<HTMLElement>('[data-footer-dot]');
-  if (footerDot) footerDot.className = footerDotClass(kind);
+  if (footerDot) footerDot.className = footerDotClass(kind === 'info' ? 'neutral' : kind);
   const footerText = kind === 'online' ? '正常运行' : text;
   all<HTMLElement>('[data-footer-status]').forEach((node) => {
     node.className = `text-sm font-medium ${kind === 'online' ? 'text-green-400' : kind === 'warn' ? 'text-yellow-400' : kind === 'bad' ? 'text-red-400' : 'text-gray-400'}`;
@@ -321,9 +359,7 @@ function connect() {
         request('subscribe', { event: 'player.quit' }),
         request('subscribe', { event: 'player.switch_server' }),
       ]);
-    } catch {
-      /* polling is sufficient */
-    }
+    } catch {}
     refresh();
     timer = window.setInterval(refresh, 30000);
   });
@@ -336,9 +372,7 @@ function connect() {
         pending.delete(message.id);
         message.error ? item.reject() : item.resolve(message.result);
       }
-    } catch {
-      /* ignore malformed messages */
-    }
+    } catch {}
   });
   socket.addEventListener('close', () => {
     if (timer) clearInterval(timer);
@@ -348,7 +382,21 @@ function connect() {
   socket.addEventListener('error', () => state('连接失败', 'bad'));
 }
 
-if (root) connect();
+if (root) {
+  void getRealtimeAccess().then((access) => {
+    if (access === 'allowed') {
+      connect();
+      return;
+    }
+    const message = access === 'outside-mainland' ? '状态系统维护' : '您处于中国大陆境外，无法访问状态服务';
+    state(
+      message,
+      access === 'outside-mainland' ? 'warn' : 'info',
+      access === 'outside-mainland' ? 'restricted' : 'failed',
+    );
+    console.info(`[Voidix realtime] 未发起状态服务连接：${message}。`);
+  });
+}
 window.addEventListener('pagehide', () => {
   if (timer) clearInterval(timer);
   if (reconnectTimer) clearTimeout(reconnectTimer);
