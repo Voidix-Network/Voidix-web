@@ -1,5 +1,4 @@
 @import 'tailwindcss/index.css';
-@import './issue.css';
 @config '../../tailwind.config.cjs';
 
 @layer base {

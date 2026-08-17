@@ -14,6 +14,9 @@ const canonicalPath = path === '/' ? '/' : `${path.replace(/\/$/, '')}/`;
 const canonical = new URL(canonicalPath, site.url).href;
 const ga = 'G-SPQQPKW4VN';
 const clarity = 'y3j7ln85s3';
+const baidu = '57ae7e11272151066255c405cc93d1d8';
+const bytedance =
+  '38c7b610b4424addab832189173b924c389f5b68fd5222ecfdd99c937ceaf3ddfd9a9dcb5ced4d7780eb6f3bbd089073c2a6d54440560d63862bbf4ec01bba3a';
 const organization = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -57,6 +60,9 @@ const webPage = {
         : 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'}
     />
     <meta name="author" content="Voidix Minecraft Server Team" />
+    {meta.publishedTime && <meta property="bytedance:published_time" content={meta.publishedTime} />}
+    {meta.updatedTime && <meta property="bytedance:lrDate_time" content={meta.updatedTime} />}
+    {meta.updatedTime && <meta property="bytedance:updated_time" content={meta.updatedTime} />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.ico" sizes="any" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /><link
       rel="manifest"
@@ -82,7 +88,7 @@ const webPage = {
       ))
     }
   </head>
-  <body data-ga={ga} data-clarity={clarity}>
+  <body data-ga={ga} data-clarity={clarity} data-baidu={baidu} data-bytedance={bytedance}>
     <div class="min-h-screen bg-[#0f172a] font-['Inter'] text-white">
       <a class="skip-to-content" href="#main-content">跳转到首页主内容</a>
       <Header currentPath={path} />
@@ -190,8 +196,10 @@ const webPage = {
         const analyticsToggle = document.querySelector('[data-analytics-toggle]');
         const ga = document.body.dataset.ga;
         const clarity = document.body.dataset.clarity;
+        const baidu = document.body.dataset.baidu;
+        const bytedance = document.body.dataset.bytedance;
         const analyticsCookieName =
-          /^(?:_ga(?:_|$)|_gid$|_gat(?:_|$)|_gcl_au$|_clck$|_clsk$|CLID$|ANONCHK$|MR$|MUID$|SM$)/;
+          /^(?:_ga(?:_|$)|_gid$|_gat(?:_|$)|_gcl_au$|_clck$|_clsk$|CLID$|ANONCHK$|MR$|MUID$|SM$|Hm_lvt_|Hm_lpvt_|HMACCOUNT$|BAIDUID$|tt_webid|ttwid$)/;
         const motionTargets = [...document.querySelectorAll('[data-motion]')];
         if (motionTargets.length) {
           const reveal = (node) => {
@@ -242,7 +250,9 @@ const webPage = {
         const disableAnalytics = () => {
           updateGoogleConsent(false);
           if (typeof window.clarity === 'function') window.clarity('consent', false);
-          document.querySelectorAll('script[data-ga], script[data-clarity]').forEach((script) => script.remove());
+          document
+            .querySelectorAll('script[data-ga], script[data-clarity], script[data-baidu], script[data-bytedance]')
+            .forEach((script) => script.remove());
           clearAnalyticsCookies();
         };
         const loadAnalytics = () => {
@@ -266,6 +276,22 @@ const webPage = {
             c.src = `https://www.clarity.ms/tag/${encodeURIComponent(clarity)}`;
             c.dataset.clarity = clarity;
             document.head.append(c);
+          }
+          if (baidu && !document.querySelector('script[data-baidu]')) {
+            window._hmt = window._hmt || [];
+            const b = document.createElement('script');
+            b.async = true;
+            b.src = `https://hm.baidu.com/hm.js?${encodeURIComponent(baidu)}`;
+            b.dataset.baidu = baidu;
+            document.head.append(b);
+          }
+          if (bytedance && !document.querySelector('script[data-bytedance]')) {
+            const t = document.createElement('script');
+            t.async = true;
+            t.id = 'ttzz';
+            t.src = `https://lf1-cdn-tos.bytegoofy.com/goofy/ttzz/push.js?${encodeURIComponent(bytedance)}`;
+            t.dataset.bytedance = bytedance;
+            document.head.append(t);
           }
         };
         const saveAnalyticsConsent = (allowed) => {

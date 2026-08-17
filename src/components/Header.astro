@@ -6,7 +6,7 @@ import { navigation } from '../data/site';
   <div class="mx-auto max-w-7xl px-3 sm:px-4">
     <div class="flex h-16 items-center justify-between">
       <div class="flex items-center">
-        <button class="focus:outline-none" data-nav-target="/">
+        <button class="cursor-pointer focus:outline-none" data-nav-target="/">
           <span class="gradient-text text-2xl font-bold font-sans">Voidix</span>
         </button>
       </div>
@@ -15,7 +15,7 @@ import { navigation } from '../data/site';
         {
           navigation.map((item) => (
             <button
-              class="whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-gray-300 transition-colors hover:text-white"
+              class="cursor-pointer whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-gray-300 transition-colors hover:text-white"
               data-nav-target={item.href}
             >
               {item.label}
@@ -26,7 +26,7 @@ import { navigation } from '../data/site';
 
       <div class="flex items-center lg:hidden">
         <button
-          class="rounded-md p-2 text-gray-300 hover:text-white focus:outline-none lg:hidden"
+          class="cursor-pointer rounded-md p-2 text-gray-300 hover:text-white focus:outline-none lg:hidden"
           data-mobile-menu-button
           aria-expanded="false"
           aria-controls="mobile-menu"
@@ -54,7 +54,7 @@ import { navigation } from '../data/site';
       {
         navigation.map((item) => (
           <button
-            class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-gray-300 transition-colors hover:text-white"
+            class="block w-full cursor-pointer rounded-md px-3 py-2 text-left text-base font-medium text-gray-300 transition-colors hover:text-white"
             data-nav-target={item.href}
           >
             {item.label}
