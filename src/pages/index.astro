@@ -24,11 +24,11 @@ const schema = [
 
 <BaseLayout meta={metadata.home} path="/" schema={schema}>
   <HeroSection />
-  <AboutSection />
   <ServersSection />
   <VersionsSection />
-  <TimelineSection />
+  <AboutSection />
   <TeamSection />
+  <TimelineSection />
   <RealtimeLoader />
 
   <script>
@@ -98,6 +98,7 @@ const schema = [
         const active = index === activeIndex;
         tab.classList.toggle('text-white', active);
         tab.classList.toggle('text-gray-400', !active);
+        tab.setAttribute('aria-selected', String(active));
       });
       if (versionSlider) versionSlider.style.transform = `translateX(-${activeIndex * 100}%)`;
       const syncHeight = () => {

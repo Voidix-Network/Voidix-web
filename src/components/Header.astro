@@ -2,20 +2,23 @@
 import { navigation } from '../data/site';
 ---
 
-<nav class="fixed z-50 w-full border-b border-gray-700 bg-[#151f38]/90 backdrop-blur-md">
-  <div class="mx-auto max-w-7xl px-3 sm:px-4">
-    <div class="flex h-16 items-center justify-between">
+<nav
+  class="fixed z-50 w-full border-b border-transparent bg-[#08090a]/90 backdrop-blur-xl transition-colors duration-200"
+  data-site-header
+>
+  <div class="mx-auto max-w-6xl px-5 sm:px-6">
+    <div class="flex h-[72px] items-center justify-between">
       <div class="flex items-center">
         <button class="cursor-pointer focus:outline-none" data-nav-target="/">
-          <span class="gradient-text text-2xl font-bold font-sans">Voidix</span>
+          <span class="font-sans text-[21px] font-semibold text-white">Voidix</span>
         </button>
       </div>
 
-      <div class="hidden items-center space-x-3 lg:flex">
+      <div class="hidden items-center gap-1 lg:flex">
         {
           navigation.map((item) => (
             <button
-              class="cursor-pointer whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium text-gray-300 transition-colors hover:text-white"
+              class="cursor-pointer whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-medium text-gray-400 transition-colors hover:text-white"
               data-nav-target={item.href}
             >
               {item.label}
@@ -26,7 +29,7 @@ import { navigation } from '../data/site';
 
       <div class="flex items-center lg:hidden">
         <button
-          class="cursor-pointer rounded-md p-2 text-gray-300 hover:text-white focus:outline-none lg:hidden"
+          class="cursor-pointer rounded-full p-2 text-gray-300 hover:text-white focus:outline-none lg:hidden"
           data-mobile-menu-button
           aria-expanded="false"
           aria-controls="mobile-menu"
@@ -45,16 +48,12 @@ import { navigation } from '../data/site';
     </div>
   </div>
 
-  <div
-    class="overflow-hidden border-t border-gray-700 bg-[#151f38]/95 backdrop-blur-md lg:hidden"
-    id="mobile-menu"
-    data-mobile-menu
-  >
+  <div class="overflow-hidden border-t border-white/10 bg-[#08090a] lg:hidden" id="mobile-menu" data-mobile-menu>
     <div class="max-h-[70vh] space-y-1 overflow-y-auto px-2 pb-3 pt-2 sm:px-3">
       {
         navigation.map((item) => (
           <button
-            class="block w-full cursor-pointer rounded-md px-3 py-2 text-left text-base font-medium text-gray-300 transition-colors hover:text-white"
+            class="block w-full cursor-pointer rounded-lg px-3 py-2 text-left text-base font-medium text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
             data-nav-target={item.href}
           >
             {item.label}
@@ -66,6 +65,18 @@ import { navigation } from '../data/site';
 </nav>
 
 <script>
+  const siteHeader = document.querySelector<HTMLElement>('[data-site-header]');
+  let headerFrame = 0;
+  const syncHeaderBoundary = () => {
+    headerFrame = 0;
+    siteHeader?.toggleAttribute('data-scrolled', window.scrollY > 0);
+  };
+  const onHeaderScroll = () => {
+    if (!headerFrame) headerFrame = window.requestAnimationFrame(syncHeaderBoundary);
+  };
+  syncHeaderBoundary();
+  window.addEventListener('scroll', onHeaderScroll, { passive: true });
+
   const button = document.querySelector<HTMLButtonElement>('[data-mobile-menu-button]');
   const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');
   button?.addEventListener('click', () => {

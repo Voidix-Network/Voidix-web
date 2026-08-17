@@ -5,12 +5,21 @@
   :root {
     --gradient-primary: linear-gradient(90deg, #6a93ff, #7367f0);
     --gradient-vbpixel: linear-gradient(90deg, #00aeff, #0067ff);
+    --brand: #6a93ff;
+    --brand-strong: #7367f0;
+    --brand-soft: #a6b8ff;
+    --canvas: #08090a;
+    --surface: #111113;
+    --surface-raised: #171719;
+    --surface-subtle: #0d0d0f;
+    --line: #28282c;
+    --line-strong: #3b3b42;
     --animation-float-duration: 6s;
-    --transition-hover-duration: 0.3s;
-    --transition-accordion-duration: 0.3s;
-    --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --transform-hover-up: translateY(-5px);
-    --transform-float-down: translateY(-10px);
+    --transition-hover-duration: 160ms;
+    --transition-accordion-duration: 200ms;
+    --shadow-hover: none;
+    --transform-hover-up: none;
+    --transform-float-down: none;
     --color-gray-500-improved: #6b7280;
     --color-gray-400-improved: #9ca3af;
     --color-gray-300-improved: #d1d5db;
@@ -27,6 +36,7 @@
 
   html {
     font-family:
+      'Inter Variable',
       'Inter',
       system-ui,
       -apple-system,
@@ -42,9 +52,10 @@
 
   body {
     margin: 0;
-    background: #111827;
+    background: var(--canvas);
     color: #f3f4f6;
     font-family:
+      'Inter Variable',
       'Inter',
       system-ui,
       -apple-system,
@@ -86,12 +97,13 @@
   }
 
   .card-hover {
-    transition: all var(--transition-hover-duration) ease;
+    transition:
+      border-color var(--transition-hover-duration) ease,
+      background-color var(--transition-hover-duration) ease;
   }
 
   .card-hover:hover {
-    transform: var(--transform-hover-up);
-    box-shadow: var(--shadow-hover);
+    border-color: var(--line-strong);
   }
 
   .timeline-card-fresh {
@@ -99,13 +111,8 @@
   }
 
   .timeline-card-fresh:hover {
-    background: rgba(31, 41, 55, 0.8);
-    border-color: rgba(147, 197, 253, 0.6);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(147, 197, 253, 0.1);
-    backdrop-filter: blur(16px);
-    transform: translateY(-2px) scale(1.02);
+    background: #172235;
+    border-color: var(--line-strong);
   }
 
   .timeline-card-fresh:hover * {
@@ -163,6 +170,9 @@
 
 [data-mobile-menu][hidden] {
   display: none;
+}
+[data-site-header][data-scrolled] {
+  border-bottom-color: rgb(255 255 255 / 0.16);
 }
 [data-consent-banner][hidden],
 [data-consent-settings-dialog][hidden] {
@@ -227,6 +237,7 @@
     background-position: 100% 50%;
   }
 }
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -277,19 +288,16 @@
 [data-team-card] {
   transition:
     border-color 300ms,
-    box-shadow 300ms,
-    transform 300ms;
+    background-color 300ms;
 }
 [data-team-card]:hover {
-  border-color: rgb(147 51 234 / 0.5);
-  box-shadow: 0 4px 20px rgb(147 51 234 / 0.2);
+  border-color: var(--line-strong);
 }
 [data-team-card][data-open] {
-  border-color: rgb(147 51 234 / 0.8);
-  box-shadow: 0 8px 30px rgb(147 51 234 / 0.3);
+  border-color: var(--brand);
 }
 [data-team-card]:active {
-  scale: 0.98;
+  background: #182337;
 }
 [data-team-card] {
   align-self: flex-start;
@@ -355,10 +363,10 @@
   transition-delay: 400ms;
 }
 [data-covenant-button]:hover {
-  background-color: rgb(147 51 234 / 0.1);
+  background-color: #172235;
 }
 [data-covenant-button]:active {
-  transform: scale(0.995);
+  background-color: #1a273c;
 }
 [data-cookie-status].allowed {
   color: rgb(74 222 128);
@@ -388,4 +396,8 @@
   html[data-voidix-mobile] [data-motion-no-mobile] {
     transition: none;
   }
+}
+
+[data-home] > section {
+  position: relative;
 }

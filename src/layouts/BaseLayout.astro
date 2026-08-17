@@ -89,10 +89,10 @@ const webPage = {
     }
   </head>
   <body data-ga={ga} data-clarity={clarity} data-baidu={baidu} data-bytedance={bytedance}>
-    <div class="min-h-screen bg-[#0f172a] font-['Inter'] text-white">
+    <div class="min-h-screen bg-[#08090a] font-['Inter_Variable'] text-white" data-home={path === '/' ? '' : undefined}>
       <a class="skip-to-content" href="#main-content">跳转到首页主内容</a>
       <Header currentPath={path} />
-      <main id="main-content" class="pt-16"><slot /></main>
+      <main id="main-content" class="pt-[72px]"><slot /></main>
       <Footer />
     </div>
     <aside
