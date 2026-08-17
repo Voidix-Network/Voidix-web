@@ -11,7 +11,7 @@ import { navigation } from '../data/site';
         </button>
       </div>
 
-      <div class="hidden items-center space-x-3 lg:flex">
+      <div class="hidden -mr-2 items-center space-x-3 lg:flex">
         {
           navigation.map((item) => (
             <button
@@ -24,9 +24,9 @@ import { navigation } from '../data/site';
         }
       </div>
 
-      <div class="flex items-center lg:hidden">
+      <div class="flex shrink-0 items-center lg:hidden">
         <button
-          class="cursor-pointer rounded-md p-2 text-gray-300 hover:text-white focus:outline-none lg:hidden"
+          class="-mr-2 cursor-pointer rounded-md p-2 text-gray-300 hover:text-white focus:outline-none lg:hidden"
           data-mobile-menu-button
           aria-expanded="false"
           aria-controls="mobile-menu"
@@ -38,8 +38,10 @@ import { navigation } from '../data/site';
             fill="none"
             stroke="currentColor"
             stroke-width="2"
-            data-mobile-menu-icon><path data-mobile-menu-icon-path d="M4 6h16M4 12h16M4 18h16"></path></svg
+            data-mobile-menu-icon
           >
+            <path data-mobile-menu-icon-path d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
         </button>
       </div>
     </div>
