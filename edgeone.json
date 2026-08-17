@@ -3,16 +3,10 @@
   "installCommand": "npm install",
   "outputDirectory": "dist",
   "nodeVersion": "24.11.0",
-  "redirects": [
-    {
-      "source": "https://voidix.net/*",
-      "destination": "https://www.voidix.net/:splat",
-      "statusCode": 301
-    },
+  "rewrites": [
     {
       "source": "/issue/*",
-      "destination": "/issue/index.html",
-      "statusCode": 200
+      "destination": "/issue/index.html"
     }
   ],
   "headers": [

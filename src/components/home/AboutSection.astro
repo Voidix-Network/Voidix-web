@@ -2,143 +2,59 @@
 
 ---
 
-<section class="mb-32 scroll-mt-32 2xl:mb-24" id="about">
-  <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 2xl:py-16">
-    <div class="flex flex-col items-center gap-8 md:flex-row md:gap-12">
-      <div class="md:w-1/2">
-        <div data-motion="fade-left" style="--motion-distance: 20px">
-          <h2 class="mb-6 text-3xl font-bold">
-            关于<span class="ml-2"><span class="gradient-text font-bold font-sans">Voidix</span></span>
-          </h2>
-          <p class="mb-6 text-gray-400">
-            Voidix是一个由开发者NekoSora和CYsonHab创建的公益小游戏Minecraft服务器，继承VBPIXEL和EternalStar的精神。我们坚持无商业化运营，致力于为所有玩家提供公平与和谐的游戏环境。
-          </p>
-
-          <div class="mt-6 hidden grid-cols-3 gap-3 sm:grid">
-            <div
-              class="rounded-lg border border-[#2a365c] bg-[#1a1f2e] px-4 py-3 transition-colors duration-200 hover:bg-[#1f2538]/60"
-            >
-              <div class="mb-1 whitespace-nowrap text-xs text-gray-400">在线玩家</div>
-              <div class="text-center text-base font-bold text-white" data-total-players>0人</div>
-            </div>
-            <div
-              class="rounded-lg border border-[#2a365c] bg-[#1a1f2e] px-4 py-3 transition-colors duration-200 hover:bg-[#1f2538]/60"
-            >
-              <div class="mb-1 whitespace-nowrap text-xs text-gray-400">运行时间</div>
-              <div
-                class="flex items-center justify-center whitespace-nowrap text-base font-bold text-white"
-                data-current-uptime
-              >
-                0分
-              </div>
-            </div>
-            <div
-              class="rounded-lg border border-[#2a365c] bg-[#1a1f2e] px-4 py-3 transition-colors duration-200 hover:bg-[#1f2538]/60"
-            >
-              <div class="mb-1 whitespace-nowrap text-xs text-gray-400">总运行时长</div>
-              <div
-                class="flex items-center justify-center whitespace-nowrap text-base font-bold text-white"
-                data-total-uptime
-              >
-                0分
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-6 grid grid-cols-3 gap-2 sm:hidden">
-            <div class="rounded-lg border border-[#2a365c] bg-[#1a1f2e] px-3 py-3">
-              <div class="mb-1 text-center text-xs text-gray-400">在线玩家</div>
-              <div
-                class="flex items-center justify-center whitespace-nowrap text-base font-bold text-white"
-                data-total-players
-              >
-                0人
-              </div>
-            </div>
-            <div class="rounded-lg border border-[#2a365c] bg-[#1a1f2e] px-3 py-3">
-              <div class="mb-1 text-center text-xs text-gray-400">运行时间</div>
-              <div
-                class="flex items-center justify-center whitespace-nowrap text-base font-bold text-white"
-                data-current-uptime
-              >
-                0分
-              </div>
-            </div>
-            <div class="rounded-lg border border-[#2a365c] bg-[#1a1f2e] px-3 py-3">
-              <div class="mb-1 text-center text-xs text-gray-400">总运行时间</div>
-              <div
-                class="flex items-center justify-center whitespace-nowrap text-base font-bold text-white"
-                data-total-uptime
-              >
-                0分
-              </div>
-            </div>
-          </div>
-        </div>
+<section class="px-5 py-16 sm:px-6 sm:py-24" id="about">
+  <div class="mx-auto max-w-6xl border-t border-white/10 pt-12 sm:pt-20">
+    <div class="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:gap-16">
+      <h2 class="text-[42px] font-semibold leading-[1.1] text-white" data-motion="fade-left">Voidix 是什么？</h2>
+      <div data-motion="fade-right">
+        <p class="max-w-2xl text-[17px] leading-8 text-gray-400">
+          Voidix 是 NekoSora 和 CYsonHab 创立的一个 Minecraft
+          公益服务器。继承VBPIXEL和EternalStar的精神。我们坚持无商业化运营，致力于为所有玩家提供公平与和谐的游戏环境。
+        </p>
+        <a
+          href="/status"
+          class="mt-7 inline-flex items-center gap-2 text-sm font-medium text-[#a6b8ff] transition-colors hover:text-white"
+        >
+          查看完整状态
+          <span aria-hidden="true">→</span>
+        </a>
       </div>
+    </div>
 
-      <div class="relative mt-10 md:mt-0 md:w-1/2">
-        <div data-motion="fade-right" style="--motion-distance: 20px">
-          <div class="absolute -left-8 -top-8 h-32 w-32 rounded-full bg-blue-600 opacity-20 blur-3xl"></div>
-          <div class="absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-indigo-600 opacity-20 blur-3xl"></div>
-          <div class="relative rounded-2xl border border-[#2a365c] bg-[#1a1f2e]/50 p-6 backdrop-blur-sm md:p-8">
-            <h3 class="mb-5 text-center text-xl font-bold md:text-left">服务器状态</h3>
-            <div class="space-y-4">
-              <div class="rounded-lg border border-[#2a365c]/70 bg-[#151b2d]/80 px-5 py-4">
-                <div class="flex items-center justify-between">
-                  <div class="mr-3 flex flex-shrink items-center gap-3">
-                    <div
-                      class="h-4 w-4 flex-shrink-0 rounded-full bg-red-500"
-                      id="minigame-status-dot-desktop"
-                      data-minigame-about-dot
-                    >
-                    </div>
-                    <span class="text-sm font-medium text-gray-200 md:text-base">小游戏服务器</span>
-                  </div>
-                  <div
-                    class="min-w-[70px] flex-shrink-0 whitespace-nowrap text-right font-mono text-sm font-semibold text-red-400 md:text-base"
-                    id="minigame-status-badge-desktop"
-                    data-minigame-summary
-                  >
-                    连接失败
-                  </div>
-                </div>
-              </div>
+    <div class="mt-12 grid border-y border-white/10 sm:grid-cols-3">
+      <div class="py-6 sm:py-7">
+        <div class="text-sm text-gray-500">在线玩家</div>
+        <div class="mt-2 text-2xl font-medium text-white" data-total-players>0人</div>
+      </div>
+      <div class="border-t border-white/10 py-6 sm:border-l sm:border-t-0 sm:px-8 sm:py-7">
+        <div class="text-sm text-gray-500">运行时间</div>
+        <div class="mt-2 text-2xl font-medium text-white" data-current-uptime>0分</div>
+      </div>
+      <div class="border-t border-white/10 py-6 sm:border-l sm:border-t-0 sm:pl-8 sm:py-7">
+        <div class="text-sm text-gray-500">总运行时长</div>
+        <div class="mt-2 text-2xl font-medium text-white" data-total-uptime>0分</div>
+      </div>
+    </div>
 
-              <div class="rounded-lg border border-[#2a365c]/70 bg-[#151b2d]/80 px-5 py-4">
-                <div class="flex items-center justify-between">
-                  <div class="mr-3 flex flex-shrink items-center gap-3">
-                    <div
-                      class="h-4 w-4 flex-shrink-0 animate-pulse rounded-full bg-yellow-500"
-                      id="survival-status-dot-desktop"
-                    >
-                    </div>
-                    <span class="text-sm font-medium text-gray-200 md:text-base">生存服务器</span>
-                  </div>
-                  <div
-                    class="min-w-[70px] flex-shrink-0 whitespace-nowrap text-right font-mono text-sm font-semibold text-yellow-400 md:text-base"
-                    id="survival-status-badge-desktop"
-                    data-survival-summary
-                  >
-                    连接失败
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-6 text-center">
-              <a
-                href="/status"
-                class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-              >
-                查看完整状态
-                <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </a>
-            </div>
-          </div>
+    <div class="mt-10 grid gap-x-12 gap-y-5 md:grid-cols-2" data-motion="fade-up">
+      <div class="flex items-center justify-between border-b border-white/10 py-4">
+        <div class="flex items-center gap-3">
+          <span class="h-2.5 w-2.5 rounded-full bg-red-500" id="minigame-status-dot-desktop" data-minigame-about-dot
+          ></span>
+          <span class="text-sm font-medium text-gray-200">小游戏服务器</span>
         </div>
+        <span class="text-sm font-medium text-red-400" id="minigame-status-badge-desktop" data-minigame-summary
+          >获取中...</span
+        >
+      </div>
+      <div class="flex items-center justify-between border-b border-white/10 py-4">
+        <div class="flex items-center gap-3">
+          <span class="h-2.5 w-2.5 rounded-full bg-yellow-500" id="survival-status-dot-desktop"></span>
+          <span class="text-sm font-medium text-gray-200">生存服务器</span>
+        </div>
+        <span class="text-sm font-medium text-yellow-400" id="survival-status-badge-desktop" data-survival-summary
+          >获取中...</span
+        >
       </div>
     </div>
   </div>

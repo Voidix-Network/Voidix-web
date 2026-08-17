@@ -24,11 +24,11 @@ const schema = [
 
 <BaseLayout meta={metadata.home} path="/" schema={schema}>
   <HeroSection />
-  <AboutSection />
   <ServersSection />
   <VersionsSection />
-  <TimelineSection />
+  <AboutSection />
   <TeamSection />
+  <TimelineSection />
   <RealtimeLoader />
 
   <script>
@@ -42,6 +42,44 @@ const schema = [
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
       window.innerWidth <= 768;
     if (mobile) document.documentElement.dataset.voidixMobile = 'true';
+
+    const heroMessages = [
+      '公平至上的Minecraft体验',
+      '由开发者NekoSora和CYAN-HEX创建',
+      '继承VBPIXEL和EternalStar精神的公益小游戏服务器',
+    ];
+    const scrambleNodes = [...document.querySelectorAll<HTMLElement>('[data-hero-scramble]')];
+    if (!reducedMotion && scrambleNodes.length) {
+      const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+-=?';
+      let messageIndex = 0;
+      let scrambleTimer = 0;
+      const outputs = scrambleNodes
+        .map((node) => node.querySelector<HTMLElement>('[data-hero-scramble-output]'))
+        .filter((node): node is HTMLElement => Boolean(node));
+      const render = (value: string) => outputs.forEach((node) => (node.textContent = value));
+      const changeMessage = () => {
+        const next = heroMessages[(messageIndex + 1) % heroMessages.length];
+        const length = Math.max(heroMessages[messageIndex].length, next.length);
+        let frame = 0;
+        window.clearInterval(scrambleTimer);
+        scrambleTimer = window.setInterval(() => {
+          const progress = frame / 18;
+          render(
+            Array.from({ length }, (_, index) =>
+              index < Math.floor(progress * next.length) ? next[index] || '' : glyphs[Math.floor(Math.random() * glyphs.length)],
+            ).join(''),
+          );
+          frame += 1;
+          if (frame > 18) {
+            window.clearInterval(scrambleTimer);
+            messageIndex = (messageIndex + 1) % heroMessages.length;
+            render(heroMessages[messageIndex]);
+          }
+        }, 42);
+      };
+      window.setInterval(changeMessage, 4200);
+    }
+
     const motionNodes = [...document.querySelectorAll<HTMLElement>('[data-motion]')];
     const eagerNodes = motionNodes.filter((node) => node.hasAttribute('data-motion-eager'));
     const observedNodes = motionNodes.filter((node) => !node.hasAttribute('data-motion-eager'));
@@ -98,6 +136,7 @@ const schema = [
         const active = index === activeIndex;
         tab.classList.toggle('text-white', active);
         tab.classList.toggle('text-gray-400', !active);
+        tab.setAttribute('aria-selected', String(active));
       });
       if (versionSlider) versionSlider.style.transform = `translateX(-${activeIndex * 100}%)`;
       const syncHeight = () => {

@@ -47,17 +47,16 @@ type ConnectionContentState = 'connected' | 'failed' | 'restricted';
 function setConnectionDependentContent(contentState: ConnectionContentState) {
   const connected = contentState === 'connected';
   all<HTMLElement>('[data-total-players], [data-current-uptime], [data-total-uptime]').forEach((node) => {
-    node.classList.toggle('text-red-400', contentState === 'failed');
-    node.classList.toggle('text-yellow-400', contentState === 'restricted');
-    node.classList.toggle('text-white', connected);
+    node.classList.remove('text-red-400', 'text-yellow-400', 'text-white');
+    node.classList.add(connected ? 'text-white' : 'text-gray-500');
   });
   if (!connected) {
     const restricted = contentState === 'restricted';
-    const message = restricted ? '状态系统维护' : '连接失败';
-    write('[data-total-players]', message);
-    write('[data-current-uptime]', message);
-    write('[data-total-uptime]', message);
-    write('[data-minigame-summary]', message);
+    write('[data-total-players]', '—');
+    write('[data-current-uptime]', '—');
+    write('[data-total-uptime]', '—');
+    const shortMessage = restricted ? '仅限中国大陆网络' : '暂不可用';
+    write('[data-minigame-summary]', shortMessage);
     all<HTMLElement>('[data-minigame-summary]').forEach((node) => {
       node.className = `min-w-[70px] flex-shrink-0 whitespace-nowrap text-right font-mono text-sm font-semibold ${restricted ? 'text-yellow-400' : 'text-red-400'} md:text-base`;
     });
@@ -69,12 +68,12 @@ function setConnectionDependentContent(contentState: ConnectionContentState) {
       (node) => (node.className = `h-3 w-3 rounded-full ${restricted ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'}`),
     );
     all<HTMLElement>('[data-minigame-status]').forEach((node) => {
-      node.textContent = message;
+      node.textContent = shortMessage;
       node.className = `text-sm font-semibold ${restricted ? 'text-yellow-400' : 'text-red-400'}`;
     });
     all<HTMLElement>('[data-minigame-status-note]').forEach((node) => (node.hidden = !restricted));
     all<HTMLElement>('[data-survival-summary]').forEach((node) => {
-      node.textContent = message;
+      node.textContent = shortMessage;
       node.className = `min-w-[70px] flex-shrink-0 whitespace-nowrap text-right font-mono text-sm font-semibold ${restricted ? 'text-yellow-400' : 'text-red-400'} md:text-base`;
     });
     document.querySelectorAll<HTMLElement>('[data-stat-skeleton]').forEach((node) => (node.hidden = true));
@@ -388,7 +387,7 @@ if (root) {
       connect();
       return;
     }
-    const message = access === 'outside-mainland' ? '状态系统维护' : '您处于中国大陆境外，无法访问状态服务';
+    const message = access === 'outside-mainland' ? '实时状态仅限中国大陆网络' : '实时状态暂不可用';
     state(
       message,
       access === 'outside-mainland' ? 'warn' : 'info',

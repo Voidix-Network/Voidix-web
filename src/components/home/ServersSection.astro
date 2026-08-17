@@ -7,9 +7,7 @@ const servers = [
     address: 'minigame.voidix.net',
     description: '我们有起床战争等玩法，更多玩法正在持续更新中！',
     icon: 'trophy' as const,
-    iconClass: 'text-blue-400',
-    iconBackground: 'from-blue-500/20 to-purple-500/20',
-    borderGradient: 'via-blue-500',
+    iconClass: 'text-[#a6b8ff]',
     features: ['支持 26.1-26.1.2', '尽最大努力的优化', '多种玩法可选择'],
   },
   {
@@ -18,79 +16,46 @@ const servers = [
     description: '没有花里胡哨的特效，没有乱糟糟的界面，只有最纯净的生存',
     icon: 'mountain' as const,
     iconClass: 'text-green-400',
-    iconBackground: 'from-green-500/20 to-blue-500/20',
-    borderGradient: 'via-green-500',
     features: ['极致的性能', '超纯净生存', '装有回档保护'],
   },
 ];
 ---
 
-<section class="mb-32 scroll-mt-32 2xl:mb-24" id="servers">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="mb-16 text-center">
-      <h2 class="mb-4 text-3xl font-bold" data-motion="fade-up">
-        我们的<span class="ml-2"><span class="gradient-text font-bold font-sans">服务器</span></span>
-      </h2>
-      <p class="mx-auto max-w-2xl text-gray-300" data-motion="fade-up" style="--motion-delay: 100ms">
-        我们提供多种游戏模式，所有服务器均采用公平机制设计，没有任何付费优势。
+<section class="px-5 py-16 sm:px-6 sm:py-24" id="servers">
+  <div class="mx-auto max-w-6xl border-t border-white/10 pt-12 sm:pt-20">
+    <div class="max-w-2xl">
+      <h2 class="text-[42px] font-semibold leading-[1.1] text-white" data-motion="fade-up">先选一个玩法</h2>
+      <p class="mt-5 text-[17px] leading-7 text-gray-400" data-motion="fade-up" style="--motion-delay: 80ms">
+        两个服务器，都是免费加入，也都没有付费优势。
       </p>
     </div>
 
-    <div class="grid gap-8 md:grid-cols-2">
+    <div class="mt-12 grid gap-10 md:grid-cols-2 md:gap-16">
       {
         servers.map((server, index) => (
-          <div
-            class="group relative cursor-pointer overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 p-8 backdrop-blur-sm transition-all duration-300 hover:bg-gray-800/60"
+          <article
+            class="border-t border-white/10 pt-6"
             data-motion="fade-up"
             style={`--motion-delay: ${index * 100}ms`}
           >
-            <div class="absolute inset-0 overflow-hidden rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-              <div
-                class:list={[
-                  'absolute inset-0 bg-gradient-conic from-transparent to-transparent animate-[border-spin_2s_linear_infinite]',
-                  server.borderGradient,
-                ]}
-              />
-              <div class="absolute inset-[2px] rounded-[14px] bg-gray-800/50" />
-            </div>
-
-            <div class="relative z-10">
-              <div class="mb-6 flex items-center gap-4">
-                <div
-                  class:list={[
-                    'flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r',
-                    server.iconBackground,
-                  ]}
-                >
-                  <LucideIcon name={server.icon} class:list={['h-6 w-6', server.iconClass]} />
-                </div>
-                <div>
-                  <h3 class="text-xl font-bold">{server.name}</h3>
-                  <p class:list={['text-sm', server.iconClass]}>{server.address}</p>
-                </div>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <LucideIcon name={server.icon} class:list={['h-5 w-5', server.iconClass]} />
+                <h3 class="text-xl font-medium text-white">{server.name}</h3>
               </div>
-              <p class="mb-6 text-gray-400">{server.description}</p>
-              <ul class="mb-8 space-y-3">
-                {server.features.map((feature) => (
-                  <li class="flex items-center gap-3">
-                    <svg
-                      class="h-5 w-5 text-green-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.707-9.293a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4z"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+              <LucideIcon name="external-link" class="h-4 w-4 text-gray-600" />
             </div>
-          </div>
+            <p class:list={['mt-5 font-mono text-sm', server.iconClass]}>{server.address}</p>
+            <p class="mt-4 max-w-md text-[15px] leading-7 text-gray-400">{server.description}</p>
+            <ul class="mt-7 space-y-3">
+              {server.features.map((feature) => (
+                <li class="flex items-center gap-3 text-sm text-gray-300">
+                  <LucideIcon name="check" class="h-4 w-4 flex-shrink-0 text-gray-500" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </article>
         ))
       }
     </div>

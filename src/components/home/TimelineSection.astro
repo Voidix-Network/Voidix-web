@@ -1,115 +1,52 @@
 ---
 const events = [
-  {
-    date: '2022年7月16日',
-    title: 'VBPIXEL成立',
-    description:
-      'VBPIXEL开始运营，在之后的两年里保持稳定运行，积累了110+名入群玩家。但由于初期架构原因，技术债逐渐积累，仅Neko一人已难以处理所有服务器问题。',
-    position: 'right',
-    color: 'purple',
-  },
-  {
-    date: '2025年5月4日',
-    title: '新服务器的构想',
-    description:
-      'Neko在EternalStar中与cyh2讨论是否需要搭建新服务器的问题，开始规划Voidix的雏形，最终正式确定将Voidix设为服务器名称。',
-    position: 'left',
-    color: 'indigo',
-  },
-  {
-    date: '2025年5月10日',
-    title: 'Voidix开始搭建',
-    description: '基于全新的技术架构，Voidix项目正式启动开发，采用现代化技术栈解决历史遗留问题。',
-    position: 'right',
-    color: 'purple',
-  },
-  {
-    date: '2025年5月11日',
-    title: '新老交替',
-    description:
-      'Voidix正式替换VBPIXEL，后者完成历史使命。Voidix同时继承了EternalStar和VBPIXEL的核心理念：公益、免费、和谐的游戏环境。',
-    additionalDescription: 'Voidix将带着这些理念，继续走下去。',
-    position: 'left',
-    color: 'indigo',
-  },
-  {
-    date: '2025年5月13日',
-    title: '官网建设',
-    description: 'Voidix官网开始搭建，采用现代化设计语言，展示服务器理念和技术特点。',
-    position: 'right',
-    color: 'purple',
-  },
-  {
-    date: '2025年7月1日',
-    title: 'Voidix正式启航',
-    description: 'Voidix正式启航，开启全新的Minecraft服务器篇章。',
-    position: 'left',
-    color: 'indigo',
-  },
+  [
+    '2022年7月16日',
+    'VBPIXEL成立',
+    'VBPIXEL 开始运营。两年里，陆续有 110 多名玩家加入。后来服务器的问题越来越多，只靠 Neko 一个人已经很难继续维护。',
+  ],
+  [
+    '2025年5月4日',
+    '新服务器的构想',
+    'Neko 和 cyh2 在 EternalStar 聊起了新服务器的想法，Voidix 这个名字也在那时定了下来。',
+  ],
+  ['2025年5月10日', 'Voidix开始搭建', 'Voidix 开始搭建。我们重新整理了服务器的结构，希望把以前遇到的问题一一解决。'],
+  [
+    '2025年5月11日',
+    '新老交替',
+    'Voidix 接替 VBPIXEL。服务器继续保持公益、免费，也希望大家能在这里好好玩游戏。',
+    'Voidix将带着这些理念，继续走下去。',
+  ],
+  ['2025年5月13日', '官网建设', '官网开始搭建，先把服务器的玩法、加入方法和规则说明白。'],
+  ['2025年7月1日', 'Voidix正式启航', 'Voidix 正式开放，欢迎第一批玩家进来。'],
 ];
 ---
 
-<section class="mb-32 scroll-mt-32 2xl:mb-24" id="timeline">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="mb-16 text-center">
-      <h2 class="mb-4 text-3xl font-bold" data-motion="fade-up">
-        从
-        <span class="mx-2"><span class="vbpixel-gradient-text font-bold font-sans">VBPIXEL</span></span>
-        到
-        <span class="ml-2"><span class="gradient-text font-bold font-sans">Voidix</span></span>
-      </h2>
-      <p class="mx-auto max-w-2xl text-gray-400" data-motion="fade-up" style="--motion-delay: 100ms">
-        我们的发展历程，记录着每一次技术突破和社区成长
+<section class="px-5 py-16 sm:px-6 sm:py-24" id="timeline">
+  <div class="mx-auto max-w-6xl border-t border-white/10 pt-12 sm:pt-20">
+    <div class="max-w-2xl">
+      <h2 class="text-[42px] font-semibold leading-[1.1] text-white" data-motion="fade-up">我们是怎么走到这里的</h2>
+      <p class="mt-5 text-[17px] leading-7 text-gray-400" data-motion="fade-up" style="--motion-delay: 80ms">
+        从 VBPIXEL 到 Voidix，留下了这些时间点。
       </p>
     </div>
 
-    <div class="relative mx-auto max-w-4xl">
-      <div class="absolute left-5 top-0 h-0.5 w-8 -translate-x-1/2 bg-gray-700 md:left-1/2"></div>
-      <div class="absolute bottom-0 left-5 h-0.5 w-8 -translate-x-1/2 bg-gray-700 md:left-1/2"></div>
-      <div class="absolute bottom-0 left-5 top-0 w-0.5 -translate-x-1/2 bg-gray-700 md:left-1/2"></div>
-
-      <div class="space-y-8 pt-6">
-        {
-          events.map((event, index) => {
-            const left = event.position === 'left';
-            const purple = event.color === 'purple';
-            return (
-              <div
-                class="relative"
-                data-motion={left ? 'fade-left' : 'fade-right'}
-                style={`--motion-delay: ${(index + 1) * 100}ms; --motion-distance: 20px`}
-              >
-                <div
-                  class:list={[
-                    'absolute left-5 top-1 h-4 w-4 -translate-x-1/2 rounded-full border-4 border-gray-900 md:left-1/2',
-                    purple ? 'bg-purple-400' : 'bg-indigo-400',
-                  ]}
-                />
-                <div
-                  class:list={[
-                    'ml-12 md:ml-0',
-                    left ? 'md:mr-[calc(50%+2rem)] md:flex md:justify-end' : 'md:pl-[calc(50%+2rem)]',
-                  ]}
-                >
-                  <div
-                    class:list={[
-                      'timeline-card-fresh card-hover relative rounded-xl border border-gray-700 bg-gray-800/50 p-4 backdrop-blur-sm transition-all duration-300 md:w-[calc(70%-2rem)]',
-                      left ? 'text-left' : '',
-                    ]}
-                  >
-                    <div class:list={['mb-2 text-sm font-medium', purple ? 'text-purple-400' : 'text-indigo-400']}>
-                      {event.date}
-                    </div>
-                    <h3 class="mb-3 text-xl font-bold">{event.title}</h3>
-                    <p class="text-gray-400">{event.description}</p>
-                    {event.additionalDescription && <p class="mt-2 text-gray-400">{event.additionalDescription}</p>}
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        }
-      </div>
+    <div class="mt-12 border-t border-white/10">
+      {
+        events.map(([date, title, description, additionalDescription], index) => (
+          <article
+            class="grid gap-3 border-b border-white/10 py-7 sm:grid-cols-[180px_1fr] sm:gap-10"
+            data-motion={index % 2 ? 'fade-left' : 'fade-right'}
+          >
+            <time class="text-sm text-gray-500">{date}</time>
+            <div>
+              <h3 class="text-lg font-medium text-white">{title}</h3>
+              <p class="mt-3 max-w-3xl text-[15px] leading-7 text-gray-400">{description}</p>
+              {additionalDescription && <p class="mt-3 text-[15px] leading-7 text-gray-300">{additionalDescription}</p>}
+            </div>
+          </article>
+        ))
+      }
     </div>
   </div>
 </section>
