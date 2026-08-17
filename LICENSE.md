@@ -25,6 +25,7 @@
 ## 贡献
 
 提交代码即表示同意：
+
 - 代码使用 AGPLv3 许可证
 - 文档使用 CC BY-SA 4.0 许可证
 
@@ -57,5 +58,6 @@ The project uses open source libraries under MIT, Apache 2.0, ISC, 0BSD licenses
 ## Contributing
 
 By submitting code, you agree that:
+
 - Code contributions are licensed under AGPLv3
 - Documentation contributions are licensed under CC BY-SA 4.0

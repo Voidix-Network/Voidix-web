@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LucideIcon from '../components/LucideIcon.astro';
+import { metadata } from '../data/site';
+---
+
+<BaseLayout meta={metadata.login} path="/login">
+  <section class="flex min-h-screen items-center justify-center bg-[#0d1321] px-4" data-issue-app data-mode="login">
+    <div class="w-full max-w-sm">
+      <header class="mb-8 text-center">
+        <h1
+          class="mb-2 text-2xl font-bold"
+          style="background:linear-gradient(135deg,#6a93ff,#7367f0);background-clip:text;-webkit-background-clip:text;color:transparent"
+        >
+          欢迎回来
+        </h1><p class="text-sm text-gray-500">使用你的游戏账号登录</p>
+      </header>
+      <form class="space-y-4" data-login-form>
+        <input
+          class="w-full rounded-lg border border-gray-700/50 bg-[#151f38] px-4 py-3 text-white placeholder-gray-500 transition-colors focus:border-purple-500/50 focus:outline-none"
+          name="username"
+          autocomplete="username"
+          placeholder="用户名"
+          required
+          data-login-username
+        />
+        <div class="relative">
+          <input
+            class="w-full rounded-lg border border-gray-700/50 bg-[#151f38] px-4 py-3 pr-11 text-white placeholder-gray-500 transition-colors focus:border-purple-500/50 focus:outline-none"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="密码"
+            required
+            data-login-password
+          /><button
+            type="button"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors hover:text-gray-300"
+            data-password-toggle
+            aria-label="显示或隐藏密码"
+            ><svg
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+              data-password-icon
+              ><path
+                d="M2.06 12.35a1 1 0 0 1 0-.7C3.3 8.6 7.11 5 12 5s8.7 3.6 9.94 6.65a1 1 0 0 1 0 .7C20.7 15.4 16.89 19 12 19s-8.7-3.6-9.94-6.65Z"
+              ></path><circle cx="12" cy="12" r="3"></circle></svg
+            ></button
+          >
+        </div>
+        <p
+          class="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-sm text-red-400"
+          data-form-error
+          hidden
+        >
+          <LucideIcon name="alert-circle" class="h-4 w-4 flex-shrink-0" /><span data-form-error-message></span>
+        </p>
+        <button
+          class="w-full rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 py-3 font-medium text-white transition-all hover:from-purple-600 hover:to-blue-600 disabled:cursor-not-allowed disabled:from-gray-600 disabled:to-gray-700"
+          type="submit"
+          disabled
+          data-login-submit>登录</button
+        >
+      </form>
+      <p class="mt-6 text-center text-xs text-gray-600">
+        没有账号？在游戏内使用 <code class="text-purple-400">/register</code> 注册
+      </p>
+    </div>
+  </section>
+  <script>
+    import '../scripts/issue';
+    const passwordToggle = document.querySelector<HTMLButtonElement>('[data-password-toggle]');
+    const passwordInput = document.querySelector<HTMLInputElement>('[data-login-password]');
+    passwordToggle?.addEventListener('click', () => {
+      if (!passwordInput) return;
+      const visible = passwordInput.type === 'password';
+      passwordInput.type = visible ? 'text' : 'password';
+      passwordToggle.setAttribute('aria-label', visible ? '隐藏密码' : '显示密码');
+      const icon = passwordToggle.querySelector('[data-password-icon]');
+      if (icon)
+        icon.innerHTML = visible
+          ? '<path d="m9.88 9.88 4.24 4.24M10.73 5.08A10.43 10.43 0 0 1 12 5c4.89 0 8.7 3.6 9.94 6.65a1 1 0 0 1 0 .7 10.6 10.6 0 0 1-4.11 4.68M6.61 6.61A10.5 10.5 0 0 0 2.06 11.65a1 1 0 0 0 0 .7C3.3 15.4 7.11 19 12 19a10.5 10.5 0 0 0 3.39-.56"/><path d="M2 2 22 22"/>'
+          : '<path d="M2.06 12.35a1 1 0 0 1 0-.7C3.3 8.6 7.11 5 12 5s8.7 3.6 9.94 6.65a1 1 0 0 1 0 .7C20.7 15.4 16.89 19 12 19s-8.7-3.6-9.94-6.65Z"/><circle cx="12" cy="12" r="3"/>';
+    });
+  </script>
+</BaseLayout>

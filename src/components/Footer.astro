@@ -1,0 +1,173 @@
+<footer class="cls-optimized border-t border-gray-600 bg-gray-800/70">
+  <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+    <div class="cls-optimized grid min-h-[200px] grid-cols-1 gap-16 sm:grid-cols-2 lg:grid-cols-3 lg:gap-20">
+      <div class="cls-optimized min-h-[200px]">
+        <div class="min-h-[200px]">
+          <h3 class="mb-6 text-lg font-semibold">快速加入</h3>
+          <div class="space-y-4">
+            <div>
+              <p class="mb-2 text-sm font-medium">小游戏服务器</p><button
+                class="flex h-8 w-full min-w-[220px] cursor-pointer items-center text-left font-mono text-sm text-gray-300 transition-colors hover:text-white"
+                data-copy="minigame.voidix.net">minigame.voidix.net</button
+              >
+            </div>
+            <div>
+              <p class="mb-2 text-sm font-medium">生存服务器</p><button
+                class="flex h-8 w-full min-w-[220px] cursor-pointer items-center text-left font-mono text-sm text-gray-300 transition-colors hover:text-white"
+                data-copy="survival.voidix.net">survival.voidix.net</button
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cls-optimized min-h-[200px]">
+        <div class="min-h-[200px]">
+          <h3 class="mb-6 text-lg font-semibold">社区链接</h3>
+          <ul class="space-y-3">
+            {
+              ['QQ群', 'Discord', 'GitHub'].map((label, index) => (
+                <li>
+                  <a
+                    href={
+                      index === 0
+                        ? 'https://qm.qq.com/cgi-bin/qm/qr?k=aMRoacVuxcGVSzEwfjb49oN4CWCv6yHj&jump_from=webapi&authKey=hw0EhRKGDGN1vmHD4AfK2yJCzPzSA+AXGJOEcugZpsA7KfK9GhNXpe9GNWCjCcmr'
+                        : index === 1
+                          ? 'https://discord.gg/fUMyfhuQ5b'
+                          : 'https://github.com/Voidix-Network'
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group flex h-8 items-center gap-3 text-sm text-gray-300 transition-colors hover:text-white"
+                  >
+                    <>
+                      <span>{label}</span>
+                      <svg
+                        class="h-4 w-4 flex-shrink-0 opacity-70 transition-opacity group-hover:opacity-100"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <>
+                          <path
+                            fill-rule="evenodd"
+                            d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h5a.75.75 0 0 1 0 1.5h-5z"
+                            clip-rule="evenodd"
+                          />
+                          <path
+                            fill-rule="evenodd"
+                            d="M6.194 12.753a.75.75 0 0 0 1.06.053L16.5 4.44v2.81a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.553l-9.056 8.194a.75.75 0 0 0-.053 1.06z"
+                            clip-rule="evenodd"
+                          />
+                        </>
+                      </svg>
+                    </>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+
+      <div class="cls-optimized hidden min-h-[120px] flex-col items-center justify-center lg:flex">
+        <div class="text-center">
+          <div class="mb-4 flex items-center gap-4">
+            <div
+              class="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-cyan-400/10 shadow-lg backdrop-blur-sm"
+            >
+              <img
+                src="/logo.png"
+                width="80"
+                height="80"
+                alt="Voidix Logo"
+                class="h-20 w-20 object-contain opacity-0 transition-opacity duration-300"
+                style="filter: drop-shadow(0 0 8px rgba(147, 51, 234, 0.3));"
+                loading="lazy"
+                decoding="async"
+                data-footer-logo
+              />
+              <div class="absolute h-20 w-20 animate-pulse rounded-2xl bg-gray-600" data-footer-logo-skeleton></div>
+            </div>
+            <div class="flex min-w-[120px] flex-col">
+              <span class="voidix-logo-flow text-2xl font-bold leading-tight">Voidix</span><span
+                class="text-xs font-medium text-gray-300">Open, Free, Harmonious</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cls-optimized mt-20 min-h-[120px] border-t border-gray-700/50 pt-8">
+      <div class="cls-optimized mb-8">
+        <div class="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center" data-footer-skeleton>
+          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-8">
+            <div class="flex items-center gap-3">
+              <div class="h-4 w-4 animate-pulse rounded-full bg-gray-600"></div><div
+                class="h-4 w-24 animate-pulse rounded bg-gray-600"
+              >
+              </div>
+            </div><div class="flex items-center gap-2">
+              <div class="h-4 w-16 animate-pulse rounded bg-gray-600"></div><div
+                class="h-4 w-8 animate-pulse rounded bg-gray-600"
+              >
+              </div>
+            </div>
+          </div>
+          <div class="h-4 w-32 animate-pulse rounded bg-gray-600"></div>
+        </div>
+        <div
+          class="flex min-h-[40px] flex-col items-start justify-between gap-6 md:flex-row md:items-center"
+          data-footer-content
+          style="display: none"
+        >
+          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-8">
+            <div class="flex min-w-[140px] items-center gap-3">
+              <div class="h-4 w-4 flex-shrink-0 rounded-full bg-gray-400 shadow-lg shadow-gray-400/30" data-footer-dot>
+              </div><span class="text-sm font-medium text-gray-400" data-footer-status>服务器状态: 连接中...</span>
+            </div><div class="min-w-[120px] text-sm text-gray-300">
+              在线玩家: <span class="font-semibold text-green-400" data-footer-players>0</span>
+            </div>
+          </div>
+          <div class="min-w-[180px] text-sm text-gray-300">最后更新: <span data-footer-updated>获取中...</span></div>
+        </div>
+      </div>
+
+      <div class="flex min-h-[60px] flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+        <div class="space-y-2">
+          <p class="text-sm text-gray-300">© 2025-2026 Voidix Minecraft Server. 保留所有权利。</p><p
+            class="text-xs text-gray-300"
+          >
+            本服务器为非商业公益项目，与Mojang Studios无官方关联。
+          </p>
+        </div>
+        <div class="flex-shrink-0 space-y-2 text-sm text-gray-300 md:text-right">
+          <p>服务器由 <span class="gradient-text text-xs font-bold font-sans">Voidix Team</span> 维护</p><p
+            class="text-xs font-medium"
+          >
+            <a
+              href="https://beian.miit.gov.cn/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-gray-399 transition-colors hover:text-blue-400">粤ICP备2025491588号-1</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll<HTMLImageElement>('[data-footer-logo]').forEach((image) => {
+    const skeleton = image.parentElement?.querySelector<HTMLElement>('[data-footer-logo-skeleton]');
+    image.addEventListener(
+      'load',
+      () => {
+        image.classList.replace('opacity-0', 'opacity-100');
+        skeleton?.remove();
+      },
+      { once: true },
+    );
+  });
+</script>

@@ -1,40 +1,6 @@
-# =============================================================================
-# Netlify 配置文件 for voidix-web
-# =============================================================================
-
-# 全局构建设置，适用于所有部署（包括生产、预览等）
 [build]
-  # 完整的构建命令，用于生产环境
   command = "npm run build"
-
-  # 构建产物的输出目录
   publish = "dist"
 
-  # 在构建环境中设置环境变量
   [build.environment]
-    # 指定一个稳定的Node.js版本，确保构建一致性
-    NODE_VERSION = "18"
-
-# 部署预览 (Deploy Previews) 的特定配置
-# 这里我们覆盖默认的构建命令
-[context.deploy-preview]
-  # 对于预览环境，我们跳过耗时且非必要的Prerender步骤，
-  # 这样既可以修复错误，也能加快预览构建速度。
-  command = "npx tsc && vite build --mode production && npm run generate:sitemap"
-
-  # 同时，在预览环境中禁用分析和追踪，避免测试数据污染生产统计
-  [context.deploy-preview.environment]
-    VITE_ENABLE_ANALYTICS = "false"
-
-# =============================================================================
-# 重定向规则
-# =============================================================================
-
-# 这是针对React等单页面应用（SPA）的关键规则。
-# 它将所有未直接匹配到文件的请求都重定向到 index.html，
-# 这样React Router才能接管并正确显示对应的页面。
-# 解决了直接访问 /status 或 /faq 等子页面时出现404的问题。
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+    NODE_VERSION = "22.12.0"

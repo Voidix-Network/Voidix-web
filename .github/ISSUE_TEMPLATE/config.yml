@@ -13,7 +13,7 @@ contact_links:
 
   # 项目文档 - 技术文档和开发指南
   - name: 📖 查看项目文档
-    url: https://github.com/Voidix-Network/voidix-web/blob/main/docs/README.md
+    url: https://github.com/Voidix-Network/voidix-web/blob/main/README.md
     about: 阅读完整的项目文档、开发指南和贡献指南
 
   # 社区交流 - QQ群实时讨论

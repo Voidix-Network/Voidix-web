@@ -1,0 +1,177 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RealtimeLoader from '../components/RealtimeLoader.astro';
+import HeroSection from '../components/home/HeroSection.astro';
+import AboutSection from '../components/home/AboutSection.astro';
+import ServersSection from '../components/home/ServersSection.astro';
+import VersionsSection from '../components/home/VersionsSection.astro';
+import TimelineSection from '../components/home/TimelineSection.astro';
+import TeamSection from '../components/home/TeamSection.astro';
+import { metadata, site } from '../data/site';
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Voidix Minecraft公益服务器',
+    url: site.url,
+    description: site.description,
+    inLanguage: 'zh-CN',
+    publisher: { '@type': 'Organization', name: 'Voidix Team' },
+  },
+];
+---
+
+<BaseLayout meta={metadata.home} path="/" schema={schema}>
+  <HeroSection />
+  <AboutSection />
+  <ServersSection />
+  <VersionsSection />
+  <TimelineSection />
+  <TeamSection />
+  <RealtimeLoader />
+
+  <script>
+    const reveal = (node: HTMLElement) => {
+      requestAnimationFrame(() => {
+        node.dataset.motionVisible = 'true';
+      });
+    };
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.innerWidth <= 768;
+    if (mobile) document.documentElement.dataset.voidixMobile = 'true';
+    const motionNodes = [...document.querySelectorAll<HTMLElement>('[data-motion]')];
+    const eagerNodes = motionNodes.filter((node) => node.hasAttribute('data-motion-eager'));
+    const observedNodes = motionNodes.filter((node) => !node.hasAttribute('data-motion-eager'));
+
+    if (reducedMotion || mobile || !('IntersectionObserver' in window)) {
+      motionNodes.forEach(reveal);
+    } else {
+      eagerNodes.forEach(reveal);
+      const standardObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.target instanceof HTMLElement) {
+            reveal(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      });
+      const teamObserver = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.target instanceof HTMLElement) {
+              reveal(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.3, rootMargin: '-50px' },
+      );
+      observedNodes.forEach((node) =>
+        (node.hasAttribute('data-motion-team') ? teamObserver : standardObserver).observe(node),
+      );
+    }
+
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-version-tab]')];
+    const underline = document.querySelector<HTMLElement>('[data-version-underline]');
+    const versionSlider = document.querySelector<HTMLElement>('[data-version-slider]');
+    const versionContainer = document.querySelector<HTMLElement>('[data-version-container]');
+    const versionPanels = [...document.querySelectorAll<HTMLElement>('[data-version-panel]')];
+    const measureVersionHeight = (activeIndex: number) => {
+      const activePanel = versionPanels[activeIndex];
+      if (!activePanel) return 0;
+      const displays = versionPanels.map((panel) => panel.style.display);
+      versionPanels.forEach((panel, index) => {
+        if (index !== activeIndex) panel.style.display = 'none';
+      });
+      const height = activePanel.getBoundingClientRect().height;
+      versionPanels.forEach((panel, index) => {
+        panel.style.display = displays[index];
+      });
+      return height;
+    };
+    const updateVersion = (activeIndex: number, delayedHeight = false) => {
+      const activeTab = tabs[activeIndex];
+      tabs.forEach((tab, index) => {
+        const active = index === activeIndex;
+        tab.classList.toggle('text-white', active);
+        tab.classList.toggle('text-gray-400', !active);
+      });
+      if (versionSlider) versionSlider.style.transform = `translateX(-${activeIndex * 100}%)`;
+      const syncHeight = () => {
+        const height = measureVersionHeight(activeIndex);
+        if (versionContainer && height > 0) versionContainer.style.height = `${height}px`;
+      };
+      if (delayedHeight) window.setTimeout(syncHeight, 50);
+      else syncHeight();
+      if (underline && activeTab) {
+        underline.style.left = `${activeTab.offsetLeft}px`;
+        underline.style.width = `${activeTab.offsetWidth}px`;
+      }
+    };
+    tabs.forEach((tab, index) => tab.addEventListener('click', () => updateVersion(index, true)));
+    window.addEventListener('resize', () =>
+      updateVersion(tabs.findIndex((tab) => tab.classList.contains('text-white'))),
+    );
+    window.setTimeout(() => updateVersion(0), 300);
+
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const teamCards = [...document.querySelectorAll<HTMLElement>('[data-team-card]')];
+    const setTeamCard = (card: HTMLElement, open: boolean) => {
+      card.toggleAttribute('data-open', open);
+      card.querySelector('[data-team-back]')?.setAttribute('aria-hidden', String(!open));
+    };
+    teamCards.forEach((card) => {
+      card.querySelectorAll<HTMLElement>('[data-team-hint]').forEach((hint) => {
+        hint.textContent = isTouchDevice ? '点击查看贡献' : '悬停查看贡献';
+      });
+      card.querySelectorAll<HTMLElement>('[data-team-return]').forEach((hint) => {
+        hint.textContent = isTouchDevice ? '点击返回' : '移开鼠标返回';
+      });
+      if (isTouchDevice) card.addEventListener('click', () => setTeamCard(card, !card.hasAttribute('data-open')));
+      else {
+        card.addEventListener('mouseenter', () => setTeamCard(card, true));
+        card.addEventListener('mouseleave', () => setTeamCard(card, false));
+      }
+    });
+    if (isTouchDevice)
+      document.addEventListener('mousedown', (event) =>
+        teamCards.forEach((card) => {
+          if (!card.contains(event.target as Node)) setTeamCard(card, false);
+        }),
+      );
+
+    document.querySelectorAll<HTMLImageElement>('[data-team-avatar-image]').forEach((image) => {
+      const loading = image.parentElement?.querySelector<HTMLElement>('[data-team-avatar-loading]');
+      image.addEventListener(
+        'load',
+        () => {
+          image.classList.replace('opacity-0', 'opacity-100');
+          loading?.remove();
+        },
+        { once: true },
+      );
+      image.addEventListener(
+        'error',
+        () => {
+          image.remove();
+        },
+        { once: true },
+      );
+    });
+
+    const covenant = document.querySelector<HTMLElement>('[data-covenant]');
+    const covenantButton = covenant?.querySelector<HTMLButtonElement>('[data-covenant-button]');
+    covenantButton?.addEventListener('click', () => {
+      const open = !covenant?.hasAttribute('data-open');
+      const content = covenant?.querySelector<HTMLElement>('[data-covenant-content]');
+      covenant?.toggleAttribute('data-open', open);
+      if (content) content.style.height = open ? `${content.scrollHeight}px` : '0px';
+      covenant
+        ?.querySelector<HTMLElement>('[data-covenant-chevron]')
+        ?.style.setProperty('transform', open ? 'rotate(180deg)' : 'rotate(0deg)');
+    });
+  </script>
+</BaseLayout>
