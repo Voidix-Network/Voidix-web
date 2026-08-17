@@ -1,3 +1,8 @@
 <script>
-  import '../scripts/realtime';
+  const startRealtime = () => import('../scripts/realtime');
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(startRealtime, { timeout: 1500 });
+  } else {
+    globalThis.setTimeout(startRealtime, 200);
+  }
 </script>

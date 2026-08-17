@@ -1,4 +1,7 @@
 /* Static Astro counterpart of the React Issue page component classes. */
+@reference "tailwindcss/index.css";
+@config '../../tailwind.config.cjs';
+
 @layer components {
   .issue-page {
     @apply min-h-screen bg-gray-900 px-4 pb-16 pt-10 sm:px-6 lg:px-8;
