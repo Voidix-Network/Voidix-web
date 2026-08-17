@@ -1,0 +1,398 @@
+@import 'tailwindcss/index.css';
+@import './issue.css';
+@config '../../tailwind.config.cjs';
+
+@layer base {
+  :root {
+    --gradient-primary: linear-gradient(90deg, #6a93ff, #7367f0);
+    --gradient-vbpixel: linear-gradient(90deg, #00aeff, #0067ff);
+    --animation-float-duration: 6s;
+    --transition-hover-duration: 0.3s;
+    --transition-accordion-duration: 0.3s;
+    --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --transform-hover-up: translateY(-5px);
+    --transform-float-down: translateY(-10px);
+    --color-gray-500-improved: #6b7280;
+    --color-gray-400-improved: #9ca3af;
+    --color-gray-300-improved: #d1d5db;
+    --color-high-contrast: #e5e7eb;
+    --color-medium-contrast: #d1d5db;
+    --color-dark-bg: rgba(31, 41, 55, 0.8);
+    --color-dark-text: #e5e7eb;
+    --color-dark-muted: #9ca3af;
+  }
+
+  * {
+    border-color: rgb(75 85 99);
+  }
+
+  html {
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      'Noto Sans',
+      sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: #111827;
+    color: #f3f4f6;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      'Noto Sans',
+      sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .skip-to-content {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    z-index: 999;
+    padding: 1rem;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .skip-to-content:focus {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
+
+@layer components {
+  .cls-optimized {
+    contain: layout;
+  }
+
+  .card-hover {
+    transition: all var(--transition-hover-duration) ease;
+  }
+
+  .card-hover:hover {
+    transform: var(--transform-hover-up);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .timeline-card-fresh {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .timeline-card-fresh:hover {
+    background: rgba(31, 41, 55, 0.8);
+    border-color: rgba(147, 197, 253, 0.6);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(147, 197, 253, 0.1);
+    backdrop-filter: blur(16px);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .timeline-card-fresh:hover * {
+    color: rgb(243, 244, 246) !important;
+  }
+  .timeline-card-fresh:hover .text-purple-400 {
+    color: rgb(196, 181, 253) !important;
+  }
+  .timeline-card-fresh:hover .text-indigo-400 {
+    color: rgb(165, 180, 252) !important;
+  }
+
+  .gradient-text {
+    font-weight: 700;
+    background: var(--gradient-primary);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .vbpixel-gradient-text {
+    font-weight: 700;
+    background: var(--gradient-vbpixel);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgb(31 41 55);
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(75 85 99);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(107 114 128);
+}
+
+@layer utilities {
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Astro-only interaction helpers; the visual values come from the source styles. */
+[data-mobile-menu][hidden] {
+  display: none;
+}
+[data-consent-banner][hidden],
+[data-consent-settings-dialog][hidden] {
+  display: none !important;
+}
+
+/* Keep the Astro header and footer behaviour aligned with their React components. */
+[data-mobile-menu] {
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 300ms cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 300ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+[data-mobile-menu][data-open] {
+  max-height: 70vh;
+  opacity: 1;
+}
+[data-mobile-menu] a {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition:
+    opacity 300ms,
+    transform 300ms;
+}
+[data-mobile-menu][data-open] a {
+  opacity: 1;
+  transform: translateX(0);
+}
+[data-mobile-menu][data-open] a:nth-child(1) {
+  transition-delay: 0ms;
+}
+[data-mobile-menu][data-open] a:nth-child(2) {
+  transition-delay: 100ms;
+}
+[data-mobile-menu][data-open] a:nth-child(3) {
+  transition-delay: 200ms;
+}
+[data-mobile-menu][data-open] a:nth-child(4) {
+  transition-delay: 300ms;
+}
+[data-mobile-menu][data-open] a:nth-child(5) {
+  transition-delay: 400ms;
+}
+[data-mobile-menu-icon] {
+  transition: transform 200ms;
+}
+.voidix-logo-flow {
+  background: linear-gradient(45deg, #6a93ff, #7367f0, #6a93ff, #7367f0, #6a93ff);
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: voidix-gradient-flow 6s linear infinite;
+}
+
+@keyframes voidix-gradient-flow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+[data-server-groups] > article {
+  animation: slideInLeft 0.4s ease-out both;
+}
+[data-server-groups] > article:nth-child(2) {
+  animation-delay: 80ms;
+}
+[data-server-groups] > article:nth-child(3) {
+  animation-delay: 160ms;
+}
+[data-group-panel] > div > article {
+  animation: slideInLeft 0.4s ease-out both;
+}
+[data-group-panel] > div > article:nth-child(2) {
+  animation-delay: 80ms;
+}
+[data-group-panel] > div > article:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+/* The React team cards cross-fade and scale their two faces; preserve that state model in Astro. */
+[data-team-card] {
+  transition:
+    border-color 300ms,
+    box-shadow 300ms,
+    transform 300ms;
+}
+[data-team-card]:hover {
+  border-color: rgb(147 51 234 / 0.5);
+  box-shadow: 0 4px 20px rgb(147 51 234 / 0.2);
+}
+[data-team-card][data-open] {
+  border-color: rgb(147 51 234 / 0.8);
+  box-shadow: 0 8px 30px rgb(147 51 234 / 0.3);
+}
+[data-team-card]:active {
+  scale: 0.98;
+}
+[data-team-card] {
+  align-self: flex-start;
+}
+[data-team-front],
+[data-team-back] {
+  transition:
+    opacity 300ms cubic-bezier(0.42, 0, 0.58, 1),
+    transform 300ms cubic-bezier(0.42, 0, 0.58, 1);
+}
+[data-team-back] {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.05);
+}
+[data-team-card][data-open] [data-team-front] {
+  opacity: 0;
+  transform: scale(0.95);
+}
+[data-team-card][data-open] [data-team-back] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+[data-team-contribution] {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition:
+    opacity 300ms cubic-bezier(0, 0, 0.58, 1),
+    transform 300ms cubic-bezier(0, 0, 0.58, 1);
+}
+[data-team-card][data-open] [data-team-contribution] {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: var(--contribution-delay, 0ms);
+}
+[data-covenant-content] {
+  height: 0;
+  transition: height 400ms cubic-bezier(0.42, 0, 0.58, 1);
+}
+[data-covenant-rule],
+[data-covenant-link],
+[data-covenant-notice] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 300ms cubic-bezier(0, 0, 0.58, 1),
+    transform 300ms cubic-bezier(0, 0, 0.58, 1);
+}
+[data-covenant][data-open] [data-covenant-rule] {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: var(--covenant-delay, 0ms);
+}
+[data-covenant][data-open] [data-covenant-link] {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 300ms;
+}
+[data-covenant][data-open] [data-covenant-notice] {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 400ms;
+}
+[data-covenant-button]:hover {
+  background-color: rgb(147 51 234 / 0.1);
+}
+[data-covenant-button]:active {
+  transform: scale(0.995);
+}
+[data-cookie-status].allowed {
+  color: rgb(74 222 128);
+}
+
+/* Source-equivalent replacement for AnimatedSection and the Framer Motion entry variants. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-motion] {
+    opacity: 0;
+    transition:
+      opacity var(--motion-duration, 500ms) cubic-bezier(0.25, 0.8, 0.25, 1),
+      transform var(--motion-duration, 500ms) cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition-delay: var(--motion-delay, 0ms);
+  }
+  [data-motion='fade-up'] {
+    transform: translateY(20px);
+  }
+  [data-motion='fade-left'] {
+    transform: translateX(calc(var(--motion-distance, 30px) * -1));
+  }
+  [data-motion='fade-right'] {
+    transform: translateX(var(--motion-distance, 30px));
+  }
+  [data-motion][data-motion-visible] {
+    opacity: 1;
+    transform: translate(0);
+  }
+  html[data-voidix-mobile] [data-motion-no-mobile] {
+    transition: none;
+  }
+}
+
+/* Home sections retain the original React component's visual layers. */

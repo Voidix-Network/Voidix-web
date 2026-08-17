@@ -1,0 +1,138 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import LucideIcon from '../components/LucideIcon.astro';
+import { metadata } from '../data/site';
+
+const channels = [
+  [
+    'QQ群',
+    '186438621 (推荐，可截图和实时交流)',
+    'message-square',
+    'https://qm.qq.com/cgi-bin/qm/qr?k=aMRoacVuxcGVSzEwfjb49oN4CWCv6yHj&jump_from=webapi&authKey=hw0EhRKGDGN1vmHD4AfK2yJCzPzSA+AXGJOEcugZpsA7KfK9GhNXpe9GNWCjCcmr',
+    'from-blue-500 to-cyan-500',
+    false,
+  ],
+  [
+    'Discord服务器',
+    '加入我们的 Discord',
+    'globe',
+    'https://discord.gg/fUMyfhuQ5b',
+    'from-indigo-500 to-purple-500',
+    false,
+  ],
+  ['邮件支持', 'support@voidix.net', 'mail', 'mailto:support@voidix.net', 'from-green-500 to-emerald-500', false],
+  ['Issue系统', '在我们的Issue系统中提交Bug', 'github', '/issue/', 'from-gray-500 to-slate-500', true],
+] as const;
+const requirements = [
+  ['bug', '您当时所在的服务器', '例如：小游戏服、生存服'],
+  ['clock', 'Bug发生的具体时间和日期', '大致即可'],
+  ['check-circle', 'Bug的详细描述', '您做了什么操作？预期结果是什么？实际发生了什么？'],
+  ['check-circle', '复现步骤', '如果可能，请提供如何让Bug再次出现的步骤'],
+  ['camera', '截图或录屏', '这对于我们理解问题非常有帮助'],
+  ['user', '您的游戏内ID', '帮助我们定位相关的游戏记录'],
+] as const;
+---
+
+<BaseLayout meta={metadata.bugReport} path="/bug-report">
+  <section class="min-h-screen bg-gray-900">
+    <div class="mx-auto max-w-4xl px-4 pb-16 pt-12 sm:px-6 lg:px-8">
+      <Breadcrumb current="Bug反馈" class="mb-8" />
+      <article
+        class="rounded-2xl border border-gray-700 bg-gray-800/50 p-8 backdrop-blur-sm"
+        data-motion="fade-up"
+        style="--motion-delay: 100ms"
+      >
+        <h1 class="mb-8 text-3xl font-bold text-white" data-motion="fade-up" style="--motion-delay: 200ms">Bug 反馈</h1>
+        <div class="space-y-6 text-gray-300" data-motion="fade-up" style="--motion-delay: 300ms">
+          <p class="text-lg leading-relaxed">
+            我们非常重视您在游戏过程中遇到的任何问题。如果您发现了Bug，请尽可能详细地告诉我们，这将帮助我们更快地定位和修复问题。
+          </p>
+          <section
+            class="rounded-xl border border-gray-700/50 bg-gray-900/50 p-6"
+            data-motion="fade-up"
+            style="--motion-delay: 400ms"
+          >
+            <h2 class="mb-6 flex items-center gap-3 text-xl font-semibold text-white">
+              <LucideIcon name="message-square" class="h-6 w-6 text-blue-400" />反馈渠道
+            </h2>
+            <div class="grid gap-4 md:grid-cols-2">
+              {
+                channels.map(([name, description, icon, href, gradient, internal]) => (
+                  <a
+                    href={href}
+                    target={internal || href.startsWith('mailto:') ? undefined : '_blank'}
+                    rel={internal || href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                    class="group flex w-full items-center gap-4 rounded-lg border border-gray-700/50 bg-gray-800/50 p-4 text-left transition-all duration-300 hover:scale-[.98] hover:border-gray-600 hover:bg-gray-700/50"
+                  >
+                    <span
+                      class:list={[
+                        'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br transition-transform duration-300 group-hover:scale-110',
+                        gradient,
+                      ]}
+                    >
+                      <LucideIcon name={icon} class="h-5 w-5 text-white" />
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      <>
+                        <span class="flex items-center gap-2">
+                          <b class="font-semibold text-white transition-colors group-hover:text-blue-300">{name}</b>
+                          {internal ? (
+                            <span class="rounded bg-blue-500/20 px-2 py-0.5 text-xs text-blue-300">内部</span>
+                          ) : (
+                            <LucideIcon
+                              name="external-link"
+                              class="h-4 w-4 text-gray-400 transition-colors group-hover:text-blue-300"
+                            />
+                          )}
+                        </span>
+                        <small class="block text-sm text-gray-400 transition-colors group-hover:text-gray-300">
+                          {description}
+                        </small>
+                      </>
+                    </span>
+                  </a>
+                ))
+              }
+            </div>
+          </section>
+          <section
+            class="rounded-xl border border-gray-700/50 bg-gray-900/50 p-6"
+            data-motion="fade-up"
+            style="--motion-delay: 600ms"
+          >
+            <h2 class="mb-6 flex items-center gap-3 text-xl font-semibold text-white">
+              <LucideIcon name="bug" class="h-6 w-6 text-orange-400" />反馈时请尽量包含以下信息
+            </h2>
+            <div class="grid gap-4">
+              {
+                requirements.map(([icon, title, description]) => (
+                  <article class="flex items-start gap-4 rounded-lg border border-gray-700/30 bg-gray-800/30 p-4 transition-all duration-300 hover:border-gray-600/50 hover:bg-gray-800/50">
+                    <>
+                      <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-orange-500/20">
+                        <LucideIcon name={icon} class="h-4 w-4 text-orange-400" />
+                      </span>
+                      <span class="flex-1">
+                        <>
+                          <h3 class="mb-1 font-semibold text-blue-300">{title}</h3>
+                          <p class="text-sm leading-relaxed text-gray-400">{description}</p>
+                        </>
+                      </span>
+                    </>
+                  </article>
+                ))
+              }
+            </div>
+          </section>
+          <aside
+            class="rounded-xl border border-purple-500/20 bg-gradient-to-r from-purple-900/20 to-blue-900/20 p-6 text-center"
+            data-motion="fade-up"
+            style="--motion-delay: 800ms"
+          >
+            <p class="font-medium text-purple-300">感谢您的帮助，让我们一起把Voidix建设得更好！</p>
+          </aside>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

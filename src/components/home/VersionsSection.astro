@@ -1,0 +1,163 @@
+---
+import LucideIcon from '../LucideIcon.astro';
+
+const javaSteps = ['启动Minecraft Java版', '点击"多人游戏"', '点击"添加服务器"', '点击"完成"并加入服务器'];
+
+const bedrockSteps = [
+  '启动Minecraft基岩版 (Windows 10/11, Mobile, Xbox, PS, Switch)',
+  '点击"游戏" → "服务器"选项卡',
+  '滚动到底部，点击"添加服务器"',
+  '点击"保存"，然后在服务器列表中找到并加入Voidix',
+];
+---
+
+<section class="mb-32 scroll-mt-32 px-4 sm:px-6 lg:px-8 2xl:mb-24" id="versions">
+  <div class="mx-auto max-w-7xl">
+    <div class="mb-16 text-center">
+      <h2 class="mb-4 text-3xl font-bold" data-motion="fade-up">
+        <span class="gradient-text font-bold font-sans">跨平台</span>连接
+      </h2>
+      <p class="mx-auto max-w-2xl text-gray-400" data-motion="fade-up" style="--motion-delay: 100ms">
+        我们采用先进技术实现Java版与基岩版的互通，让不同平台的玩家可以一起游戏。
+      </p>
+    </div>
+
+    <div
+      class="overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50"
+      data-motion="fade-up"
+      style="--motion-delay: 200ms"
+    >
+      <div class="relative flex border-b border-gray-700">
+        <button
+          class="tab-btn whitespace-nowrap px-6 py-4 text-sm font-medium text-white transition-colors"
+          data-version-tab="0"
+          type="button">Java版连接</button
+        >
+        <button
+          class="tab-btn whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-400 transition-colors hover:text-white"
+          data-version-tab="1"
+          type="button">基岩版连接</button
+        >
+        <div
+          class="absolute bottom-0 h-0.5 bg-indigo-400 transition-all duration-300 ease-in-out"
+          id="active-tab-underline"
+          data-version-underline
+        >
+        </div>
+      </div>
+
+      <div class="relative overflow-hidden transition-all duration-300 ease-in-out" data-version-container>
+        <div class="flex transition-transform duration-300 ease-in-out" id="content-slider" data-version-slider>
+          <div class="w-full flex-shrink-0" data-version-panel>
+            <div class="space-y-6 p-8">
+              <div class="mb-6 flex items-center">
+                <LucideIcon name="monitor" class="mr-3 h-8 w-8 text-blue-400" />
+                <div>
+                  <h3 class="text-xl font-bold">Java版玩家连接指南</h3>
+                  <p class="text-gray-300">适用于PC端Minecraft Java版</p>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                {
+                  javaSteps.slice(0, 3).map((step, index) => (
+                    <div class="flex items-center">
+                      <span class="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
+                        {index + 1}
+                      </span>
+                      <span>{step}</span>
+                    </div>
+                  ))
+                }
+                <div class="flex items-center">
+                  <span
+                    class="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white"
+                    >4</span
+                  >
+                  <div class="flex flex-col">
+                    <span>输入服务器地址：</span>
+                    <div class="mt-2 flex flex-wrap gap-4">
+                      <div class="rounded bg-gray-800 px-3 py-1 font-mono text-sm">minigame.voidix.net</div>
+                      <span class="text-gray-400">或</span>
+                      <div class="rounded bg-gray-800 px-3 py-1 font-mono text-sm">survival.voidix.net</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <span
+                    class="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white"
+                    >5</span
+                  >
+                  <span>{javaSteps[3]}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full flex-shrink-0" data-version-panel>
+            <div class="space-y-6 p-8">
+              <div class="mb-6 flex items-center">
+                <LucideIcon name="smartphone" class="mr-3 h-8 w-8 text-green-400" />
+                <div>
+                  <h3 class="text-xl font-bold">基岩版玩家连接指南</h3>
+                  <p class="text-gray-400">启动Minecraft基岩版 (Windows 10/11, Mobile, Xbox, PS, Switch)</p>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                {
+                  bedrockSteps.slice(0, 3).map((step, index) => (
+                    <div class="flex items-center">
+                      <span class="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
+                        {index + 1}
+                      </span>
+                      <span>{step}</span>
+                    </div>
+                  ))
+                }
+                <div class="flex flex-col space-y-2">
+                  <div class="flex items-center">
+                    <span
+                      class="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white"
+                      >4</span
+                    >
+                    <span>输入以下信息：</span>
+                  </div>
+                  <div class="ml-9 space-y-2">
+                    <div>
+                      <span class="text-gray-400">服务器名称：</span><span class="font-semibold">Voidix</span><span
+                        class="text-gray-400">（任意）</span
+                      >
+                    </div>
+                    <div>
+                      <span class="text-gray-400">服务器地址：</span>
+                      <div class="mt-1 flex flex-wrap gap-4">
+                        <div class="rounded bg-gray-800 px-3 py-1 font-mono text-sm">minigame.voidix.net</div>
+                        <span class="text-gray-400">或</span>
+                        <div class="rounded bg-gray-800 px-3 py-1 font-mono text-sm">survival.voidix.net</div>
+                      </div>
+                    </div>
+                    <div>
+                      <span class="text-gray-400">端口：</span><div
+                        class="inline-block rounded bg-gray-800 px-3 py-1 font-mono text-sm"
+                      >
+                        10205
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <span
+                    class="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white"
+                    >5</span
+                  >
+                  <span>{bedrockSteps[3]}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

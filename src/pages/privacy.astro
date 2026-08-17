@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import LucideIcon from '../components/LucideIcon.astro';
+import { metadata, privacySections } from '../data/site';
+
+const icons = ['shield', 'eye', 'cookie', 'database', 'file-text', 'lock', 'mail'] as const;
+---
+
+<BaseLayout meta={metadata.privacy} path="/privacy">
+  <section class="min-h-screen bg-gray-900 pb-16 pt-12">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <Breadcrumb current="隐私政策" class="mb-8" />
+      <header class="mb-12 text-center" data-motion="fade">
+        <h1 class="mb-4 text-4xl font-bold md:text-5xl"><span class="gradient-text">隐私政策</span></h1><p
+          class="mx-auto max-w-2xl text-xl text-gray-400"
+        >
+          我们如何收集、使用和保护您的信息
+        </p><time class="mt-6 block text-sm text-gray-500">最后更新：2024年7月26日</time>
+      </header>
+      <aside
+        class="mb-8 rounded-xl border border-blue-500/30 bg-blue-900/20 p-6"
+        data-motion="fade"
+        style="--motion-delay: 200ms"
+      >
+        <h2 class="mb-3 text-xl font-semibold text-blue-300">重要说明</h2><p class="leading-relaxed text-gray-300">
+          Voidix致力于保护用户隐私。本隐私政策说明我们如何收集、使用、存储和保护您的信息。使用我们的服务即表示您同意本政策的条款。
+        </p>
+      </aside>
+      <div class="space-y-8">
+        {
+          privacySections.map(([title, content], index) => (
+            <article
+              class="rounded-xl border border-gray-700/50 bg-gray-800/50 p-8 backdrop-blur-sm"
+              data-motion="fade"
+              style={`--motion-delay: ${300 + index * 100}ms`}
+            >
+              <div class="flex items-start gap-4">
+                <>
+                  <span class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-blue-500/30 bg-blue-600/20">
+                    <LucideIcon name={icons[index]} class="h-6 w-6 text-blue-400" />
+                  </span>
+                  <div class="flex-1">
+                    <>
+                      <h2 class="mb-4 text-2xl font-semibold text-white">{title}</h2>
+                      <p class="whitespace-pre-line leading-relaxed text-gray-300">{content}</p>
+                    </>
+                  </div>
+                </>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+      <aside
+        class="mt-12 rounded-xl border border-gray-700 bg-gradient-to-r from-gray-800 to-gray-900 p-8"
+        data-motion="fade"
+        style="--motion-delay: 800ms"
+      >
+        <div class="flex items-start gap-4">
+          <span
+            class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-green-500/30 bg-green-600/20"
+            ><LucideIcon name="sliders-horizontal" class="h-6 w-6 text-green-400" /></span
+          ><div class="flex-1">
+            <h2 class="mb-4 text-2xl font-semibold text-white">管理您的Cookie设置</h2><p
+              class="mb-4 leading-relaxed text-gray-300"
+            >
+              您可以随时查看和管理您对我们网站Cookie使用的同意情况。
+            </p><p class="mb-6 text-gray-300">
+              分析Cookie: <strong class="font-bold text-red-400" data-cookie-status>未同意</strong>
+            </p><button
+              class="rounded-lg bg-purple-600 px-6 py-2 font-medium text-white transition-colors hover:bg-purple-700"
+              data-reset-consent>修改或重置设置</button
+            >
+          </div>
+        </div>
+      </aside>
+      <aside
+        class="mt-12 rounded-xl border border-purple-500/20 bg-gradient-to-r from-purple-900/20 to-blue-900/20 p-8"
+      >
+        <h2 class="mb-4 text-2xl font-semibold text-white">政策更新</h2><p class="mb-4 leading-relaxed text-gray-300">
+          我们可能会不时更新此隐私政策。重大变更将通过以下方式通知：
+        </p><ul class="ml-6 space-y-2 text-gray-300">
+          <li>• 在网站上发布更新通知</li><li>• 通过社交媒体渠道公告</li><li>• 在服务器内发送通知</li>
+        </ul><p class="mt-4 text-sm text-gray-400">继续使用我们的服务即表示您接受更新后的政策。</p>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>

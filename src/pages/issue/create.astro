@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { metadata } from '../../data/site';
+---
+
+<BaseLayout meta={metadata.issue} path="/issue/create"
+  ><section data-issue-app></section><script>
+    import '../../scripts/issue';
+  </script></BaseLayout
+>
